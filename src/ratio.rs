@@ -26,7 +26,10 @@ impl Ratio {
 
     #[inline]
     pub fn zero() -> Ratio {
-        Ratio::new(BigInt::one(), BigInt::zero())
+        Ratio {
+            denom: BigInt::one(),
+            numer: BigInt::zero()
+        }
     }
 
     #[inline]
