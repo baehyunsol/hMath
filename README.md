@@ -1,0 +1,1 @@
+It never compromises accuracy for the sake of performance.

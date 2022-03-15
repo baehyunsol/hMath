@@ -112,20 +112,27 @@ impl BigInt {
             Ok(0)
         }
 
-        else if self.len() == 1 {
-
-            if !self.is_negative {
-                Ok(self.data[0])
-            }
-
-            else {
-                Err("u32 cannot be negative!")
-            }
-
+        else if self.is_negative {
+            Err("u32 cannot be negative!")
         }
 
         else {
-            Err("too big to be u32")
+            let mut result: u64 = 0;
+            let base_u64 = BASE as u64;
+            let u32_limit = u32::MAX as u64;
+            let mut pow = 1;
+
+            for n in self.data.iter() {
+                result += *n as u64 * pow;
+                pow *= base_u64;
+
+                if result > u32_limit {
+                    return Err("too big to be u32");
+                }
+
+            }
+
+            Ok(result as u32)
         }
 
     }
@@ -136,20 +143,30 @@ impl BigInt {
             Ok(0)
         }
 
-        else if self.len() == 1 {
+        else {
+            let mut result: i64 = 0;
+            let base_i64 = BASE as i64;
+            let i32_limit = i32::MAX as i64;
+            let mut pow = 1;
 
-            if !self.is_negative {
-                Ok(self.data[0] as i32)
+            for n in self.data.iter() {
+                result += *n as i64 * pow;
+                pow *= base_i64;
+
+                if result > i32_limit {
+                    return Err("too big to be i32");
+                }
+
+            }
+
+            if self.is_negative {
+                Ok(-result as i32)
             }
 
             else {
-                Ok(-(self.data[0] as i32))
+                Ok(result as i32)
             }
 
-        }
-
-        else {
-            Err("too big to be i32")
         }
 
     }
@@ -306,8 +323,11 @@ mod tests {
             let n_str_n_str_n = BigInt::from_string(n_str_n_str).unwrap();
 
             assert_eq!(n, n_str_n_str_n.to_i32().unwrap());
+            assert_eq!(n.abs() as u32, n_str_n_str_n.abs().to_u32().unwrap());
         }
 
+        assert_eq!(BigInt::from_u32(u32::MAX).to_u32().unwrap(), u32::MAX);
+        assert_eq!(BigInt::from_i32(i32::MAX).to_i32().unwrap(), i32::MAX);
     }
 
 }

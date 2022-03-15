@@ -8,7 +8,7 @@ mod conv;
 Always in most reduced form
 denom is always positive
 */
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct Ratio {
     denom: BigInt,
     numer: BigInt
@@ -84,6 +84,7 @@ impl Ratio {
 
         if self.numer.is_zero() {
             *self = Ratio::zero();
+            return;
         }
 
         if self.denom.is_zero() {
