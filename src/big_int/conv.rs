@@ -4,6 +4,11 @@ use crate::big_int::{BigInt, BASE};
 impl BigInt {
 
     pub fn from_u32(n: u32) -> Self {
+
+        if n == 0 {
+            return BigInt::zero();
+        }
+
         let mut result = BigInt {
             is_negative: false,
             data: vec![n]
@@ -27,6 +32,11 @@ impl BigInt {
     }
 
     pub fn from_u64(mut n: u64) -> Self {
+
+        if n == 0 {
+            return BigInt::zero();
+        }
+
         let mut data = vec![];
         let base_u64 = BASE as u64;
 

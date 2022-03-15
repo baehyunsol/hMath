@@ -64,4 +64,8 @@ impl Ratio {
         panic!("Not Implemented!")
     }
 
+    pub fn to_string(&self) -> String {
+        panic!("Not Implemented!")
+    }
+
 }
