@@ -2,6 +2,14 @@ use crate::{Ratio, BigInt};
 
 impl Ratio {
 
+    pub fn from_f32(f: f32) -> Ratio {
+        panic!("Not Implemented!")
+    }
+
+    pub fn from_f64(f: f64) -> Ratio {
+        panic!("Not Implemented!")
+    }
+
     #[inline]
     pub fn from_u32s(denom: u32, numer: u32) -> Ratio {
         Ratio::new(BigInt::from_u32(denom), BigInt::from_u32(numer))
