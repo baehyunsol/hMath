@@ -210,7 +210,7 @@ fn _from_string(st: &[u8]) -> Result<BigInt, &'static str> {
             base = 8;
         }
 
-        else if st[1] == 98 || st[1] == 66 {
+        else if st[1] == 98 || st[1] == 66 {  // `0b`
             base = 2;
         }
 
@@ -221,8 +221,8 @@ fn _from_string(st: &[u8]) -> Result<BigInt, &'static str> {
         curr_index = 2;
     }
 
-    if st[curr_index] == 95 {
-        return Err("string cannot start with `_`");
+    if st[curr_index] == 95 {  // `_`
+        return Err("num literal cannot start with `_`");
     }
 
     let mut result = BigInt::zero();

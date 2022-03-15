@@ -61,11 +61,39 @@ impl Ratio {
     }
 
     pub fn from_string(s: String) -> Result<Ratio, &'static str> {
-        panic!("Not Implemented!")
+        _from_string(s.as_bytes())
     }
 
     pub fn to_string(&self) -> String {
         panic!("Not Implemented!")
+    }
+
+}
+
+
+fn _from_string(st: &[u8]) -> Result<Ratio, &'static str> {
+
+    if st.len() == 0 {
+        Err("cannot convert an empty string!")
+    }
+
+    else if st[0] == 45 {  // `-`
+        let negated = _from_string(&st[1..])?;
+
+        Ok(-&negated)
+    }
+
+    else if st[0] == 95 {  // `_`
+        Err("num literal cannot start with `_`")
+    }
+
+    else if st.contains(&46) {  // '.'
+        panic!("Not Implemented Yet!")
+    }
+
+    else {
+        let num = BigInt::from_string(String::from_utf8(st.to_vec()).unwrap())?;
+        Ok(Ratio::from_big_int(num))
     }
 
 }
