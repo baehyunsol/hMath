@@ -76,8 +76,14 @@ impl Ratio {
         result
     }
 
-    pub fn floor(&self) -> BigInt {
-        &self.numer / &self.denom
+    #[inline]
+    pub fn floor(&self) -> Ratio {
+        Ratio::from_big_int(&self.numer / &self.denom)
+    }
+
+    #[inline]
+    pub fn frac(&self) -> Ratio {
+        self - &self.floor()
     }
 
     fn div_gcd(&mut self) {
@@ -103,5 +109,16 @@ impl Ratio {
             self.numer = &self.numer / &r;
         }
 
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn frac_test() {
+        use crate::Ratio;
+
+        assert_eq!(Ratio::from_string("3.1415".to_string()).unwrap().frac(), Ratio::from_string("0.1415".to_string()).unwrap());
     }
 }

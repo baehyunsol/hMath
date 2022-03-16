@@ -52,6 +52,11 @@ impl Ratio {
         Ratio::new(denom, numer)
     }
 
+    #[inline]
+    pub fn to_big_int(&self) -> BigInt {
+        &self.numer / &self.denom
+    }
+
     pub fn from_string(s: String) -> Result<Ratio, &'static str> {
         _from_string(s.as_bytes())
     }
