@@ -40,6 +40,24 @@ impl Rem<u32> for &BigInt {
 }
 
 
+impl Rem<i32> for &BigInt {
+    type Output = BigInt;
+
+    fn rem(self, other: i32) -> BigInt {
+
+        if other > 0 {
+            self % other as u32
+        }
+
+        else {
+            self - &(&(self / other) * other)
+        }
+
+    }
+
+}
+
+
 #[cfg(test)]
 mod tests {
 
@@ -104,6 +122,17 @@ mod tests {
 
         }
 
+    }
+
+}
+
+use crate::Ratio;
+
+impl Rem<&Ratio> for &BigInt {
+    type Output = Ratio;
+
+    fn rem(self, other: &Ratio) -> Ratio {
+        self - &(&((self / other).floor()) * other)
     }
 
 }

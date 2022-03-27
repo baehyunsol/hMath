@@ -75,7 +75,7 @@ impl BigInt {
             }
             Err(_) => {
 
-                if self % 2 == 0 {
+                if self % 2 == 0u32 {
                     return false;
                 }
 

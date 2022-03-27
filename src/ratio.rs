@@ -17,7 +17,7 @@ pub struct Ratio {
 
 impl Ratio {
 
-    fn new(denom: BigInt, numer: BigInt) -> Ratio {
+    pub fn new(denom: BigInt, numer: BigInt) -> Ratio {
         let mut result = Ratio {denom, numer};
         result.div_gcd();
 

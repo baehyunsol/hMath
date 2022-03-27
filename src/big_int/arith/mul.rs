@@ -78,6 +78,27 @@ impl Mul<u8> for &BigInt {
 
 }
 
+
+impl Mul<i32> for &BigInt {
+    type Output = BigInt;
+
+    fn mul(self, other: i32) -> BigInt {
+
+        if self.is_zero() || other == 0 {
+            BigInt::zero()
+        }
+        
+        else if other > 0 {
+            self * other as u32
+        }
+
+        else {
+            self * &BigInt::from_i32(other)
+        }
+    }
+
+}
+
 #[cfg(test)]
 mod tests {
 

@@ -156,6 +156,24 @@ impl Sub<u32> for &BigInt {
 }
 
 
+impl Sub<i32> for &BigInt {
+    type Output = BigInt;
+
+    fn sub(self, other: i32) -> BigInt {
+
+        if other >= 0 {
+            self - other as u32
+        }
+
+        else {
+            self - &BigInt::from_i32(other)
+        }
+
+    }
+
+}
+
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -200,4 +218,20 @@ mod tests {
         }
 
     }
+}
+
+
+use crate::Ratio;
+
+
+impl Sub<&Ratio> for &BigInt {
+    type Output = Ratio;
+
+    fn sub(self, other: &Ratio) -> Ratio {
+        Ratio {
+            denom: other.denom.clone(),
+            numer: &(self * &other.denom) - &other.numer
+        }
+    }
+
 }

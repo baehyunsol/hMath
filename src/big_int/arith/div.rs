@@ -166,6 +166,23 @@ impl Div<u32> for &BigInt {
 
 }
 
+impl Div<i32> for &BigInt {
+    type Output = BigInt;
+
+    fn div(self, other: i32) -> BigInt {
+
+        if other > 0 {
+            self / other as u32
+        }
+
+        else {
+            self / &BigInt::from_i32(other)
+        }
+
+    }
+
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -230,6 +247,18 @@ mod tests {
 
         }
 
+    }
+
+}
+
+
+use crate::Ratio;
+
+impl Div<&Ratio> for &BigInt {
+    type Output = Ratio;
+
+    fn div(self, other: &Ratio) -> Ratio {
+        &other.reci() * self
     }
 
 }

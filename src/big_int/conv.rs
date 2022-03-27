@@ -181,7 +181,7 @@ impl BigInt {
         let mut digits = vec![];
 
         while n.len() > 0 {
-            digits.push((&n % 10).to_u32().unwrap());
+            digits.push((&n % 10u32).to_u32().unwrap());
             n = &n / 10;
         }
 

@@ -87,6 +87,28 @@ impl Add<u8> for &BigInt {
 }
 
 
+impl Add<i32> for &BigInt {
+    type Output = BigInt;
+
+    fn add(self, other: i32) -> BigInt {
+
+        if self.is_zero() {
+            BigInt::from_i32(other)
+        }
+
+        else if other >= 0 {
+            self + other as u32
+        }
+
+        else {
+            self + &BigInt::from_i32(other)
+        }
+
+    }
+
+}
+
+
 #[cfg(test)]
 mod tests {
     #[test]
