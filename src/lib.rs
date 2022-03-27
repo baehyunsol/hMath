@@ -1,8 +1,10 @@
 mod big_int;
 mod ratio;
+mod wrapper;
 
 pub use crate::big_int::{BigInt, funcs};
 pub use crate::ratio::Ratio;
+pub use crate::wrapper::Number;
 
 #[cfg(test)]
 mod tests {

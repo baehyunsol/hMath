@@ -10,8 +10,8 @@ denom is always positive
 */
 #[derive(Clone, PartialEq, Debug)]
 pub struct Ratio {
-    denom: BigInt,
-    numer: BigInt
+    pub denom: BigInt,
+    pub numer: BigInt
 }
 
 
