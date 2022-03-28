@@ -21,17 +21,14 @@ impl Number {
     }
 
     pub fn pow(&self, n: i32) -> Self {
+
+        if n < 0 {
+            return self.reci().pow(-n);
+        }
+
         let mut result = match self {
-            Number::Integer(i) => if n >= 0 {
-                Number::Integer(i.pow(n as u32))
-            } else {
-                panic!("Not Implemented Yet!")
-            },
-            Number::Ratio(r) => if n >= 0 {
-                Number::Ratio(r.pow(n as u32))
-            } else {
-                panic!("Not Implemented Yet!")
-            }
+            Number::Integer(i) => Number::Integer(i.pow(n as u32)),
+            Number::Ratio(r) =>Number::Ratio(r.pow(n as u32))
         };
         result.finalize();
 
