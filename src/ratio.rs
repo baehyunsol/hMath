@@ -76,6 +76,13 @@ impl Ratio {
         result
     }
 
+    pub fn pow(&self, n: u32) -> Ratio {
+        Ratio {
+            denom: self.denom.pow(n),
+            numer: self.numer.pow(n)
+        }
+    }
+
     #[inline]
     pub fn floor(&self) -> Ratio {
         Ratio::from_big_int(&self.numer / &self.denom)

@@ -20,6 +20,24 @@ impl Number {
         result
     }
 
+    pub fn pow(&self, n: i32) -> Self {
+        let mut result = match self {
+            Number::Integer(i) => if n >= 0 {
+                Number::Integer(i.pow(n as u32))
+            } else {
+                panic!("Not Implemented Yet!")
+            },
+            Number::Ratio(r) => if n >= 0 {
+                Number::Ratio(r.pow(n as u32))
+            } else {
+                panic!("Not Implemented Yet!")
+            }
+        };
+        result.finalize();
+
+        result
+    }
+
     pub fn reci(&self) -> Self {
         let mut result = match self {
             Number::Integer(i) => Number::Ratio(Ratio::new(i.clone(), BigInt::one())),
@@ -50,6 +68,7 @@ impl Number {
         result
     }
 
+    #[inline]
     pub fn is_integer(&self) -> bool {
         match self {
             Number::Integer(_) => true,

@@ -10,7 +10,7 @@ impl Div for &Number {
         match self {
             Number::Integer(i) => match other {
                 Number::Integer(ii) => {
-                    let mut result = Number::Integer(i / ii);
+                    let mut result = Number::Ratio(Ratio::new(ii.clone(), i.clone()));
                     result.finalize();
 
                     result
@@ -114,6 +114,39 @@ impl Div<i32> for Number {
                 result
             }
         }
+    }
+
+}
+
+
+impl Div<&Number> for i32 {
+    type Output = Number;
+
+    fn div(self, other: &Number) -> Number {
+        match other {
+            Number::Integer(i) => {
+                let mut result = Number::Ratio(Ratio::new(i.clone(), BigInt::from_i32(self)));
+                result.finalize();
+
+                result
+            }
+            Number::Ratio(r) => {
+                let mut result = Number::Ratio(self / r);
+                result.finalize();
+
+                result
+            }
+        }
+    }
+
+}
+
+
+impl Div<Number> for i32 {
+    type Output = Number;
+
+    fn div(self, other: Number) -> Number {
+        self / &other
     }
 
 }

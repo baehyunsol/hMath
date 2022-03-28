@@ -1,4 +1,4 @@
-use crate::BigInt;
+use crate::{BigInt, Ratio};
 use std::cmp::{Eq, PartialOrd, Ord, Ordering};
 
 
@@ -102,6 +102,33 @@ impl PartialEq<u32> for BigInt {
             (self - *other).is_zero()
         }
 
+    }
+
+}
+
+
+impl PartialEq<i32> for BigInt {
+
+    fn eq(&self, other: &i32) -> bool {
+        (self - *other).is_zero()
+    }
+
+}
+
+
+impl PartialOrd<Ratio> for BigInt {
+
+    fn partial_cmp(&self, other: &Ratio) -> Option<Ordering> {
+        Some((self - other).cmp(&Ratio::zero()))
+    }
+
+}
+
+
+impl PartialEq<Ratio> for BigInt {
+
+    fn eq(&self, other: &Ratio) -> bool {
+        other.denom == 1u32 && &other.numer == self
     }
 
 }

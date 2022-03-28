@@ -4,9 +4,10 @@ use crate::Ratio;
 
 mod arith;
 mod comp;
+mod conv;
 
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum Number {
     Integer(BigInt),
     Ratio(Ratio)
@@ -15,29 +16,8 @@ pub enum Number {
 
 impl Number {
 
-    pub fn from_string(string: String) -> Result<Number, ()> {
-
-        match BigInt::from_string(string.clone()) {
-            Ok(i) => {
-                let mut result = Number::Integer(i);
-                result.finalize();
-
-                return Ok(result);
-            }
-            _ => {}
-        }
-
-        match Ratio::from_string(string.clone()) {
-            Ok(r) => {
-                let mut result = Number::Ratio(r);
-                result.finalize();
-
-                return Ok(result);
-            }
-            _ => {}
-        }
-
-        return Err(());
+    pub fn zero() -> Number {
+        Number::Integer(BigInt::zero())
     }
 
     fn finalize(&mut self) {
@@ -51,6 +31,16 @@ impl Number {
 
             }
         }
+    }
+
+}
+
+
+impl std::default::Default for Number {
+
+    #[inline]
+    fn default() -> Number {
+        Number::zero()
     }
 
 }

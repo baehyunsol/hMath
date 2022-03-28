@@ -9,7 +9,7 @@ pub use crate::wrapper::Number;
 
 #[macro_export]
 macro_rules! n {($s: expr) => ({
-    Number::from_string($s.to_string()).unwrap()
+    Number::from_string(String::from($s)).unwrap()
 })}
 
 

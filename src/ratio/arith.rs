@@ -217,6 +217,19 @@ impl Div<i32> for &Ratio {
 }
 
 
+impl Div<&Ratio> for i32 {
+    type Output = Ratio;
+
+    fn div(self, other: &Ratio) -> Ratio {
+        Ratio::new (
+            other.numer.clone(),
+            &other.denom * self
+        )
+    }
+
+}
+
+
 impl Rem for &Ratio {
     type Output = Ratio;
 
