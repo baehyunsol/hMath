@@ -1,7 +1,6 @@
 use crate::Number;
 use std::cmp::{Eq, PartialOrd, Ord, Ordering};
 
-
 impl PartialOrd for Number {
 
     fn partial_cmp(&self, other: &Number) -> Option<Ordering> {
@@ -10,9 +9,7 @@ impl PartialOrd for Number {
 
 }
 
-
 impl Eq for Number {}
-
 
 impl Ord for Number {
 
@@ -31,7 +28,6 @@ impl Ord for Number {
 
 }
 
-
 impl PartialOrd<i32> for Number {
 
     fn partial_cmp(&self, other: &i32) -> Option<Ordering> {
@@ -39,7 +35,6 @@ impl PartialOrd<i32> for Number {
     }
 
 }
-
 
 impl PartialEq<i32> for Number {
 

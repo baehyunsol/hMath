@@ -3,7 +3,6 @@ mod comp;
 mod conv;
 pub mod funcs;
 
-
 /*
 Always in most reduced form
 0 is not negative
@@ -14,9 +13,7 @@ pub struct BigInt {
     pub is_negative: bool
 }
 
-
 pub const BASE: u32 = 1 << 31;
-
 
 impl BigInt {
 
@@ -82,7 +79,6 @@ impl BigInt {
 
 }
 
-
 fn trim_u64_to_u32(mut data: Vec<u64>) -> Vec<u32> {
 
     if data.len() == 0 {
@@ -107,7 +103,6 @@ fn trim_u64_to_u32(mut data: Vec<u64>) -> Vec<u32> {
     data.iter().map(|n| *n as u32).collect()
 }
 
-
 impl std::default::Default for BigInt {
 
     #[inline]
@@ -116,7 +111,6 @@ impl std::default::Default for BigInt {
     }
 
 }
-
 
 impl std::fmt::Display for BigInt {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

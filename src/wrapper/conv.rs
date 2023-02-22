@@ -1,6 +1,5 @@
 use crate::{Number, Ratio, BigInt};
 
-
 impl Number {
 
     pub fn from_string(string: String) -> Result<Number, ()> {

@@ -8,7 +8,6 @@ Ratio {4, 2} -> (2 / 4)
 use `Ratio {}` only when it's already reduced form
 */
 
-
 impl Add for &Ratio {
     type Output = Ratio;
 
@@ -20,7 +19,6 @@ impl Add for &Ratio {
     }
 
 }
-
 
 impl Add<&BigInt> for &Ratio {
     type Output = Ratio;
@@ -34,7 +32,6 @@ impl Add<&BigInt> for &Ratio {
 
 }
 
-
 impl Add<u32> for &Ratio {
     type Output = Ratio;
 
@@ -46,7 +43,6 @@ impl Add<u32> for &Ratio {
     }
 
 }
-
 
 impl Add<i32> for &Ratio {
     type Output = Ratio;
@@ -60,7 +56,6 @@ impl Add<i32> for &Ratio {
 
 }
 
-
 impl Sub for &Ratio {
     type Output = Ratio;
 
@@ -72,7 +67,6 @@ impl Sub for &Ratio {
     }
 
 }
-
 
 impl Sub<&BigInt> for &Ratio {
     type Output = Ratio;
@@ -86,7 +80,6 @@ impl Sub<&BigInt> for &Ratio {
 
 }
 
-
 impl Sub<u32> for &Ratio {
     type Output = Ratio;
 
@@ -98,7 +91,6 @@ impl Sub<u32> for &Ratio {
     }
 
 }
-
 
 impl Sub<i32> for &Ratio {
     type Output = Ratio;
@@ -112,7 +104,6 @@ impl Sub<i32> for &Ratio {
 
 }
 
-
 impl Mul for &Ratio {
     type Output = Ratio;
 
@@ -124,7 +115,6 @@ impl Mul for &Ratio {
     }
 
 }
-
 
 impl Mul<&BigInt> for &Ratio {
     type Output = Ratio;
@@ -138,7 +128,6 @@ impl Mul<&BigInt> for &Ratio {
 
 }
 
-
 impl Mul<u32> for &Ratio {
     type Output = Ratio;
 
@@ -150,7 +139,6 @@ impl Mul<u32> for &Ratio {
     }
 
 }
-
 
 impl Mul<i32> for &Ratio {
     type Output = Ratio;
@@ -164,7 +152,6 @@ impl Mul<i32> for &Ratio {
 
 }
 
-
 impl Div for &Ratio {
     type Output = Ratio;
 
@@ -176,7 +163,6 @@ impl Div for &Ratio {
     }
 
 }
-
 
 impl Div<&BigInt> for &Ratio {
     type Output = Ratio;
@@ -190,7 +176,6 @@ impl Div<&BigInt> for &Ratio {
 
 }
 
-
 impl Div<u32> for &Ratio {
     type Output = Ratio;
 
@@ -202,7 +187,6 @@ impl Div<u32> for &Ratio {
     }
 
 }
-
 
 impl Div<i32> for &Ratio {
     type Output = Ratio;
@@ -216,7 +200,6 @@ impl Div<i32> for &Ratio {
 
 }
 
-
 impl Div<&Ratio> for i32 {
     type Output = Ratio;
 
@@ -229,7 +212,6 @@ impl Div<&Ratio> for i32 {
 
 }
 
-
 impl Rem for &Ratio {
     type Output = Ratio;
 
@@ -238,7 +220,6 @@ impl Rem for &Ratio {
     }
 
 }
-
 
 impl Rem<&BigInt> for &Ratio {
     type Output = Ratio;
@@ -249,7 +230,6 @@ impl Rem<&BigInt> for &Ratio {
 
 }
 
-
 impl Rem<u32> for &Ratio {
     type Output = Ratio;
 
@@ -259,7 +239,6 @@ impl Rem<u32> for &Ratio {
 
 }
 
-
 impl Rem<i32> for &Ratio {
     type Output = Ratio;
 
@@ -268,7 +247,6 @@ impl Rem<i32> for &Ratio {
     }
 
 }
-
 
 impl Neg for &Ratio {
     type Output = Ratio;
@@ -289,7 +267,6 @@ impl Neg for &Ratio {
     }
 
 }
-
 
 #[cfg(test)]
 mod tests {

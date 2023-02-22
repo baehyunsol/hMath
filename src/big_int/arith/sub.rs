@@ -1,7 +1,6 @@
 use crate::big_int::{BigInt, BASE};
 use std::ops::{Sub, Neg};
 
-
 impl Sub for &BigInt {
     type Output = BigInt;
 
@@ -84,7 +83,6 @@ impl Sub for &BigInt {
 
 }
 
-
 impl Neg for &BigInt {
     type Output = BigInt;
 
@@ -104,7 +102,6 @@ impl Neg for &BigInt {
     }
 
 }
-
 
 impl Sub<u32> for &BigInt {
     type Output = BigInt;
@@ -155,7 +152,6 @@ impl Sub<u32> for &BigInt {
 
 }
 
-
 impl Sub<i32> for &BigInt {
     type Output = BigInt;
 
@@ -172,7 +168,6 @@ impl Sub<i32> for &BigInt {
     }
 
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -220,9 +215,7 @@ mod tests {
     }
 }
 
-
 use crate::Ratio;
-
 
 impl Sub<&Ratio> for &BigInt {
     type Output = Ratio;

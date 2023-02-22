@@ -1,7 +1,6 @@
 use crate::Number;
 use std::ops::{Mul, MulAssign};
 
-
 impl Mul for &Number {
     type Output = Number;
 
@@ -42,7 +41,6 @@ impl Mul for &Number {
 
 }
 
-
 impl Mul for Number {
     type Output = Number;
 
@@ -51,7 +49,6 @@ impl Mul for Number {
     }
 
 }
-
 
 impl Mul<&Number> for Number {
     type Output = Number;
@@ -62,7 +59,6 @@ impl Mul<&Number> for Number {
 
 }
 
-
 impl Mul<Number> for &Number {
     type Output = Number;
 
@@ -71,7 +67,6 @@ impl Mul<Number> for &Number {
     }
 
 }
-
 
 impl Mul<i32> for &Number {
     type Output = Number;
@@ -95,7 +90,6 @@ impl Mul<i32> for &Number {
 
 }
 
-
 impl Mul<i32> for Number {
     type Output = Number;
 
@@ -118,13 +112,11 @@ impl Mul<i32> for Number {
 
 }
 
-
 impl MulAssign for Number {
     fn mul_assign(&mut self, other: Self) {
         *self = &(*self) * &other;
     }
 }
-
 
 impl MulAssign<i32> for Number {
     fn mul_assign(&mut self, other: i32) {

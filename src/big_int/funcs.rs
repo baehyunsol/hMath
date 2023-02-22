@@ -1,6 +1,5 @@
 use crate::big_int::{BigInt, BASE};
 
-
 pub fn gcd(mut a: BigInt, mut b: BigInt) -> BigInt {
 
     if a.is_zero() || b.is_zero() {
@@ -16,7 +15,6 @@ pub fn gcd(mut a: BigInt, mut b: BigInt) -> BigInt {
     a
 }
 
-
 /// inclusive
 /// panics if `from` > `to`
 pub fn random(from: &BigInt, to: &BigInt) -> BigInt {
@@ -31,14 +29,12 @@ pub fn random(from: &BigInt, to: &BigInt) -> BigInt {
     from + &(&rand_val % &d)
 }
 
-
 fn _random(size: usize) -> BigInt {
     BigInt {
         is_negative: false,
         data: (0..size).map(|_| rand::random::<u32>() % BASE).collect()
     }
 }
-
 
 fn is_prime_u32(n: u32) -> bool {
 
@@ -59,7 +55,6 @@ fn is_prime_u32(n: u32) -> bool {
 
     return true;
 }
-
 
 impl BigInt {
 
@@ -108,7 +103,6 @@ impl BigInt {
     }
 
 }
-
 
 #[cfg(test)]
 mod tests {

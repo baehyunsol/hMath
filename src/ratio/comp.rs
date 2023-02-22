@@ -1,7 +1,6 @@
 use crate::{Ratio, BigInt};
 use std::cmp::{Eq, PartialOrd, Ord, Ordering};
 
-
 impl PartialOrd for Ratio {
 
     fn partial_cmp(&self, other: &Ratio) -> Option<Ordering> {
@@ -9,7 +8,6 @@ impl PartialOrd for Ratio {
     }
 
 }
-
 
 impl Ord for Ratio {
 
@@ -34,7 +32,6 @@ impl Ord for Ratio {
 
 impl Eq for Ratio {}
 
-
 impl PartialOrd<BigInt> for Ratio {
 
     fn partial_cmp(&self, other: &BigInt) -> Option<Ordering> {
@@ -50,7 +47,6 @@ impl PartialEq<BigInt> for Ratio {
     }
 
 }
-
 
 impl PartialOrd<u32> for Ratio {
 

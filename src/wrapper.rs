@@ -1,18 +1,15 @@
 use crate::BigInt;
 use crate::Ratio;
 
-
 mod arith;
 mod comp;
 mod conv;
-
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum Number {
     Integer(BigInt),
     Ratio(Ratio)
 }
-
 
 impl Number {
 
@@ -34,7 +31,6 @@ impl Number {
     }
 
 }
-
 
 impl std::default::Default for Number {
 

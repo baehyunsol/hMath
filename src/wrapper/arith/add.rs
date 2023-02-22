@@ -1,7 +1,6 @@
 use crate::Number;
 use std::ops::{Add, AddAssign};
 
-
 impl Add for &Number {
     type Output = Number;
 
@@ -42,7 +41,6 @@ impl Add for &Number {
 
 }
 
-
 impl Add for Number {
     type Output = Number;
 
@@ -51,7 +49,6 @@ impl Add for Number {
     }
 
 }
-
 
 impl Add<&Number> for Number {
     type Output = Number;
@@ -62,7 +59,6 @@ impl Add<&Number> for Number {
 
 }
 
-
 impl Add<Number> for &Number {
     type Output = Number;
 
@@ -71,7 +67,6 @@ impl Add<Number> for &Number {
     }
 
 }
-
 
 impl Add<i32> for &Number {
     type Output = Number;
@@ -95,7 +90,6 @@ impl Add<i32> for &Number {
 
 }
 
-
 impl Add<i32> for Number {
     type Output = Number;
 
@@ -118,13 +112,11 @@ impl Add<i32> for Number {
 
 }
 
-
 impl AddAssign for Number {
     fn add_assign(&mut self, other: Self) {
         *self = &(*self) + &other;
     }
 }
-
 
 impl AddAssign<i32> for Number {
     fn add_assign(&mut self, other: i32) {

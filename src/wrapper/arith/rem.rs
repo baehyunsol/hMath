@@ -1,7 +1,6 @@
 use crate::Number;
 use std::ops::{Rem, RemAssign};
 
-
 impl Rem for &Number {
     type Output = Number;
 
@@ -42,7 +41,6 @@ impl Rem for &Number {
 
 }
 
-
 impl Rem for Number {
     type Output = Number;
 
@@ -51,7 +49,6 @@ impl Rem for Number {
     }
 
 }
-
 
 impl Rem<&Number> for Number {
     type Output = Number;
@@ -62,7 +59,6 @@ impl Rem<&Number> for Number {
 
 }
 
-
 impl Rem<Number> for &Number {
     type Output = Number;
 
@@ -71,7 +67,6 @@ impl Rem<Number> for &Number {
     }
 
 }
-
 
 impl Rem<i32> for &Number {
     type Output = Number;
@@ -95,7 +90,6 @@ impl Rem<i32> for &Number {
 
 }
 
-
 impl Rem<i32> for Number {
     type Output = Number;
 
@@ -118,13 +112,11 @@ impl Rem<i32> for Number {
 
 }
 
-
 impl RemAssign for Number {
     fn rem_assign(&mut self, other: Self) {
         *self = &(*self) % &other;
     }
 }
-
 
 impl RemAssign<i32> for Number {
     fn rem_assign(&mut self, other: i32) {

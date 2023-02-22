@@ -1,7 +1,6 @@
 use crate::{Number, BigInt, Ratio};
 use std::ops::{Div, DivAssign};
 
-
 impl Div for &Number {
     type Output = Number;
 
@@ -42,7 +41,6 @@ impl Div for &Number {
 
 }
 
-
 impl Div for Number {
     type Output = Number;
 
@@ -51,7 +49,6 @@ impl Div for Number {
     }
 
 }
-
 
 impl Div<&Number> for Number {
     type Output = Number;
@@ -62,7 +59,6 @@ impl Div<&Number> for Number {
 
 }
 
-
 impl Div<Number> for &Number {
     type Output = Number;
 
@@ -71,7 +67,6 @@ impl Div<Number> for &Number {
     }
 
 }
-
 
 impl Div<i32> for &Number {
     type Output = Number;
@@ -95,7 +90,6 @@ impl Div<i32> for &Number {
 
 }
 
-
 impl Div<i32> for Number {
     type Output = Number;
 
@@ -117,7 +111,6 @@ impl Div<i32> for Number {
     }
 
 }
-
 
 impl Div<&Number> for i32 {
     type Output = Number;
@@ -141,7 +134,6 @@ impl Div<&Number> for i32 {
 
 }
 
-
 impl Div<Number> for i32 {
     type Output = Number;
 
@@ -151,13 +143,11 @@ impl Div<Number> for i32 {
 
 }
 
-
 impl DivAssign for Number {
     fn div_assign(&mut self, other: Self) {
         *self = &(*self) / &other;
     }
 }
-
 
 impl DivAssign<i32> for Number {
     fn div_assign(&mut self, other: i32) {

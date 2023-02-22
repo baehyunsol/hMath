@@ -1,7 +1,6 @@
 use crate::big_int::{BigInt, BASE};
 use std::ops::Add;
 
-
 impl Add for &BigInt {
     type Output = BigInt;
 
@@ -50,7 +49,6 @@ impl Add for &BigInt {
 
 }
 
-
 impl Add<u32> for &BigInt {
     type Output = BigInt;
 
@@ -76,7 +74,6 @@ impl Add<u32> for &BigInt {
 
 }
 
-
 impl Add<u8> for &BigInt {
     type Output = BigInt;
 
@@ -85,7 +82,6 @@ impl Add<u8> for &BigInt {
     }
 
 }
-
 
 impl Add<i32> for &BigInt {
     type Output = BigInt;
@@ -107,7 +103,6 @@ impl Add<i32> for &BigInt {
     }
 
 }
-
 
 #[cfg(test)]
 mod tests {

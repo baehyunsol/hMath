@@ -1,7 +1,6 @@
 use crate::big_int::{BigInt, BASE};
 use std::ops::Rem;
 
-
 impl Rem for &BigInt {
     type Output = BigInt;
 
@@ -10,7 +9,6 @@ impl Rem for &BigInt {
     }
 
 }
-
 
 impl Rem<u32> for &BigInt {
     type Output = BigInt;
@@ -39,7 +37,6 @@ impl Rem<u32> for &BigInt {
 
 }
 
-
 impl Rem<i32> for &BigInt {
     type Output = BigInt;
 
@@ -56,7 +53,6 @@ impl Rem<i32> for &BigInt {
     }
 
 }
-
 
 #[cfg(test)]
 mod tests {

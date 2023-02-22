@@ -1,7 +1,6 @@
 use crate::big_int::{BigInt, BASE, trim_u64_to_u32};
 use std::ops::Mul;
 
-
 impl Mul for &BigInt {
     type Output = BigInt;
 
@@ -48,7 +47,6 @@ impl Mul for &BigInt {
 
 }
 
-
 impl Mul<u32> for &BigInt {
     type Output = BigInt;
 
@@ -77,7 +75,6 @@ impl Mul<u8> for &BigInt {
     }
 
 }
-
 
 impl Mul<i32> for &BigInt {
     type Output = BigInt;

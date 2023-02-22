@@ -1,17 +1,17 @@
 mod big_int;
 mod ratio;
 mod wrapper;
+mod matrix;
 
 pub use crate::big_int::{BigInt, funcs};
 pub use crate::ratio::Ratio;
 pub use crate::wrapper::Number;
-
+pub use crate::matrix::Matrix;
 
 #[macro_export]
 macro_rules! n {($s: expr) => ({
     Number::from_string(String::from($s)).unwrap()
 })}
-
 
 #[cfg(test)]
 mod tests {

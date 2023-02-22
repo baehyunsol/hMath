@@ -1,7 +1,6 @@
 use crate::big_int::{BigInt, BASE, trim_u64_to_u32};
 use std::ops::Div;
 
-
 impl Div for &BigInt {
     type Output = BigInt;
 
@@ -45,7 +44,6 @@ impl Div for &BigInt {
     }
 
 }
-
 
 // a and b are both positive
 fn _pos_div(a: &BigInt, b: &BigInt) -> BigInt {
@@ -118,7 +116,6 @@ fn _pos_div(a: &BigInt, b: &BigInt) -> BigInt {
     }
 
 }
-
 
 impl Div<u32> for &BigInt {
     type Output = BigInt;
@@ -250,7 +247,6 @@ mod tests {
     }
 
 }
-
 
 use crate::Ratio;
 

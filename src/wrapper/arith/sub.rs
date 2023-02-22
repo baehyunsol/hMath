@@ -1,7 +1,6 @@
 use crate::Number;
 use std::ops::{Sub, SubAssign, Neg};
 
-
 impl Sub for &Number {
     type Output = Number;
 
@@ -42,7 +41,6 @@ impl Sub for &Number {
 
 }
 
-
 impl Sub for Number {
     type Output = Number;
 
@@ -51,7 +49,6 @@ impl Sub for Number {
     }
 
 }
-
 
 impl Sub<&Number> for Number {
     type Output = Number;
@@ -62,7 +59,6 @@ impl Sub<&Number> for Number {
 
 }
 
-
 impl Sub<Number> for &Number {
     type Output = Number;
 
@@ -71,7 +67,6 @@ impl Sub<Number> for &Number {
     }
 
 }
-
 
 impl Sub<i32> for &Number {
     type Output = Number;
@@ -95,7 +90,6 @@ impl Sub<i32> for &Number {
 
 }
 
-
 impl Sub<i32> for Number {
     type Output = Number;
 
@@ -117,7 +111,6 @@ impl Sub<i32> for Number {
     }
 
 }
-
 
 impl Neg for &Number {
     type Output = Number;
@@ -141,7 +134,6 @@ impl Neg for &Number {
 
 }
 
-
 impl Neg for Number {
     type Output = Number;
 
@@ -150,13 +142,11 @@ impl Neg for Number {
     }
 }
 
-
 impl SubAssign for Number {
     fn sub_assign(&mut self, other: Self) {
         *self = &(*self) - &other;
     }
 }
-
 
 impl SubAssign<i32> for Number {
     fn sub_assign(&mut self, other: i32) {

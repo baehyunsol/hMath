@@ -1,6 +1,5 @@
 use crate::big_int::{BigInt, BASE};
 
-
 impl BigInt {
 
     pub fn from_u32(n: u32) -> Self {
@@ -202,7 +201,6 @@ impl BigInt {
 
 }
 
-
 fn _from_string(st: &[u8]) -> Result<BigInt, &'static str> {
 
     if st.len() == 0 {
@@ -265,7 +263,6 @@ fn _from_string(st: &[u8]) -> Result<BigInt, &'static str> {
     Ok(result)
 }
 
-
 fn char_to_int(n: u8) -> Result<u8, &'static str> {
 
     if n < 48 {
@@ -297,7 +294,6 @@ fn char_to_int(n: u8) -> Result<u8, &'static str> {
     }
 
 }
-
 
 #[cfg(test)]
 mod tests {

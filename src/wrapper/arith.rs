@@ -4,9 +4,7 @@ mod mul;
 mod rem;
 mod sub;
 
-
 use crate::{Number, Ratio, BigInt};
-
 
 impl Number {
 

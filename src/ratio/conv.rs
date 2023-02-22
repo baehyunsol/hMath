@@ -67,7 +67,6 @@ impl Ratio {
 
 }
 
-
 fn _from_string(st: &[u8]) -> Result<Ratio, &'static str> {
 
     if st.len() == 0 {
@@ -163,7 +162,6 @@ fn _from_string(st: &[u8]) -> Result<Ratio, &'static str> {
     }
 
 }
-
 
 #[cfg(test)]
 mod tests {

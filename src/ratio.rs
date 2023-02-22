@@ -14,7 +14,6 @@ pub struct Ratio {
     pub numer: BigInt
 }
 
-
 impl Ratio {
 
     pub fn new(denom: BigInt, numer: BigInt) -> Ratio {
@@ -29,6 +28,14 @@ impl Ratio {
         Ratio {
             denom: BigInt::one(),
             numer: BigInt::zero()
+        }
+    }
+
+    #[inline]
+    pub fn one() -> Ratio {
+        Ratio {
+            denom: BigInt::one(),
+            numer: BigInt::one()
         }
     }
 
@@ -118,7 +125,6 @@ impl Ratio {
 
     }
 }
-
 
 #[cfg(test)]
 mod tests {
