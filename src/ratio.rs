@@ -1,137 +1,50 @@
-use crate::big_int::{BigInt, funcs::gcd};
+use crate::{BigInt, gcd_bi};
 
 mod arith;
-mod comp;
-mod conv;
+mod convert;
 
-/*
-Always in most reduced form
-denom is always positive
-*/
-#[derive(Clone, PartialEq, Debug)]
+// denom is always a positive integer
+// when numer is 0, denom is 1
+// denom and numer are always coprime
+#[derive(Clone, Debug, PartialEq)]
 pub struct Ratio {
-    pub denom: BigInt,
-    pub numer: BigInt
+    denom: BigInt,
+    numer: BigInt
 }
 
 impl Ratio {
 
-    pub fn new(denom: BigInt, numer: BigInt) -> Ratio {
-        let mut result = Ratio {denom, numer};
-        result.div_gcd();
-
-        result
+    /// This function DOES NOT check whether `denom` and `numer` are coprime.
+    /// Avoid using this function except when converting the result of `Ratio::into_raw` to `Ratio`.
+    /// In most cases, it's safer to use `Ratio::from_denom_and_numer`.
+    pub fn from_raw(denom: Vec<u32>, denom_neg: bool, numer: Vec<u32>, numer_neg: bool) -> Self {
+        Ratio { denom: BigInt::from_raw(denom, denom_neg), numer: BigInt::from_raw(numer, numer_neg) }
     }
 
-    #[inline]
-    pub fn zero() -> Ratio {
+    pub fn into_raw(self) -> (Vec<u32>, bool, Vec<u32>, bool) {
+        let (denom, numer) = (self.denom, self.numer);
+        let (denom, denom_neg) = denom.into_raw();
+        let (numer, numer_neg) = numer.into_raw();
+
+        (denom, denom_neg, numer, numer_neg)
+    }
+
+    pub fn zero() -> Self {
         Ratio {
             denom: BigInt::one(),
             numer: BigInt::zero()
         }
     }
 
-    #[inline]
-    pub fn one() -> Ratio {
+    pub fn one() -> Self {
         Ratio {
             denom: BigInt::one(),
             numer: BigInt::one()
         }
     }
 
-    #[inline]
-    pub fn is_zero(&self) -> bool {
-        self.numer.is_zero() && !self.denom.is_zero()
-    }
-
-    #[inline]
-    pub fn is_negative(&self) -> bool {
-        self.numer.is_negative
-    }
-
-    pub fn abs(&self) -> Ratio {
-
-        if self.numer.is_negative {
-            Ratio {
-                denom: self.denom.clone(),
-                numer: -&self.numer
-            }
-        }
-
-        else {
-            self.clone()
-        }
-
-    }
-
-    pub fn reci(&self) -> Ratio {
-
-        if self.numer.is_zero() {
-            panic!("Denominator cannot be 0");
-        }
-
-        let mut result = Ratio {
-            denom: self.numer.clone(),
-            numer: self.denom.clone(),
-        };
-
-        if result.denom.is_negative {
-            result.denom.is_negative = false;
-            result.numer.is_negative = !result.numer.is_negative;
-        }
-
-        result
-    }
-
-    pub fn pow(&self, n: u32) -> Ratio {
-        Ratio {
-            denom: self.denom.pow(n),
-            numer: self.numer.pow(n)
-        }
-    }
-
-    #[inline]
-    pub fn floor(&self) -> Ratio {
-        Ratio::from_big_int(&self.numer / &self.denom)
-    }
-
-    #[inline]
-    pub fn frac(&self) -> Ratio {
-        self - &self.floor()
-    }
-
-    fn div_gcd(&mut self) {
-
-        if self.numer.is_zero() {
-            *self = Ratio::zero();
-            return;
-        }
-
-        if self.denom.is_zero() {
-            panic!("Denominator cannot be 0");
-        }
-
-        if self.denom.is_negative {
-            self.denom.is_negative = false;
-            self.numer.is_negative = !self.numer.is_negative;
-        }
-
-        let r = gcd(self.denom.abs(), self.numer.abs());
-
-        if r != 1 {
-            self.denom = &self.denom / &r;
-            self.numer = &self.numer / &r;
-        }
-
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn frac_test() {
-        use crate::Ratio;
-
-        assert_eq!(Ratio::from_string("3.1415".to_string()).unwrap().frac(), Ratio::from_string("0.1415".to_string()).unwrap());
+    #[cfg(test)]
+    pub fn is_valid(&self) -> bool {
+        self.denom.is_valid() && self.numer.is_valid() && !self.denom.is_neg() && (!self.numer.is_zero() || self.denom.is_one()) && gcd_bi(&self.denom, &self.numer).is_one()
     }
 }
