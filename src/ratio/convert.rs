@@ -75,8 +75,15 @@ impl Ratio {
         let exponential_part = todo!();
     }
 
+    /// It returns "a/b".
     pub fn to_ratio_string(&self) -> String {
         format!("{}/{}", self.numer.to_string_dec(), self.denom.to_string_dec())
+    }
+
+    /// It returns "3.14".
+    /// It shows up to `digits` digits.
+    pub fn to_approx_string(&self, digits: usize) -> String {
+        todo!()
     }
 
 }
@@ -198,8 +205,14 @@ mod tests {
         ];
 
         for n in samples.into_iter() {
-            assert_eq!(Ratio::from_ieee754_f32(n.parse::<f32>().unwrap()), Ratio::from_string(n).unwrap());
-            assert_eq!(Ratio::from_ieee754_f64(n.parse::<f64>().unwrap()), Ratio::from_string(n).unwrap());
+            let rat = Ratio::from_string(n).unwrap();
+            assert_eq!(Ratio::from_ieee754_f32(n.parse::<f32>().unwrap()), rat);
+            assert_eq!(Ratio::from_ieee754_f64(n.parse::<f64>().unwrap()), rat);
+
+            let n = rat.to_approx_string(1000);
+            let rat = Ratio::from_string(&n).unwrap();
+            assert_eq!(Ratio::from_ieee754_f32(n.parse::<f32>().unwrap()), rat);
+            assert_eq!(Ratio::from_ieee754_f64(n.parse::<f64>().unwrap()), rat);
         }
 
     }

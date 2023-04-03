@@ -29,7 +29,14 @@ impl Ratio {
 
     #[must_use]
     pub fn div_i32(&self, other: i32) -> Self {
-        todo!()
+        let result = Ratio::from_denom_and_numer(
+            self.denom.mul_i32(other),
+            self.numer.clone()
+        );
+
+        #[cfg(test)] assert!(result.is_valid());
+
+        result
     }
 
     pub fn div_i32_mut(&mut self, other: i32) {

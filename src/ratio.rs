@@ -3,6 +3,7 @@ use crate::{BigInt, gcd_bi};
 mod arith;
 mod convert;
 mod funcs;
+pub mod pi;
 
 // denom is always a positive integer
 // when numer is 0, denom is 1
