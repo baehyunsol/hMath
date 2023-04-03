@@ -2,6 +2,7 @@ use crate::{BigInt, gcd_bi};
 
 mod arith;
 mod convert;
+mod funcs;
 
 // denom is always a positive integer
 // when numer is 0, denom is 1

@@ -2,5 +2,9 @@
 pub enum ConversionError {
     NoData,
     InvalidChar(char),
-    NotInRange
+    NotInRange,
+
+    // ieee754 numbers
+    Infinity,
+    NotANumber
 }

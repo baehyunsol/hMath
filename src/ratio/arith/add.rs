@@ -4,7 +4,10 @@ impl Ratio {
 
     #[must_use]
     pub fn add_rat(&self, other: &Ratio) -> Self {
-        todo!()
+        Ratio::from_denom_and_numer(
+            self.denom.mul_bi(&other.denom),
+            self.denom.mul_bi(&other.numer).add_bi(&other.denom.mul_bi(&self.numer))
+        )
     }
 
     pub fn add_rat_mut(&mut self, other: &Ratio) {
