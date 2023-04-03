@@ -45,6 +45,10 @@ impl Ratio {
         }
     }
 
+    pub fn is_neg(&self) -> bool {
+        self.numer.is_neg()
+    }
+
     #[cfg(test)]
     pub fn is_valid(&self) -> bool {
         self.denom.is_valid() && self.numer.is_valid() && !self.denom.is_neg() && (!self.numer.is_zero() || self.denom.is_one()) && gcd_bi(&self.denom, &self.numer).is_one()

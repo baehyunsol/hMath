@@ -20,6 +20,8 @@ impl Ratio {
     }
 
     pub fn from_bi(n: BigInt) -> Self {
+        #[cfg(test)] assert!(n.is_valid());
+
         // Safety: 1 and another integer are always coprime. 1 is positive. denom is 1 when n is 0.
         Ratio::from_denom_and_numer_raw(BigInt::one(), n)
     }
@@ -36,7 +38,8 @@ impl Ratio {
 
     /// If you don't know what `ieee754` is, you're okay to use this function.
     /// Though the ieee 754 standard distinguishes negative 0 and positive 0, it doesn't distinguish between them.
-    pub fn from_ieee754_f32(n: f32) -> Self {
+    /// It returns an error if `n` is NaN or Inf.
+    pub fn from_ieee754_f32(n: f32) -> Result<Self, ConversionError> {
         todo!()
     }
 
@@ -48,7 +51,8 @@ impl Ratio {
 
     /// If you don't know what `ieee754` is, you're okay to use this function.
     /// Though the ieee 754 standard distinguishes negative 0 and positive 0, it doesn't distinguish between them.
-    pub fn from_ieee754_f64(n: f64) -> Self {
+    /// It returns an error if `n` is NaN or Inf.
+    pub fn from_ieee754_f64(n: f64) -> Result<Self, ConversionError> {
         todo!()
     }
 
@@ -58,34 +62,158 @@ impl Ratio {
         todo!()
     }
 
-    // TODO: support hex/bin/oct representations
-    //   - `0x1.23` -> 1 + 2/16 + 3/256
-    //   - `0x1.23e12` -> (1 + 2/16 + 3/256) * (16 ^ 0x12)
-    //   - in hex case, `e` represents both number and exp -> what should I do?
-    // TODO: base 64 number system: 0~9, a~z, A~Z, #, $
-    //   - sounds very space-efficient, doesn't it?
     pub fn from_string(s: &str) -> Result<Self, ConversionError> {
         let dot_index = s.find('.');
-        let e_index = s.find(|c: char| c.to_ascii_lowercase() == 'e');
+
+        let e_index = if let Some(c) = get_non_decimal_char(s) {
+
+            if c.to_ascii_lowercase() != 'x' {
+                s.find(|c: char| c.to_ascii_lowercase() == 'e')
+            }
+
+            else {
+                None
+            }
+
+        } else {
+            s.find(|c: char| c.to_ascii_lowercase() == 'e')
+        };
+
+        if dot_index.is_none() && e_index.is_none() {
+            return match BigInt::from_string(s) {
+                Ok(n) => Ok(Ratio::from_bi(n)),
+                Err(e) => Err(e)
+            };
+        }
+
+        if let Some(c) = get_non_decimal_char(s) {
+
+            if c.to_ascii_lowercase() != 'e' {
+                return Err(ConversionError::InvalidChar(c));
+            }
+
+        }
+
+        // `111e22.33` is invalid
+        let integer_end_index = if let Some(i) = dot_index {
+            i
+        } else {
+            e_index.unwrap()
+        };
 
         // in case `-33.44e55`, `-33` is integer_part, `.44` is fractional_part and `e55` is exponential_part.
         // todo: find their index and extract each part
-        let integer_part = todo!();
-        let fractional_part = todo!();
-        let exponential_part = todo!();
+        let integer_part = {
+            let integer_string = s.get(0..integer_end_index).unwrap();
+
+            match BigInt::from_string(integer_string) {
+                Ok(n) => n,
+                Err(e) => { return Err(e); }
+            }
+
+        };
+        let mut fractional_part = match dot_index {
+            None => Ratio::zero(),
+            Some(i) => {
+                let fractional_part_end_index = if let Some(ii) = e_index {
+                    ii
+                } else {
+                    s.len()
+                };
+
+                let fraction_string = match s.get((i + 1)..fractional_part_end_index) {
+                    Some(i) => i,
+                    _ => { return Err(ConversionError::UnexpectedEnd); }
+                };
+                let mut denom = BigInt::one();
+                let mut numer = BigInt::zero();
+
+                for c in fraction_string.chars() {
+
+                    match c {
+                        '_' => { continue; }
+                        x if x.is_digit(10) => {
+                            denom.mul_i32_mut(10);
+                            numer.mul_i32_mut(10);
+                            numer.add_i32_mut(x.to_digit(10).unwrap() as i32);
+                        }
+                        _ => {
+                            return Err(ConversionError::InvalidChar(c));
+                        }
+                    }
+
+                }
+
+                Ratio::from_denom_and_numer(denom, numer)
+            }
+        };
+        let exponential_part = match e_index {
+            None => 0,
+            Some(i) => {
+                let exp_string = match s.get((i + 1)..) {
+                    Some(i) => i,
+                    _ => { return Err(ConversionError::UnexpectedEnd); }
+                };
+
+                match BigInt::from_string(&exp_string) {
+                    Err(e) => {
+                        return Err(e);
+                    }
+                    Ok(n) => match n.to_i32() {
+                        Ok(n) => n,
+                        Err(e) => { return Err(e); }
+                    }
+                }
+
+            }
+        };
+
+        if integer_part.is_neg() {
+            fractional_part.neg_mut();
+        }
+
+        let mut result = Ratio::from_bi(integer_part);
+        result.add_rat(&fractional_part);
+
+        if exponential_part == 0 {
+            Ok(result)
+        }
+
+        else {
+            // multiply 10^exp
+            todo!()
+        }
+
     }
 
-    /// It returns "a/b".
+    /// Ratio { 4, 7 } -> "4/7".
     pub fn to_ratio_string(&self) -> String {
         format!("{}/{}", self.numer.to_string_dec(), self.denom.to_string_dec())
     }
 
-    /// It returns "3.14".
-    /// It shows up to `digits` digits.
+    /// Ratio { 4, 7 } -> "1.75"
+    /// The length of the returned string is less or equal to `digits`.
     pub fn to_approx_string(&self, digits: usize) -> String {
         todo!()
     }
 
+}
+
+// it returns the first non-decimal character, if exists
+// it assumes that `s` is a valid numeric literal
+fn get_non_decimal_char(s: &str) -> Option<char> {
+
+    for c in s.chars() {
+
+        match c.to_ascii_lowercase() {
+            '-' | '0' | '.' => { continue; }
+            x if x.is_digit(10) => { return None; }
+            x => { return Some(c); }
+        }
+
+    }
+
+    None
 }
 
 // https://en.wikipedia.org/wiki/IEEE_754
@@ -180,8 +308,43 @@ fn inspect_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> {  // (neg, 
 
 #[cfg(test)]
 mod tests {
-    use crate::Ratio;
+    use crate::{Ratio, BigInt};
     use super::{inspect_f32, inspect_f64};
+
+    #[test]
+    fn string_test() {
+        assert_eq!(
+            // not 16 * 10^5
+            Ratio::from_string("0x16e5").unwrap(),
+            Ratio::from_bi(BigInt::from_i32(0x16e5))
+        );
+
+        assert_eq!(
+            // not -16 * 10^5
+            Ratio::from_string("-0x16e5").unwrap(),
+            Ratio::from_bi(BigInt::from_i32(-0x16e5))
+        );
+
+        assert_eq!(
+            Ratio::from_string("16e5").unwrap(),
+            Ratio::from_bi(BigInt::from_i32(1600000))
+        );
+
+        assert!(Ratio::from_string("0x123.4").is_err());
+        assert!(Ratio::from_string("0x123.4e4").is_err());
+        assert!(Ratio::from_string("0x123.e44").is_err());
+        assert!(Ratio::from_string("0x.3").is_err());
+        assert!(Ratio::from_string("-0x123.4").is_err());
+        assert!(Ratio::from_string("-0x123.4e4").is_err());
+        assert!(Ratio::from_string("-0x123.e44").is_err());
+        assert!(Ratio::from_string("-0x.3").is_err());
+
+        // TODO: aren't the below valid in Rust?
+        assert!(Ratio::from_string(".3").is_err());
+        assert!(Ratio::from_string("-.3").is_err());
+        assert!(Ratio::from_string("3.").is_err());
+        assert!(Ratio::from_string("-3.").is_err());
+    }
 
     #[test]
     fn ieee754_test() {
@@ -191,7 +354,10 @@ mod tests {
             "2.0", "-2.0",
             "3.0", "-3.0",
             "1.125", "-1.125",
+            // "1._125", "-1._125",  // is this valid in Rust?
+            "1.1_25", "-1.1_25",
             "17.0", "-17.0",
+            "1_7.0", "-1_7.0",
             "17.5", "-17.5",
             "1048576.0", "-1048576.0",
             "0.0625", "-0.0625",
@@ -206,13 +372,13 @@ mod tests {
 
         for n in samples.into_iter() {
             let rat = Ratio::from_string(n).unwrap();
-            assert_eq!(Ratio::from_ieee754_f32(n.parse::<f32>().unwrap()), rat);
-            assert_eq!(Ratio::from_ieee754_f64(n.parse::<f64>().unwrap()), rat);
+            assert_eq!(Ratio::from_ieee754_f32(n.parse::<f32>().unwrap()).unwrap(), rat);
+            assert_eq!(Ratio::from_ieee754_f64(n.parse::<f64>().unwrap()).unwrap(), rat);
 
             let n = rat.to_approx_string(1000);
             let rat = Ratio::from_string(&n).unwrap();
-            assert_eq!(Ratio::from_ieee754_f32(n.parse::<f32>().unwrap()), rat);
-            assert_eq!(Ratio::from_ieee754_f64(n.parse::<f64>().unwrap()), rat);
+            assert_eq!(Ratio::from_ieee754_f32(n.parse::<f32>().unwrap()).unwrap(), rat);
+            assert_eq!(Ratio::from_ieee754_f64(n.parse::<f64>().unwrap()).unwrap(), rat);
         }
 
     }

@@ -2,6 +2,9 @@ use crate::{BigInt, Ratio};
 
 // https://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula
 
+/*
+These values are memoized.
+
 fn unit(k: i32) -> Ratio {
     let k2_bi = BigInt::from_i64(k as i64 * k as i64);
     let k3_bi = k2_bi.mul_i32(k);
@@ -16,6 +19,7 @@ fn unit(k: i32) -> Ratio {
 fn large_unit(k: i32) -> Ratio {
     unit(k * 2).add_rat(&unit(k * 2 + 1).div_i32(16))
 }
+*/
 
 /// It returns the approximate value of PI.
 /// It gets more and more accurate as `k` gets bigger.

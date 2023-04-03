@@ -93,10 +93,15 @@ impl BigInt {
             if let Some(s) = s.get(1..) {
 
                 match UBigInt::from_string(s) {
-                    Ok(n) => Ok(BigInt {
-                        val: n,
-                        _is_neg: true
-                    }),
+                    Ok(n) => {
+                        // it has to be neg, except '-0'
+                        let _is_neg = !n.is_zero();
+
+                        Ok(BigInt {
+                            val: n,
+                            _is_neg
+                        })
+                    },
                     Err(e) => Err(e)
                 }
 

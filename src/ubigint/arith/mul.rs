@@ -84,12 +84,39 @@ impl UBigInt {
     // first multiply, then shift
     #[must_use]
     pub fn mul_pow2(&self, exp: u32) -> Self {
-        todo!()
+        let mut result = self.clone();
+        result.mul_pow2_mut(exp);
+
+        result
     }
 
     /// multiplies 2^`exp`
     // first multiply, then shift
     pub fn mul_pow2_mut(&mut self, exp: u32) {
-        todo!()
+        let small = 1 << (exp % 32);
+        let big = exp / 32;
+
+        self.mul_u32_mut(small);
+        self.shift_left_mut(big as usize);
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::UBigInt;
+
+    #[test]
+    fn mul_pow2_test() {
+        let two = UBigInt::from_u32(2);
+        let three = UBigInt::from_u32(3);
+
+        for i in 16..64 {
+            assert_eq!(
+                three.mul_pow2(i * 8),
+                three.mul_ubi(&two.pow_u32(i * 8))
+            );
+        }
+
+    }
+
 }
