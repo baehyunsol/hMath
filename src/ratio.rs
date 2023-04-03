@@ -48,4 +48,22 @@ impl Ratio {
     pub fn is_valid(&self) -> bool {
         self.denom.is_valid() && self.numer.is_valid() && !self.denom.is_neg() && (!self.numer.is_zero() || self.denom.is_one()) && gcd_bi(&self.denom, &self.numer).is_one()
     }
+
+    // TODO: better name
+    fn fit(&mut self) {
+
+        if self.denom.is_neg() {
+            self.denom.neg_mut();
+            self.numer.neg_mut();
+        }
+
+        let r = gcd_bi(&self.denom, &self.numer);
+
+        if !r.is_one() {
+            self.denom.div_bi_mut(&r);
+            self.numer.div_bi_mut(&r);
+        }
+
+    }
+
 }

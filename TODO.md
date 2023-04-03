@@ -22,9 +22,4 @@ In order for it to be `sort`able, I have to impl `comp` traits in std.
 
 ---
 
-64/(8k+1) - 32/(8k+4) - 16/(8k+5) - 16/(8k+6) + 4/(8k+9) - 2/(8k+12) - 1/(8k+13) - 1/(8k+14)를 각 k마다 계산을 해두고 어딘가에 상수로 미리 저장. 나중에 1/256^k만 일괄적으로 곱해서 더하는 거임!!! -> 아주 빠른 pi 계산기!
--> ln(2)도 비슷한 방식으로 할 수 있지 않을까? [[math]]sum{k=1}{inf}{cfrac{1}{k sup{2}{k}}}[[/math]]이니까, 적당히 3~4개 정도씩 끊어서!
-
----
-
 https://doc.rust-lang.org/stable/std/fmt/index.html#traits

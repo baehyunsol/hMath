@@ -196,7 +196,7 @@ pub fn gcd_ubi(a: &UBigInt, b: &UBigInt) -> UBigInt {
 
     while !a.is_zero() {
         let _a = a.clone();
-        a.rem_ubi_mut(&b);
+        a = b.rem_ubi(&a);
         b = _a;
     }
 

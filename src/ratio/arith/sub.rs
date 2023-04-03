@@ -3,10 +3,10 @@ use crate::{BigInt, Ratio};
 impl Ratio {
 
     #[must_use]
-    pub fn add_rat(&self, other: &Ratio) -> Self {
+    pub fn sub_rat(&self, other: &Ratio) -> Self {
         let result = Ratio::from_denom_and_numer(
             self.denom.mul_bi(&other.denom),
-            self.denom.mul_bi(&other.numer).add_bi(&other.denom.mul_bi(&self.numer))
+            self.numer.mul_bi(&other.denom).sub_bi(&other.numer.mul_bi(&self.denom))
         );
 
         #[cfg(test)] assert!(result.is_valid());
@@ -14,25 +14,25 @@ impl Ratio {
         result
     }
 
-    pub fn add_rat_mut(&mut self, other: &Ratio) {
+    pub fn sub_rat_mut(&mut self, other: &Ratio) {
         todo!()
     }
 
     #[must_use]
-    pub fn add_bi(&self, other: &BigInt) -> Self {
+    pub fn sub_bi(&self, other: &BigInt) -> Self {
         todo!()
     }
 
-    pub fn add_bi_mut(&mut self, other: &BigInt) {
+    pub fn sub_bi_mut(&mut self, other: &BigInt) {
         todo!()
     }
 
     #[must_use]
-    pub fn add_i32(&self, other: i32) -> Self {
+    pub fn sub_i32(&self, other: i32) -> Self {
         todo!()
     }
 
-    pub fn add_i32_mut(&mut self, other: i32) {
+    pub fn sub_i32_mut(&mut self, other: i32) {
         todo!()
     }
 

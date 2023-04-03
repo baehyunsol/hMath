@@ -3,21 +3,11 @@ use crate::err::ConversionError;
 
 impl Ratio {
 
-    pub fn from_denom_and_numer(mut denom: BigInt, mut numer: BigInt) -> Self {
+    pub fn from_denom_and_numer(denom: BigInt, numer: BigInt) -> Self {
+        let mut result = Ratio::from_denom_and_numer_raw(denom, numer);
+        result.fit();
 
-        if denom.is_neg() {
-            denom.neg_mut();
-            numer.neg_mut();
-        }
-
-        let r = gcd_bi(&denom, &numer);
-
-        if !r.is_one() {
-            denom.div_bi_mut(&r);
-            numer.div_bi_mut(&r);
-        }
-
-        Ratio { denom, numer }
+        result
     }
 
     /// This function does not do any safety checks. Use this function only when you're sure that the properties below are satisfied.
@@ -30,7 +20,18 @@ impl Ratio {
     }
 
     pub fn from_bi(n: BigInt) -> Self {
-        Ratio { denom: BigInt::one(), numer: n }
+        // Safety: 1 and another integer are always coprime. 1 is positive. denom is 1 when n is 0.
+        Ratio::from_denom_and_numer_raw(BigInt::one(), n)
+    }
+
+    pub fn from_i32(n: i32) -> Self {
+        // Safety: 1 and another integer are always coprime. 1 is positive. denom is 1 when n is 0.
+        Ratio::from_denom_and_numer_raw(BigInt::one(), BigInt::from_i32(n))
+    }
+
+    pub fn from_i64(n: i64) -> Self {
+        // Safety: 1 and another integer are always coprime. 1 is positive. denom is 1 when n is 0.
+        Ratio::from_denom_and_numer_raw(BigInt::one(), BigInt::from_i64(n))
     }
 
     /// If you don't know what `ieee754` is, you're okay to use this function.
@@ -72,6 +73,10 @@ impl Ratio {
         let integer_part = todo!();
         let fractional_part = todo!();
         let exponential_part = todo!();
+    }
+
+    pub fn to_ratio_string(&self) -> String {
+        format!("{}/{}", self.numer.to_string_dec(), self.denom.to_string_dec())
     }
 
 }
