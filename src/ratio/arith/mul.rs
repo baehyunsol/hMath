@@ -1,4 +1,4 @@
-use crate::{BigInt, Ratio};
+use crate::{BigInt, Ratio, gcd_bi};
 
 impl Ratio {
 
@@ -20,11 +20,25 @@ impl Ratio {
 
     #[must_use]
     pub fn mul_bi(&self, other: &BigInt) -> Self {
-        todo!()
+        let mut result = self.clone();
+        result.mul_bi_mut(other);
+
+        result
     }
 
     pub fn mul_bi_mut(&mut self, other: &BigInt) {
-        todo!()
+        let r = gcd_bi(&self.denom, other);
+
+        if r.is_one() {
+            self.numer.mul_bi_mut(other);
+        }
+
+        else {
+            self.numer.mul_bi_mut(&other.div_bi(&r));
+            self.denom.div_bi_mut(&r);
+        }
+
+        #[cfg(test)] assert!(self.is_valid());
     }
 
     #[must_use]
@@ -33,7 +47,10 @@ impl Ratio {
     }
 
     pub fn mul_i32_mut(&mut self, other: i32) {
-        todo!()
+        self.numer.mul_i32_mut(other);
+        self.fit();
+
+        #[cfg(test)] assert!(self.is_valid());
     }
 
 }

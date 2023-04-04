@@ -1,6 +1,7 @@
 use crate::{BigInt, gcd_bi};
 
 mod arith;
+mod comp;
 mod convert;
 mod funcs;
 pub mod pi;
@@ -47,6 +48,14 @@ impl Ratio {
 
     pub fn is_neg(&self) -> bool {
         self.numer.is_neg()
+    }
+
+    pub fn is_one(&self) -> bool {
+        self.denom.is_one() && self.numer.is_one()
+    }
+
+    pub fn is_zero(&self) -> bool {
+        self.denom.is_one() && self.numer.is_zero()
     }
 
     #[cfg(test)]

@@ -28,7 +28,10 @@ impl Ratio {
     }
 
     pub fn truncate_mut(&mut self) {
-        todo!()
+        self.numer.div_bi_mut(&self.denom);
+        self.denom = BigInt::one();
+
+        #[cfg(test)] assert!(self.is_valid());
     }
 
     #[must_use]
@@ -49,6 +52,11 @@ impl Ratio {
         #[cfg(test)] {
             assert!(result.is_valid());
             assert_eq!(&result.add_rat(&self.truncate()), self);
+
+            let mut self_clone = self.clone();
+            self_clone.frac_mut();
+
+            assert_eq!(self_clone, result);
         }
 
         result
@@ -56,7 +64,7 @@ impl Ratio {
 
     /// self -= truncate(self)
     pub fn frac_mut(&mut self) {
-        todo!()
+        self.numer.rem_bi_mut(&self.denom);
     }
 
 }
@@ -81,6 +89,10 @@ mod tests {
                 Ratio::from_string(before).unwrap().truncate(),
                 Ratio::from_string(after).unwrap()
             );
+
+            // test code is inside the `.frac()` method
+            let _ = Ratio::from_string(before).unwrap().frac();
+            let _ = Ratio::from_string(after).unwrap().frac();
         }
 
     }

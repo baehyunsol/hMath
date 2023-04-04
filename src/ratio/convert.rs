@@ -1,4 +1,4 @@
-use crate::{Ratio, BigInt, gcd_bi};
+use crate::{Ratio, BigInt};
 use crate::err::ConversionError;
 
 impl Ratio {
@@ -40,26 +40,132 @@ impl Ratio {
     /// Though the ieee 754 standard distinguishes negative 0 and positive 0, it doesn't distinguish between them.
     /// It returns an error if `n` is NaN or Inf.
     pub fn from_ieee754_f32(n: f32) -> Result<Self, ConversionError> {
-        todo!()
+
+        match inspect_f32(n) {
+            Ok((neg, exp, frac)) => if exp == i32::MIN {
+                Ok(Ratio::zero())
+            } else if exp >= 23 {
+                // (2^23 + frac) * 2^(exp-23)
+                let mut numer = BigInt::from_i32((frac + (1 << 23)) as i32);
+                numer.mul_pow2_mut((exp - 23) as u32);
+
+                Ok(Ratio::from_bi(numer))
+            } else {
+                // (2^23 + frac) / 2^(23-exp)
+                let numer = BigInt::from_i32((frac + (1 << 23)) as i32);
+                let denom = BigInt::pow2((23 - exp) as u32);
+
+                Ok(Ratio::from_denom_and_numer(denom, numer))
+            },
+            Err(e) => Err(e)
+        }
+
     }
 
     /// If you don't know what `ieee754` is, you're okay to use this function.
     /// This function does not return `f32::NAN` or `f32::INFINITY`, but it returns `ConversionError::NotInRange` instead.
     pub fn to_ieee754_f32(&self) -> Result<f32, ConversionError> {
-        todo!()
+
+        if self.is_zero() {
+            return Ok(0.0)
+        }
+
+        let mut self_clone = self.clone();
+
+        let neg = self_clone.is_neg();
+        let mut exp = 0;
+
+        if neg { self_clone.neg_mut(); }
+
+        while self_clone.gt_one() {
+            self_clone.div_i32_mut(2);
+            exp += 1;
+        }
+
+        while self_clone.lt_one() {
+            self_clone.mul_i32_mut(2);
+            exp -= 1;
+        }
+
+        exp += 127;
+
+        // TODO: denormalized numbers
+        if exp < 0 || exp > 255 {
+            return Err(ConversionError::NotInRange);
+        }
+
+        let frac = self_clone.mul_i32(1 << 23).truncate_bi().to_i32().unwrap() as u32;
+
+        let result = ((neg as u32) << 31) | ((exp as u32) << 23) | frac;
+        let rp = &result as *const u32 as *const f32;
+
+        unsafe { Ok(*rp) }
     }
 
     /// If you don't know what `ieee754` is, you're okay to use this function.
     /// Though the ieee 754 standard distinguishes negative 0 and positive 0, it doesn't distinguish between them.
     /// It returns an error if `n` is NaN or Inf.
     pub fn from_ieee754_f64(n: f64) -> Result<Self, ConversionError> {
-        todo!()
+
+        match inspect_f64(n) {
+            Ok((neg, exp, frac)) => if exp == i32::MIN {
+                Ok(Ratio::zero())
+            } else if exp >= 52 {
+                // (2^52 + frac) * 2^(exp-52)
+                let mut numer = BigInt::from_i64((frac + (1 << 52)) as i64);
+                numer.mul_pow2_mut((exp - 52) as u32);
+
+                Ok(Ratio::from_bi(numer))
+            } else {
+                // (2^52 + frac) / 2^(52-exp)
+                let numer = BigInt::from_i64((frac + (1 << 52)) as i64);
+                let denom = BigInt::pow2((52 - exp) as u32);
+
+                Ok(Ratio::from_denom_and_numer(denom, numer))
+            },
+            Err(e) => Err(e)
+        }
+
     }
 
     /// If you don't know what `ieee754` is, you're okay to use this function.
     /// This function does not return `f64::NAN` or `f64::INFINITY`, but it returns `ConversionError::NotInRange` instead.
     pub fn to_ieee754_f64(&self) -> Result<f64, ConversionError> {
-        todo!()
+
+        if self.is_zero() {
+            return Ok(0.0)
+        }
+
+        let mut self_clone = self.clone();
+
+        let neg = self_clone.is_neg();
+        let mut exp = 0;
+
+        if neg { self_clone.neg_mut(); }
+
+        while self_clone.gt_one() {
+            self_clone.div_i32_mut(2);
+            exp += 1;
+        }
+
+        while self_clone.lt_one() {
+            self_clone.mul_i32_mut(2);
+            exp -= 1;
+        }
+
+        exp += 1023;
+
+        // TODO: denormalized numbers
+        if exp < 0 || exp > 2047 {
+            return Err(ConversionError::NotInRange);
+        }
+
+        let frac = self_clone.mul_bi(&BigInt::from_i64(1 << 52)).truncate_bi().to_i64().unwrap() as u64;
+
+        let result = ((neg as u64) << 63) | ((exp as u64) << 52) | frac;
+        let rp = &result as *const u64 as *const f64;
+
+        unsafe { Ok(*rp) }
     }
 
     pub fn from_string(s: &str) -> Result<Self, ConversionError> {
@@ -101,8 +207,6 @@ impl Ratio {
             e_index.unwrap()
         };
 
-        // in case `-33.44e55`, `-33` is integer_part, `.44` is fractional_part and `e55` is exponential_part.
-        // todo: find their index and extract each part
         let integer_part = {
             let integer_string = s.get(0..integer_end_index).unwrap();
 
@@ -121,10 +225,13 @@ impl Ratio {
                     s.len()
                 };
 
+                // if i + 1 == fractional_part_end_index, fractional_part is 0
+                // eg: '3.'
                 let fraction_string = match s.get((i + 1)..fractional_part_end_index) {
                     Some(i) => i,
                     _ => { return Err(ConversionError::UnexpectedEnd); }
                 };
+
                 let mut denom = BigInt::one();
                 let mut numer = BigInt::zero();
 
@@ -173,17 +280,17 @@ impl Ratio {
         }
 
         let mut result = Ratio::from_bi(integer_part);
-        result.add_rat(&fractional_part);
+        result.add_rat_mut(&fractional_part);
 
-        if exponential_part == 0 {
-            Ok(result)
+        if exponential_part > 0 {
+            result.mul_bi_mut(&BigInt::from_i32(10).pow_u32(exponential_part as u32));
         }
 
-        else {
-            // multiply 10^exp
-            todo!()
+        else if exponential_part < 0 {
+            result.div_bi_mut(&BigInt::from_i32(10).pow_u32(exponential_part.abs() as u32));
         }
 
+        Ok(result)
     }
 
     /// Ratio { 4, 7 } -> "4/7".
@@ -191,7 +298,7 @@ impl Ratio {
         format!("{}/{}", self.numer.to_string_dec(), self.denom.to_string_dec())
     }
 
-    /// Ratio { 4, 7 } -> "1.75"
+    /// Ratio { 4, 7 } -> "1.75".
     /// The length of the returned string is less or equal to `digits`.
     pub fn to_approx_string(&self, digits: usize) -> String {
         todo!()
@@ -208,7 +315,7 @@ fn get_non_decimal_char(s: &str) -> Option<char> {
         match c.to_ascii_lowercase() {
             '-' | '0' | '.' => { continue; }
             x if x.is_digit(10) => { return None; }
-            x => { return Some(c); }
+            _ => { return Some(c); }
         }
 
     }
@@ -330,6 +437,16 @@ mod tests {
             Ratio::from_bi(BigInt::from_i32(1600000))
         );
 
+        assert_eq!(
+            Ratio::from_string("1600e-1").unwrap(),
+            Ratio::from_bi(BigInt::from_i32(160))
+        );
+
+        assert_eq!(
+            Ratio::from_string("3.012").unwrap(),
+            Ratio::from_denom_and_numer(BigInt::from_i32(1000), BigInt::from_i32(3012))
+        );
+
         assert!(Ratio::from_string("0x123.4").is_err());
         assert!(Ratio::from_string("0x123.4e4").is_err());
         assert!(Ratio::from_string("0x123.e44").is_err());
@@ -342,8 +459,6 @@ mod tests {
         // TODO: aren't the below valid in Rust?
         assert!(Ratio::from_string(".3").is_err());
         assert!(Ratio::from_string("-.3").is_err());
-        assert!(Ratio::from_string("3.").is_err());
-        assert!(Ratio::from_string("-3.").is_err());
     }
 
     #[test]
@@ -353,6 +468,7 @@ mod tests {
             "1.0", "-1.0",
             "2.0", "-2.0",
             "3.0", "-3.0",
+            "3.", "-3.",
             "1.125", "-1.125",
             // "1._125", "-1._125",  // is this valid in Rust?
             "1.1_25", "-1.1_25",
@@ -372,13 +488,20 @@ mod tests {
 
         for n in samples.into_iter() {
             let rat = Ratio::from_string(n).unwrap();
-            assert_eq!(Ratio::from_ieee754_f32(n.parse::<f32>().unwrap()).unwrap(), rat);
-            assert_eq!(Ratio::from_ieee754_f64(n.parse::<f64>().unwrap()).unwrap(), rat);
+            let nf32 = n.parse::<f32>().unwrap();
+            let nf64 = n.parse::<f64>().unwrap();
+
+            assert_eq!(Ratio::from_ieee754_f32(nf32).unwrap(), rat);
+            assert_eq!(Ratio::from_ieee754_f64(nf64).unwrap(), rat);
+            assert_eq!(rat.to_ieee754_f32().unwrap(), nf32);
+            assert_eq!(rat.to_ieee754_f64().unwrap(), nf64);
 
             let n = rat.to_approx_string(1000);
             let rat = Ratio::from_string(&n).unwrap();
-            assert_eq!(Ratio::from_ieee754_f32(n.parse::<f32>().unwrap()).unwrap(), rat);
-            assert_eq!(Ratio::from_ieee754_f64(n.parse::<f64>().unwrap()).unwrap(), rat);
+            let nf32 = n.parse::<f32>().unwrap();
+            let nf64 = n.parse::<f64>().unwrap();
+            assert_eq!(Ratio::from_ieee754_f32(nf32).unwrap(), rat);
+            assert_eq!(Ratio::from_ieee754_f64(nf64).unwrap(), rat);
         }
 
     }

@@ -15,7 +15,10 @@ impl Ratio {
     }
 
     pub fn add_rat_mut(&mut self, other: &Ratio) {
-        todo!()
+        self.numer = self.denom.mul_bi(&other.numer).add_bi(&other.denom.mul_bi(&self.numer));
+        self.denom.mul_bi_mut(&other.denom);
+
+        self.fit();
     }
 
     #[must_use]

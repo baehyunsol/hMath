@@ -38,6 +38,16 @@ impl BigInt {
         #[cfg(test)] assert!(self.is_valid());
     }
 
+    /// returns `self * 2^exp`
+    #[must_use]
+    pub fn mul_pow2(&self, exp: u32) -> Self {
+        BigInt::from_ubi(self.val.mul_pow2(exp), self.is_neg())
+    }
+
+    /// self *= 2^exp
+    pub fn mul_pow2_mut(&mut self, exp: u32) {
+        self.val.mul_pow2_mut(exp);
+    }
 }
 
 #[cfg(test)]

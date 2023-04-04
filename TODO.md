@@ -3,7 +3,7 @@
   - `UBigInt`, is_neg: `bool`
 - [ ] `Ratio`
   - denom: `BigInt`, numer: `BigInt`
-  - `from_f64`: directly use IEEE754 (bitwise operation)
+  - convert to/from IEEE floating point numbers
 - [ ] `Number`
   - `BigInt` | `Ratio`
   - [ ] Auto conversion between variants

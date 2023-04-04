@@ -2,6 +2,12 @@ use crate::{BigInt, gcd_ubi};
 
 impl BigInt {
 
+    /// It returns 0 when `self` is less than or equal to 0.
+    #[must_use]
+    pub fn log2(&self) -> Self {
+        BigInt::from_ubi(self.val.log2(), false)
+    }
+
     #[must_use]
     pub fn neg(&self) -> Self {
         //   self.is_neg()      self.val.is_zero()       result

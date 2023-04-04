@@ -1,4 +1,4 @@
-use crate::{BigInt, Ratio};
+use crate::{BigInt, Ratio, gcd_bi};
 
 impl Ratio {
 
@@ -20,11 +20,35 @@ impl Ratio {
 
     #[must_use]
     pub fn div_bi(&self, other: &BigInt) -> Self {
-        todo!()
+        let mut result = self.clone();
+        result.div_bi_mut(other);
+
+        result
     }
 
     pub fn div_bi_mut(&mut self, other: &BigInt) {
-        todo!()
+
+        if other.is_zero() {
+            panic!("Attempt to divide by zero: {self:?} / {other:?}");
+        }
+
+        let r = gcd_bi(&self.numer, other);
+
+        if r.is_one() {
+            self.denom.mul_bi_mut(&other);
+        }
+
+        else {
+            self.denom.mul_bi_mut(&other.div_bi(&r));
+            self.numer.div_bi_mut(&r);
+        }
+
+        if self.denom.is_neg() {
+            self.denom.neg_mut();
+            self.numer.neg_mut();
+        }
+
+        #[cfg(test)] assert!(self.is_valid());
     }
 
     #[must_use]

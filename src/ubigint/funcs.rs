@@ -2,6 +2,7 @@ use super::UBigInt;
 
 impl UBigInt {
 
+    /// It returns 0 when `self` is 0.
     #[must_use]
     pub fn log2(&self) -> Self {
         // It assumes that `self` is less than 2^(2^64)
@@ -225,6 +226,14 @@ pub fn log2_u32(mut n: u32) -> u32 {
     result
 }
 
+// Internal function: it doesn't always return an answer!
+pub fn log10(n: &UBigInt) -> i64 {
+    let log2 = n.log2().to_u64().unwrap() as i64;
+
+    // 2^681 = 10^205 + small
+    log2 * 205 / 681
+}
+
 #[cfg(test)]
 mod tests {
     use crate::UBigInt;
@@ -344,6 +353,8 @@ mod tests {
 
     #[test]
     fn log_test() {
+        use crate::ubigint::funcs::log10;
+
         if !RUN_ALL_TESTS { return; }
 
         let mut n = UBigInt::from_u32(2);
@@ -355,6 +366,19 @@ mod tests {
             assert_eq!(UBigInt::from_u32(i - 1), n.sub_u32(1).log2());
             n.mul_u32_mut(2);
             i += 1;
+        }
+
+        let decimals = vec![
+            "123", "1234", "12345", "123456",
+            "1234567", "12345678", "123456789",
+            "1234567890", "12345678901",
+            "10000000000000000000", "10000000000000000001"
+        ];
+
+        for decimal in decimals.into_iter() {
+            assert!(
+                ((decimal.len() as i64 - 1) - log10(&UBigInt::from_string(decimal).unwrap())).abs() < 2
+            );
         }
 
     }
