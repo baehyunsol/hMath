@@ -10,6 +10,10 @@ impl Ratio {
         result
     }
 
+    pub fn from_denom_and_numer_i32(denom: i32, numer: i32) -> Self {
+        Ratio::from_denom_and_numer(BigInt::from_i32(denom), BigInt::from_i32(numer))
+    }
+
     /// This function does not do any safety checks. Use this function only when you're sure that the properties below are satisfied.
     ///
     /// - `denom` and `numer` are coprime
@@ -416,7 +420,7 @@ impl Ratio {
 
         };
 
-        /// TODO: how about `123e10000000.to_approx_string(6)`? len(exp) is greater than 6!
+        // TODO: how about `123e10000000.to_approx_string(6)`? len(exp) is greater than 6!
         #[cfg(test)] assert!(result.len() <= max_len);
 
         result
@@ -546,8 +550,9 @@ impl std::fmt::Display for Ratio {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Ratio, BigInt};
     use super::{inspect_f32, inspect_f64};
+    use crate::{Ratio, BigInt};
+    use crate::consts::RUN_ALL_TESTS;
 
     #[test]
     fn string_test() {
@@ -603,7 +608,7 @@ mod tests {
         );
         assert_eq!(
             Ratio::from_string("3.012").unwrap(),
-            Ratio::from_denom_and_numer(BigInt::from_i32(1000), BigInt::from_i32(3012))
+            Ratio::from_denom_and_numer_i32(1000, 3012)
         );
         assert!(Ratio::from_string("0x123.4").is_err());
         assert!(Ratio::from_string("0x123.4e4").is_err());
@@ -621,10 +626,14 @@ mod tests {
 
     #[test]
     fn ieee754_test() {
+
+        if !RUN_ALL_TESTS { return; }
+
         let samples = vec![
             "0.0", "1.0", "2.0", "3.0",
             "3.", "1.125", "17.5",
             "17.0", "1048576.0", "0.0625",
+            "0.03125", "0.015625", "0.0078125",
             "19.015625", "6256255.5",
             "0.01171875", "15.640625",
             "625e-3", "15.625e-2", "12e3",

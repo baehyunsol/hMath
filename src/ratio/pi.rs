@@ -2,32 +2,13 @@ use crate::{BigInt, Ratio};
 
 // https://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula
 
-/*
-These values are memoized.
-
-fn unit(k: i32) -> Ratio {
-    let k2_bi = BigInt::from_i64(k as i64 * k as i64);
-    let k3_bi = k2_bi.mul_i32(k);
-    let k4_bi = k3_bi.mul_i32(k);
-
-    Ratio::from_denom_and_numer(
-        k4_bi.mul_i32(512).add_bi(&k3_bi.mul_i32(1024)).add_bi(&k2_bi.mul_i32(712)).add_i32(k * 194).add_i32(15),
-        k2_bi.mul_i32(120).add_i32(k * 151).add_i32(47)
-    )
-}
-
-fn large_unit(k: i32) -> Ratio {
-    unit(k * 2).add_rat(&unit(k * 2 + 1).div_i32(16))
-}
-*/
-
-/// It returns the approximate value of PI.
+/// It returns an approximate value of PI.
 /// It gets more and more accurate as `k` gets bigger.
-/// For now, `k` should be less than 256.
+/// For now, `k` should be less than 255.
 pub fn pi_iter(k: usize) -> Ratio {
     let data = spigot_cache();
-    let mut coeff = Ratio::one();
-    let mut result = Ratio::zero();
+    let mut coeff = Ratio::from_denom_and_numer_i32(256, 1);
+    let mut result = Ratio::from_denom_and_numer_i32(0x7ff8, 0x19201);
 
     for i in 0..k {
         let curr = Ratio::from_denom_and_numer_raw(
@@ -35,11 +16,8 @@ pub fn pi_iter(k: usize) -> Ratio {
             BigInt::from_i128(data[i].0),
         );
 
-        // TODO: result.add_rat_mut();
-        result = result.add_rat(&curr.mul_rat(&coeff));
-
-        // TODO: coeff.div_i32_mut();
-        coeff = coeff.div_i32(256);
+        result.add_rat_mut(&curr.mul_rat(&coeff));
+        coeff.div_i32_mut(256);
     }
 
     result
@@ -48,7 +26,7 @@ pub fn pi_iter(k: usize) -> Ratio {
 // data[i] = (large_unit(i).numer, large_unit(i).denom)
 fn spigot_cache() -> Vec<(i128, i128)> {
     vec![
-        (0x19201, 0x7ff8),           // 3.141...
+        //(0x19201, 0x7ff8),           // 3.141...
         (0x1148f, 0x18d314),         // 3.141592...
         (0x201a5eb, 0x9c795af8),     // 3.141592653...
         (0x763182c5, 0x4c4119c21e),  // 3.14159265358...
@@ -314,23 +292,23 @@ mod tests {
     #[test]
     fn pi_test() {
         assert_eq!(
-            pi_iter(2).to_approx_string(8),
+            pi_iter(1).to_approx_string(8),
             "3.141592"
         );
         assert_eq!(
-            pi_iter(3).to_approx_string(11),
+            pi_iter(2).to_approx_string(11),
             "3.141592653"
         );
         assert_eq!(
-            pi_iter(4).to_approx_string(13),
+            pi_iter(3).to_approx_string(13),
             "3.14159265358"
         );
         assert_eq!(
-            pi_iter(5).to_approx_string(16),
+            pi_iter(4).to_approx_string(16),
             "3.14159265358979"
         );
         assert_eq!(
-            pi_iter(6).to_approx_string(19),
+            pi_iter(5).to_approx_string(19),
             "3.14159265358979323"
         );
     }

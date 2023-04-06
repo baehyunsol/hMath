@@ -34,7 +34,7 @@ impl Ratio {
     }
 
     pub fn comp_rat(&self, other: &Ratio) -> Ordering {
-        todo!()
+        self.numer.mul_bi(&other.denom).comp_bi(&other.numer.mul_bi(&self.denom))
     }
 
     /// self < 1
@@ -45,6 +45,22 @@ impl Ratio {
     /// self > 1
     pub fn gt_one(&self) -> bool {
         !self.is_neg() && self.numer.gt_bi(&self.denom)
+    }
+
+}
+
+impl PartialOrd for Ratio {
+
+    fn partial_cmp(&self, other: &Ratio) -> Option<Ordering> {
+        Some(self.comp_rat(other))
+    }
+
+}
+
+impl Ord for Ratio {
+
+    fn cmp(&self, other: &Ratio) -> Ordering {
+        self.comp_rat(other)
     }
 
 }

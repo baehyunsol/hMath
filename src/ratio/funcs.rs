@@ -22,6 +22,34 @@ impl Ratio {
         self.numer.abs_mut();
     }
 
+    /// 1 / self
+    #[must_use = "method returns a new number and does not mutate the original value"]
+    pub fn reci(&self) -> Self {
+        // Safety: `self.denom` and `self.numer` is already coprime
+        let mut result = Ratio::from_denom_and_numer_raw(
+            self.numer.clone(),
+            self.denom.clone()
+        );
+
+        if result.denom.is_zero() {
+            panic!("Attempt to divide by zero: 1 / {self:?}");
+        }
+
+        if result.denom.is_neg() {
+            result.denom.neg_mut();
+            result.numer.neg_mut();
+        }
+
+        #[cfg(test)] assert!(result.is_valid());
+
+        result
+    }
+
+    /// self = 1 / self
+    pub fn reci_mut(&mut self) {
+        *self = self.reci();
+    }
+
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn truncate(&self) -> Self {
         Ratio::from_bi(self.truncate_bi())

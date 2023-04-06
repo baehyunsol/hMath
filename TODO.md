@@ -18,7 +18,13 @@ Optional: Very Big Number
 - `(2, 5)` -> 2\^(2\^5)
 - `(3, 7)` -> 2\^(2\^(2\^5))
 
-In order for it to be `sort`able, I have to impl `comp` traits in std.
+---
+
+Eval function
+
+`Ratio::eval("/ 3 4")` -> `Ratio { 4, 3 }`
+
+Lisp-like syntax
 
 ---
 

@@ -6,7 +6,7 @@ mod convert;
 pub mod funcs;
 
 // 0 is not negative
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct BigInt {
     val: UBigInt,
     _is_neg: bool

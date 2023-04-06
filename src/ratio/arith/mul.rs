@@ -15,7 +15,11 @@ impl Ratio {
     }
 
     pub fn mul_rat_mut(&mut self, other: &Ratio) {
-        todo!()
+        self.denom.mul_bi_mut(&other.denom);
+        self.numer.mul_bi_mut(&other.numer);
+        self.fit();
+
+        #[cfg(test)] assert!(self.is_valid());
     }
 
     #[must_use = "method returns a new number and does not mutate the original value"]

@@ -46,7 +46,10 @@ impl BigInt {
     // TODO: write a unit test
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn rem_pow2(&self, other: i32) -> Self {
-        todo!()
+        let new_val = self.val.rem_pow2(other.abs() as u32);
+        let is_neg = self.is_neg() & !new_val.is_zero();
+
+        BigInt::from_ubi(new_val, is_neg)
     }
 
 }

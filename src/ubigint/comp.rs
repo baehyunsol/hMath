@@ -180,4 +180,20 @@ impl UBigInt {
     }
 }
 
+impl PartialOrd for UBigInt {
+
+    fn partial_cmp(&self, other: &UBigInt) -> Option<Ordering> {
+        Some(self.comp_ubi(other))
+    }
+
+}
+
+impl Ord for UBigInt {
+
+    fn cmp(&self, other: &UBigInt) -> Ordering {
+        self.comp_ubi(other)
+    }
+
+}
+
 // TODO: more tests

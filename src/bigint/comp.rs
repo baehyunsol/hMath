@@ -222,6 +222,22 @@ impl BigInt {
 
 }
 
+impl PartialOrd for BigInt {
+
+    fn partial_cmp(&self, other: &BigInt) -> Option<Ordering> {
+        Some(self.comp_bi(other))
+    }
+
+}
+
+impl Ord for BigInt {
+
+    fn cmp(&self, other: &BigInt) -> Ordering {
+        self.comp_bi(other)
+    }
+
+}
+
 #[cfg(test)]
 mod tests {
     use crate::BigInt;
