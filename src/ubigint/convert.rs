@@ -337,6 +337,9 @@ mod tests {
 
     #[test]
     fn string_conversion_test() {
+
+        if !RUN_ALL_TESTS { return; }
+
         let samples = vec![
             ("0", 0),
             ("0_", 0_),

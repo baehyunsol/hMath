@@ -5,7 +5,7 @@ use crate::utils::remove_suffix_0;
 impl UBigInt {
 
     // TODO: the code is too messy
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn div_ubi(&self, other: &UBigInt) -> Self {
 
         if self.len() < other.len() {
@@ -66,7 +66,7 @@ impl UBigInt {
         *self = result;
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn div_u32(&self, other: u32) -> Self {
         let mut result = self.clone();
         result.div_u32_mut(other);

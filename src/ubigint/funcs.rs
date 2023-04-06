@@ -3,14 +3,52 @@ use super::UBigInt;
 impl UBigInt {
 
     /// It returns 0 when `self` is 0.
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn log2(&self) -> Self {
         // It assumes that `self` is less than 2^(2^64)
         UBigInt::from_u64((self.len() as u64 - 1) * 32 + log2_u32(self.0[self.len() - 1]) as u64)
     }
 
+    /// It returns `truncate(log2(self) * 16777216)`.
+    /// Warning: This function is very expensive.
+    #[must_use = "method returns a new number and does not mutate the original value"]
+    pub fn log2_accurate(&self) -> Self {
+        let mut result = UBigInt::zero();
+        let mut self_clone = if self.len() > 3 {
+            result.add_ubi_mut(&UBigInt::from_u64((self.len() - 3) as u64).mul_u32(32));
+            self.shift_right(self.len() - 3)
+        } else {
+            self.clone()
+        };
+
+        // self = self^256
+        for _ in 0..8 {
+            self_clone = self_clone.mul_ubi(&self_clone);
+        }
+
+        result.mul_u32_mut(256);
+
+        for _ in 0..2 {
+
+            if self_clone.len() > 3 {
+                result.add_ubi_mut(&UBigInt::from_u64((self_clone.len() - 3) as u64).mul_u32(32));
+                self_clone.shift_right_mut(self_clone.len() - 3);
+            }
+
+            // self = self^256
+            for _ in 0..8 {
+                self_clone = self_clone.mul_ubi(&self_clone);
+            }
+
+            result.mul_u32_mut(256);
+        }
+
+        result.add_ubi_mut(&self_clone.log2());
+        result
+    }
+
     /// divide by 2^32
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn shift_right(&self, n: usize) -> Self {
         UBigInt::from_raw(self.0[n..].to_vec())
     }
@@ -21,7 +59,7 @@ impl UBigInt {
     }
 
     /// multiply 2^32
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn shift_left(&self, n: usize) -> Self {
         UBigInt::from_raw(vec![
             vec![0; n],
@@ -38,7 +76,7 @@ impl UBigInt {
     }
 
     /// modulo 2^32
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn slice_right(&self, n: usize) -> Self {
         UBigInt::from_raw(self.0[0..n].to_vec())
     }
@@ -48,7 +86,7 @@ impl UBigInt {
         self.0 = self.0[0..n].to_vec();
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn sqrt(&self) -> Self {
         let mut div = if self.len() > 2 {
             self.shift_right(1)
@@ -226,14 +264,6 @@ pub fn log2_u32(mut n: u32) -> u32 {
     result
 }
 
-// Internal function: it doesn't always return an answer!
-pub fn log10(n: &UBigInt) -> i64 {
-    let log2 = n.log2().to_u64().unwrap() as i64;
-
-    // 2^681 = 10^205 + small
-    log2 * 205 / 681
-}
-
 #[cfg(test)]
 mod tests {
     use crate::UBigInt;
@@ -353,7 +383,6 @@ mod tests {
 
     #[test]
     fn log_test() {
-        use crate::ubigint::funcs::log10;
 
         if !RUN_ALL_TESTS { return; }
 
@@ -368,18 +397,22 @@ mod tests {
             i += 1;
         }
 
-        let decimals = vec![
-            "123", "1234", "12345", "123456",
-            "1234567", "12345678", "123456789",
-            "1234567890", "12345678901",
-            "10000000000000000000", "10000000000000000001"
-        ];
+        use crate::{Ratio, BigInt};
+        let denom = BigInt::from_i32(16777216);
 
-        for decimal in decimals.into_iter() {
-            assert!(
-                ((decimal.len() as i64 - 1) - log10(&UBigInt::from_string(decimal).unwrap())).abs() < 2
-            );
-        }
-
+        assert_eq!(
+            Ratio::from_denom_and_numer(
+                denom.clone(),
+                BigInt::from_i32(3).log2_accurate()
+            ).to_approx_string(6),
+            "1.5849"
+        );
+        assert_eq!(
+            Ratio::from_denom_and_numer(
+                denom.clone(),
+                BigInt::from_i32(9900).log2_accurate()
+            ).to_approx_string(6),
+            "13.273"
+        );
     }
 }

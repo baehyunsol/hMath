@@ -314,10 +314,6 @@ mod tests {
     #[test]
     fn pi_test() {
         assert_eq!(
-            pi_iter(1).to_approx_string(5),
-            "3.141"
-        );
-        assert_eq!(
             pi_iter(2).to_approx_string(8),
             "3.141592"
         );
@@ -332,6 +328,10 @@ mod tests {
         assert_eq!(
             pi_iter(5).to_approx_string(16),
             "3.14159265358979"
+        );
+        assert_eq!(
+            pi_iter(6).to_approx_string(19),
+            "3.14159265358979323"
         );
     }
 

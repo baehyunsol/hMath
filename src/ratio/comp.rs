@@ -5,12 +5,14 @@ impl Ratio {
 
     /// self < other
     pub fn lt_rat(&self, other: &Ratio) -> bool {
-        todo!()
+        // self - other < 0
+        self.sub_rat(other).is_neg()
     }
 
     /// self > other
     pub fn gt_rat(&self, other: &Ratio) -> bool {
-        todo!()
+        // other - self < 0
+        other.sub_rat(self).is_neg()
     }
 
     pub fn eq_rat(&self, other: &Ratio) -> bool {

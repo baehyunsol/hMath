@@ -4,7 +4,7 @@ use crate::ubigint::funcs::log2_u32;
 impl UBigInt {
 
     /// 0^0 is 1
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn pow_u32(&self, mut exp: u32) -> Self {
 
         if exp < 3 {
@@ -59,7 +59,7 @@ impl UBigInt {
     }
 
     /// returns 2^exp
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn pow2(exp: u32) -> Self {
         UBigInt::from_raw(
             vec![

@@ -2,7 +2,7 @@ use crate::{BigInt, Ratio};
 
 impl Ratio {
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn add_rat(&self, other: &Ratio) -> Self {
         let result = Ratio::from_denom_and_numer(
             self.denom.mul_bi(&other.denom),
@@ -21,7 +21,7 @@ impl Ratio {
         self.fit();
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn add_bi(&self, other: &BigInt) -> Self {
         todo!()
     }
@@ -30,7 +30,7 @@ impl Ratio {
         todo!()
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn add_i32(&self, other: i32) -> Self {
         todo!()
     }

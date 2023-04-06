@@ -4,7 +4,7 @@ use crate::consts::U32_OVER;
 impl UBigInt {
 
     // self - self / other * other
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn rem_ubi(&self, other: &UBigInt) -> Self {
         let mut sdo = self.div_ubi(other);
         sdo.mul_ubi_mut(other);
@@ -18,7 +18,7 @@ impl UBigInt {
         self.sub_ubi_mut(&sdo);
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn rem_u32(&self, other: u32) -> Self {
         let other = other as u64;
         let unit = U32_OVER % other;
@@ -63,7 +63,7 @@ impl UBigInt {
     }
 
     /// `other` must be a power of 2
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn rem_pow2(&self, other: u32) -> Self {
         #[cfg(test)] assert!(is_pow2(other));
 

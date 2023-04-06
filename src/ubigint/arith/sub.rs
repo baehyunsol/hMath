@@ -4,7 +4,7 @@ use crate::utils::remove_suffix_0;
 impl UBigInt {
 
     /// it panics when `other` > `self` (TODO: it doesn't panic on release mode)
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn sub_ubi(&self, other: &UBigInt) -> Self {
         let mut result = self.clone();
         result.sub_ubi_mut(other);
@@ -68,7 +68,7 @@ impl UBigInt {
     }
 
     /// it panics when `other` > `self`
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn sub_u32(&self, other: u32) -> Self {
         let mut result = self.clone();
         result.sub_u32_mut(other);

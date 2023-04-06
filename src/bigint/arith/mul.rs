@@ -2,7 +2,7 @@ use crate::BigInt;
 
 impl BigInt {
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn mul_bi(&self, other: &BigInt) -> Self {
         let val = self.val.mul_ubi(&other.val);
         let is_neg = !val.is_zero() && self.is_neg() != other.is_neg();
@@ -20,7 +20,7 @@ impl BigInt {
         #[cfg(test)] assert!(self.is_valid());
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn mul_i32(&self, other: i32) -> Self {
         let val = self.val.mul_u32(other.abs() as u32);
         let is_neg = !val.is_zero() && self.is_neg() != (other < 0);
@@ -39,7 +39,7 @@ impl BigInt {
     }
 
     /// returns `self * 2^exp`
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn mul_pow2(&self, exp: u32) -> Self {
         BigInt::from_ubi(self.val.mul_pow2(exp), self.is_neg())
     }

@@ -5,7 +5,7 @@ use crate::utils::{v64_to_v32, remove_suffix_0};
 impl UBigInt {
 
     // TODO: https://en.wikipedia.org/wiki/Karatsuba_algorithm
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn mul_ubi(&self, other: &UBigInt) -> Self {
         let mut result = vec![0; self.len() + other.len()];
 
@@ -34,7 +34,7 @@ impl UBigInt {
         *self = result;
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn mul_u32(&self, other: u32) -> Self {
         let mut result = self.clone();
         result.mul_u32_mut(other);
@@ -82,7 +82,7 @@ impl UBigInt {
 
     /// multiplies 2^`exp`
     // first multiply, then shift
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn mul_pow2(&self, exp: u32) -> Self {
         let mut result = self.clone();
         result.mul_pow2_mut(exp);

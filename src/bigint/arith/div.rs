@@ -2,7 +2,7 @@ use crate::BigInt;
 
 impl BigInt {
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn div_bi(&self, other: &BigInt) -> Self {
         let val = self.val.div_ubi(&other.val);
         let is_neg = !val.is_zero() && self.is_neg() != other.is_neg();
@@ -20,7 +20,7 @@ impl BigInt {
         #[cfg(test)] assert!(self.is_valid());
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn div_i32(&self, other: i32) -> Self {
         let val = self.val.div_u32(other.abs() as u32);
         let is_neg = !val.is_zero() && self.is_neg() != (other < 0);

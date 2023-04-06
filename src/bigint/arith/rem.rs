@@ -3,7 +3,7 @@ use crate::BigInt;
 impl BigInt {
 
     // self - self / other * other
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn rem_bi(&self, other: &BigInt) -> Self {
         let mut sdo = self.div_bi(other);
         sdo.mul_bi_mut(other);
@@ -24,7 +24,7 @@ impl BigInt {
 
     // x % y = x % -y
     // x % y = -(-x % y)
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn rem_i32(&self, other: i32) -> Self {
         let new_val = self.val.rem_u32(other.abs() as u32);
         let is_neg = self.is_neg() & !new_val.is_zero();
@@ -44,7 +44,7 @@ impl BigInt {
 
     /// `other` must be a power of 2
     // TODO: write a unit test
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn rem_pow2(&self, other: i32) -> Self {
         todo!()
     }

@@ -2,13 +2,21 @@ use crate::{BigInt, gcd_ubi};
 
 impl BigInt {
 
-    /// It returns 0 when `self` is less than or equal to 0.
-    #[must_use]
+    /// It returns 0 when `self` is 0.
+    /// It returns `log2(abs(self))`.
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn log2(&self) -> Self {
         BigInt::from_ubi(self.val.log2(), false)
     }
 
-    #[must_use]
+    /// It returns `truncate(log2(self) * 16777216)`.
+    /// Warning: This function is very expensive.
+    #[must_use = "method returns a new number and does not mutate the original value"]
+    pub fn log2_accurate(&self) -> Self {
+        BigInt::from_ubi(self.val.log2_accurate(), false)
+    }
+
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn neg(&self) -> Self {
         //   self.is_neg()      self.val.is_zero()       result
         //       true                  false             false
@@ -21,7 +29,7 @@ impl BigInt {
         self._is_neg = !self.is_neg() & !self.val.is_zero();
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn abs(&self) -> Self {
         BigInt::from_ubi(self.val.clone(), false)
     }

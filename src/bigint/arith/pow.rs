@@ -3,7 +3,7 @@ use crate::{BigInt, UBigInt};
 impl BigInt {
 
     /// 0^0 is 1
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn pow_u32(&self, exp: u32) -> Self {
         BigInt::from_ubi(self.val.pow_u32(exp), self.is_neg() && exp % 2 == 1)
     }
@@ -14,7 +14,7 @@ impl BigInt {
     }
 
     /// returns 2^exp
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn pow2(exp: u32) -> Self {
         BigInt::from_ubi(UBigInt::pow2(exp), false)
     }

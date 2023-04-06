@@ -2,7 +2,7 @@ use crate::{BigInt, UBigInt};
 
 impl BigInt {
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn add_bi(&self, other: &BigInt) -> Self {
 
         if self.is_neg() == other.is_neg() {
@@ -57,7 +57,7 @@ impl BigInt {
 
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn add_i32(&self, other: i32) -> Self {
 
         if self.is_neg() == (other < 0) {

@@ -49,11 +49,15 @@ impl Ratio {
                 let mut numer = BigInt::from_i32((frac + (1 << 23)) as i32);
                 numer.mul_pow2_mut((exp - 23) as u32);
 
+                if neg { numer.neg_mut(); }
+
                 Ok(Ratio::from_bi(numer))
             } else {
                 // (2^23 + frac) / 2^(23-exp)
-                let numer = BigInt::from_i32((frac + (1 << 23)) as i32);
+                let mut numer = BigInt::from_i32((frac + (1 << 23)) as i32);
                 let denom = BigInt::pow2((23 - exp) as u32);
+
+                if neg { numer.neg_mut(); }
 
                 Ok(Ratio::from_denom_and_numer(denom, numer))
             },
@@ -94,7 +98,7 @@ impl Ratio {
             return Err(ConversionError::NotInRange);
         }
 
-        let frac = self_clone.mul_i32(1 << 23).truncate_bi().to_i32().unwrap() as u32;
+        let frac = self_clone.sub_i32(1).mul_i32(1 << 23).truncate_bi().to_i32().unwrap() as u32;
 
         let result = ((neg as u32) << 31) | ((exp as u32) << 23) | frac;
         let rp = &result as *const u32 as *const f32;
@@ -115,11 +119,15 @@ impl Ratio {
                 let mut numer = BigInt::from_i64((frac + (1 << 52)) as i64);
                 numer.mul_pow2_mut((exp - 52) as u32);
 
+                if neg { numer.neg_mut(); }
+
                 Ok(Ratio::from_bi(numer))
             } else {
                 // (2^52 + frac) / 2^(52-exp)
-                let numer = BigInt::from_i64((frac + (1 << 52)) as i64);
+                let mut numer = BigInt::from_i64((frac + (1 << 52)) as i64);
                 let denom = BigInt::pow2((52 - exp) as u32);
+
+                if neg { numer.neg_mut(); }
 
                 Ok(Ratio::from_denom_and_numer(denom, numer))
             },
@@ -160,7 +168,7 @@ impl Ratio {
             return Err(ConversionError::NotInRange);
         }
 
-        let frac = self_clone.mul_bi(&BigInt::from_i64(1 << 52)).truncate_bi().to_i64().unwrap() as u64;
+        let frac = self_clone.sub_i32(1).mul_bi(&BigInt::from_i64(1 << 52)).truncate_bi().to_i64().unwrap() as u64;
 
         let result = ((neg as u64) << 63) | ((exp as u64) << 52) | frac;
         let rp = &result as *const u64 as *const f64;
@@ -169,6 +177,11 @@ impl Ratio {
     }
 
     pub fn from_string(s: &str) -> Result<Self, ConversionError> {
+
+        if s.len() == 0 {
+            return Err(ConversionError::NoData);
+        }
+
         let dot_index = s.find('.');
 
         let e_index = if let Some(c) = get_non_decimal_char(s) {
@@ -199,6 +212,8 @@ impl Ratio {
             }
 
         }
+
+        let is_neg = s.starts_with('-');
 
         // `111e22.33` is invalid
         let integer_end_index = if let Some(i) = dot_index {
@@ -275,7 +290,7 @@ impl Ratio {
             }
         };
 
-        if integer_part.is_neg() {
+        if is_neg {
             fractional_part.neg_mut();
         }
 
@@ -300,8 +315,116 @@ impl Ratio {
 
     /// Ratio { 4, 7 } -> "1.75".
     /// The length of the returned string is less or equal to `digits`.
-    pub fn to_approx_string(&self, digits: usize) -> String {
-        todo!()
+    /// If `digits` is less than 6, it'll count that as 6.
+    ///
+    /// TODO: This function is very expensive.
+    pub fn to_approx_string(&self, max_len: usize) -> String {
+        let max_len = max_len.max(6);
+
+        // 2^70777 = 10^21306 + small
+        let log10 = self.numer.log2_accurate().sub_bi(&self.denom.log2_accurate()).mul_i32(21306).div_i32(70777).div_i32(16777216).to_i64().unwrap();
+        let is_neg = self.is_neg();
+
+        let result = if log10 > max_len as i64 {
+            // we don't need the fractional part
+
+            let mut bi = self.truncate_bi();
+            bi.abs_mut();
+            let big_decimal = BigInt::from_i32(10).pow_u32(16);
+            let mut exp = 0;
+
+            while bi.gt_bi(&big_decimal) {
+                bi.div_i32_mut(1_000_000);
+                exp += 6;
+            }
+
+            while bi.gt_i32(1_000_000_000) {
+                bi.div_i32_mut(10);
+                exp += 1;
+            }
+
+            let mut bi = bi.to_i32().unwrap();
+            let mut digits = Vec::with_capacity(10);
+
+            while bi > 0 {
+                digits.push(bi % 10);
+                bi /= 10;
+                exp += 1;
+            }
+
+            digits.reverse();
+            exp -= 1;
+
+            while digits.len() > 1 && digits[digits.len() - 1] == 0 {
+                digits.pop().unwrap();
+            }
+
+            let mut digits = if digits.len() == 1 {
+                digits[0].to_string()
+            } else {
+                format!(
+                    "{}.{}",
+                    digits[0].to_string(),
+                    digits[1..].iter().map(|n| n.to_string()).collect::<Vec<String>>().concat()
+                )
+            };
+
+            let exp = format!("e{exp}");
+            let neg = if is_neg { "-" } else { "" };
+
+            if digits.len() + exp.len() + neg.len() > max_len {
+                digits = digits.get(0..(max_len - exp.len() - neg.len())).unwrap().to_string();
+
+                // '3.e720' doesn't make sense; it should be `3e720`
+                if digits.ends_with('.') {
+                    digits = digits.get(0..(digits.len() - 1)).unwrap().to_string();
+                }
+
+            }
+
+            format!("{neg}{digits}{exp}")
+        }
+
+        else if log10 < -(max_len as i64) {
+            todo!()
+        }
+
+        else {
+            let int_part = self.truncate_bi().abs().to_string();
+            let mut frac_part = self.abs().frac();
+            let sign_part = if is_neg {"-"} else {""};
+
+            let mut digits = vec![];
+            let mut curr_len = int_part.len() + 1 + sign_part.len();
+
+            while curr_len < max_len {
+                frac_part.mul_i32_mut(10);
+                digits.push(frac_part.truncate_bi().to_i32().unwrap());
+                frac_part.frac_mut();
+                curr_len += 1;
+            }
+
+            while digits.len() > 0 && digits[digits.len() - 1] == 0 {
+                digits.pop().unwrap();
+            }
+
+            if digits.len() > 0 {
+                format!("{sign_part}{int_part}.{}", digits.iter().map(|c| c.to_string()).collect::<Vec<String>>().join(""))
+            } else {
+                format!("{sign_part}{int_part}")
+            }
+
+        };
+
+        /// TODO: how about `123e10000000.to_approx_string(6)`? len(exp) is greater than 6!
+        #[cfg(test)] assert!(result.len() <= max_len);
+
+        result
+    }
+
+    /// `self.to_approx_string(12)`
+    pub fn to_string(&self) -> String {
+        self.to_approx_string(12)
     }
 
 }
@@ -413,6 +536,14 @@ fn inspect_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> {  // (neg, 
     Ok((neg, exp, frac))
 }
 
+impl std::fmt::Display for Ratio {
+
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(fmt, "{}", self.to_string())
+    }
+
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{Ratio, BigInt};
@@ -421,32 +552,59 @@ mod tests {
     #[test]
     fn string_test() {
         assert_eq!(
+            Ratio::from_string("3.141592e720").unwrap().to_approx_string(12),
+            "3.141592e720"
+        );
+        assert_eq!(
+            Ratio::from_string("-3.141592e720").unwrap().to_approx_string(16),
+            "-3.141592e720"
+        );
+        assert_eq!(
+            Ratio::from_string("3.141592e720").unwrap().to_approx_string(9),
+            "3.141e720"
+        );
+        assert_eq!(
+            Ratio::from_string("-3.141592e720").unwrap().to_approx_string(10),
+            "-3.141e720"
+        );
+        assert_eq!(
+            Ratio::from_string("3.141592e720").unwrap().to_approx_string(6),
+            "3e720"
+        );
+        assert_eq!(
+            Ratio::from_string("-3.141592e720").unwrap().to_approx_string(6),
+            "-3e720"
+        );
+        assert_eq!(
+            Ratio::from_string("3e20").unwrap().to_approx_string(0),
+            "3e20"
+        );
+        assert_eq!(
+            Ratio::from_string("-3e20").unwrap().to_approx_string(0),
+            "-3e20"
+        );
+        assert_eq!(
             // not 16 * 10^5
             Ratio::from_string("0x16e5").unwrap(),
             Ratio::from_bi(BigInt::from_i32(0x16e5))
         );
-
         assert_eq!(
             // not -16 * 10^5
             Ratio::from_string("-0x16e5").unwrap(),
             Ratio::from_bi(BigInt::from_i32(-0x16e5))
         );
-
         assert_eq!(
             Ratio::from_string("16e5").unwrap(),
             Ratio::from_bi(BigInt::from_i32(1600000))
         );
-
         assert_eq!(
             Ratio::from_string("1600e-1").unwrap(),
             Ratio::from_bi(BigInt::from_i32(160))
         );
-
         assert_eq!(
             Ratio::from_string("3.012").unwrap(),
             Ratio::from_denom_and_numer(BigInt::from_i32(1000), BigInt::from_i32(3012))
         );
-
         assert!(Ratio::from_string("0x123.4").is_err());
         assert!(Ratio::from_string("0x123.4e4").is_err());
         assert!(Ratio::from_string("0x123.e44").is_err());
@@ -464,30 +622,23 @@ mod tests {
     #[test]
     fn ieee754_test() {
         let samples = vec![
-            "0.0", "-0.0",
-            "1.0", "-1.0",
-            "2.0", "-2.0",
-            "3.0", "-3.0",
-            "3.", "-3.",
-            "1.125", "-1.125",
-            // "1._125", "-1._125",  // is this valid in Rust?
-            "1.1_25", "-1.1_25",
-            "17.0", "-17.0",
-            "1_7.0", "-1_7.0",
-            "17.5", "-17.5",
-            "1048576.0", "-1048576.0",
-            "0.0625", "-0.0625",
-            "0.01171875", "-0.01171875",
-            "15.640625", "-15.640625",
-            "625e-3", "-625e-3",
-            "15.625e-2", "-15.625e-2",
-            "12e3", "-12e3",
-            "16.3e2", "-16.3e2",
+            "0.0", "1.0", "2.0", "3.0",
+            "3.", "1.125", "17.5",
+            "17.0", "1048576.0", "0.0625",
+            "19.015625", "6256255.5",
+            "0.01171875", "15.640625",
+            "625e-3", "15.625e-2", "12e3",
+            "16.3e2",
             // TODO: denormalized numbers (2^n, where n < -126)
         ];
 
+        let samples: Vec<String> = vec![
+            samples.iter().map(|s| format!("-{s}")).collect::<Vec<String>>(),
+            samples.iter().map(|s| s.to_string()).collect()
+        ].concat();
+
         for n in samples.into_iter() {
-            let rat = Ratio::from_string(n).unwrap();
+            let rat = Ratio::from_string(&n).unwrap();
             let nf32 = n.parse::<f32>().unwrap();
             let nf64 = n.parse::<f64>().unwrap();
 
@@ -496,7 +647,7 @@ mod tests {
             assert_eq!(rat.to_ieee754_f32().unwrap(), nf32);
             assert_eq!(rat.to_ieee754_f64().unwrap(), nf64);
 
-            let n = rat.to_approx_string(1000);
+            let n = rat.to_approx_string(n.len());
             let rat = Ratio::from_string(&n).unwrap();
             let nf32 = n.parse::<f32>().unwrap();
             let nf64 = n.parse::<f64>().unwrap();

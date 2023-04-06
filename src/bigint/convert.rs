@@ -61,7 +61,18 @@ impl BigInt {
     }
 
     pub fn to_i128(&self) -> Result<i128, ConversionError> {
-        todo!()
+
+        match self.val.to_u128() {
+            Ok(n) => if !self.is_neg() && n <= i128::MAX as u128 {
+                Ok(n as i128)
+            } else if self.is_neg() && n < (1 << 127) {
+                Ok(-(n as i128))
+            } else {
+                Err(ConversionError::NotInRange)
+            },
+            Err(e) => Err(e)
+        }
+
     }
 
     pub fn from_ubi(n: UBigInt, is_neg: bool) -> Self {

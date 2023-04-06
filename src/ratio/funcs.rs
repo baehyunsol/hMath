@@ -2,7 +2,7 @@ use crate::{Ratio, BigInt};
 
 impl Ratio {
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn neg(&self) -> Self {
         // Safety: if a and b are coprime, a and -b are also coprime. property 2 and 3 are satisfied because it doesn't change the sign of denom
         Ratio::from_denom_and_numer_raw(self.denom.clone(), self.numer.neg())
@@ -12,7 +12,7 @@ impl Ratio {
         self.numer.neg_mut();
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn abs(&self) -> Self {
         // Safety: if a and b are coprime, a and -b are also coprime. property 2 and 3 are satisfied because it doesn't change the sign of denom
         Ratio::from_denom_and_numer_raw(self.denom.clone(), self.numer.abs())
@@ -22,7 +22,7 @@ impl Ratio {
         self.numer.abs_mut();
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn truncate(&self) -> Self {
         Ratio::from_bi(self.truncate_bi())
     }
@@ -34,7 +34,7 @@ impl Ratio {
         #[cfg(test)] assert!(self.is_valid());
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn truncate_bi(&self) -> BigInt {
         let result = self.numer.div_bi(&self.denom);
 
@@ -43,7 +43,7 @@ impl Ratio {
         result
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     /// self - truncate(self)
     pub fn frac(&self) -> Self {
         // Safety: (a % b) and b are coprime

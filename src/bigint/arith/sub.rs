@@ -2,7 +2,7 @@ use crate::{BigInt, UBigInt};
 
 impl BigInt {
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn sub_bi(&self, other: &BigInt) -> Self {
         let result = if self.is_neg() != other.is_neg() {
             BigInt::from_ubi(self.val.add_ubi(&other.val), self.is_neg())
@@ -58,7 +58,7 @@ impl BigInt {
         #[cfg(test)] assert!(self.is_valid());
     }
 
-    #[must_use]
+    #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn sub_i32(&self, other: i32) -> Self {
         let result = if self.is_neg() != (other < 0) {
             BigInt::from_ubi(self.val.add_u32(other.abs() as u32), self.is_neg())
