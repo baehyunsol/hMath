@@ -76,6 +76,7 @@ impl BigInt {
     }
 
     pub fn from_ubi(n: UBigInt, is_neg: bool) -> Self {
+        let is_neg = is_neg & !n.is_zero();
         BigInt::from_raw(n.0, is_neg)
     }
 

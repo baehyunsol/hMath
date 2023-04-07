@@ -221,6 +221,22 @@ impl UBigInt {
 
     }
 
+    /// It returns a random number between 1..2^(32 * scale).\
+    /// If `scale` is 0, it returns 0.
+    #[cfg(feature = "rand")]
+    pub fn random(scale: usize) -> Self {
+
+        if scale == 0 {
+            UBigInt::zero()
+        }
+
+        else {
+            UBigInt::from_raw(
+                (0..scale).map(|_| rand::random::<u32>().max(1)).collect()
+            )
+        }
+
+    }
 }
 
 pub fn gcd_ubi(a: &UBigInt, b: &UBigInt) -> UBigInt {

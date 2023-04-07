@@ -23,7 +23,16 @@ impl Ratio {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn add_bi(&self, other: &BigInt) -> Self {
-        todo!()
+
+        // Safety: `self.denom` and `self.numer` are already coprime.
+        let result = Ratio::from_denom_and_numer_raw(
+            self.denom.clone(),
+            self.numer.add_bi(&self.denom.mul_bi(other))
+        );
+
+        #[cfg(test)] assert!(result.is_valid());
+
+        result
     }
 
     pub fn add_bi_mut(&mut self, other: &BigInt) {
@@ -32,7 +41,16 @@ impl Ratio {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn add_i32(&self, other: i32) -> Self {
-        todo!()
+
+        // Safety: `self.denom` and `self.numer` are already coprime.
+        let result = Ratio::from_denom_and_numer_raw(
+            self.denom.clone(),
+            self.numer.add_bi(&self.denom.mul_i32(other))
+        );
+
+        #[cfg(test)] assert!(result.is_valid());
+
+        result
     }
 
     pub fn add_i32_mut(&mut self, other: i32) {

@@ -15,7 +15,10 @@ impl Ratio {
     }
 
     pub fn sub_rat_mut(&mut self, other: &Ratio) {
-        todo!()
+        self.numer = self.numer.mul_bi(&other.denom).sub_bi(&other.numer.mul_bi(&self.denom));
+        self.denom.mul_bi_mut(&other.denom);
+
+        self.fit();
     }
 
     #[must_use = "method returns a new number and does not mutate the original value"]

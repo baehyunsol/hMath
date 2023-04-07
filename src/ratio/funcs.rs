@@ -95,6 +95,25 @@ impl Ratio {
         self.numer.rem_bi_mut(&self.denom);
     }
 
+    /// It returns a number between 0 and 1 (both exclusive).
+    #[cfg(feature = "rand")]
+    pub fn random() -> Self {
+        let mut result = Ratio::from_raw(
+            vec![0, 0, 0, 0, 1],
+            false,
+            (0..4).map(|_| rand::random::<u32>().max(1)).collect(),
+            false
+        );
+        result.fit();
+
+        #[cfg(test)] {
+            assert!(result.is_valid());
+            assert!(result.lt_one());
+            assert!(!result.is_zero());
+        }
+
+        result
+    }
 }
 
 #[cfg(test)]

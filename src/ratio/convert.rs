@@ -95,14 +95,29 @@ impl Ratio {
             exp -= 1;
         }
 
+        let mut frac = self_clone.sub_i32(1).mul_i32(1 << 23).truncate_bi().to_i32().unwrap() as u32;
+
+        if exp < -126 {
+            frac += 1 << 23;
+            frac /= 2;
+            exp += 1;
+
+            while exp < -127 {
+                exp += 1;
+                frac /= 2;
+            }
+
+            if frac == 0 {
+                return Err(ConversionError::NotInRange);
+            }
+
+        }
+
         exp += 127;
 
-        // TODO: denormalized numbers
         if exp < 0 || exp > 255 {
             return Err(ConversionError::NotInRange);
         }
-
-        let frac = self_clone.sub_i32(1).mul_i32(1 << 23).truncate_bi().to_i32().unwrap() as u32;
 
         let result = ((neg as u32) << 31) | ((exp as u32) << 23) | frac;
         let rp = &result as *const u32 as *const f32;
@@ -165,14 +180,29 @@ impl Ratio {
             exp -= 1;
         }
 
+        let mut frac = self_clone.sub_i32(1).mul_bi(&BigInt::from_i64(1 << 52)).truncate_bi().to_i64().unwrap() as u64;
+
+        if exp < -1022 {
+            frac += 1 << 52;
+            frac /= 2;
+            exp += 1;
+
+            while exp < -1023 {
+                exp += 1;
+                frac /= 2;
+            }
+
+            if frac == 0 {
+                return Err(ConversionError::NotInRange);
+            }
+
+        }
+
         exp += 1023;
 
-        // TODO: denormalized numbers
         if exp < 0 || exp > 2047 {
             return Err(ConversionError::NotInRange);
         }
-
-        let frac = self_clone.sub_i32(1).mul_bi(&BigInt::from_i64(1 << 52)).truncate_bi().to_i64().unwrap() as u64;
 
         let result = ((neg as u64) << 63) | ((exp as u64) << 52) | frac;
         let rp = &result as *const u64 as *const f64;
@@ -329,7 +359,7 @@ impl Ratio {
         let log10 = self.numer.log2_accurate().sub_bi(&self.denom.log2_accurate()).mul_i32(21306).div_i32(70777).div_i32(16777216).to_i64().unwrap();
         let is_neg = self.is_neg();
 
-        let result = if log10 > max_len as i64 {
+        let result = if log10 > max_len as i64 - 3 {
             // we don't need the fractional part
 
             let mut bi = self.truncate_bi();
@@ -348,7 +378,7 @@ impl Ratio {
             }
 
             let mut bi = bi.to_i32().unwrap();
-            let mut digits = Vec::with_capacity(10);
+            let mut digits = Vec::with_capacity(20);
 
             while bi > 0 {
                 digits.push(bi % 10);
@@ -389,8 +419,46 @@ impl Ratio {
             format!("{neg}{digits}{exp}")
         }
 
-        else if log10 < -(max_len as i64) {
-            todo!()
+        else if log10 < -(max_len as i64 - 3) {
+            let mut self_clone = self.abs();
+            let mut exp = -1;
+
+            while self_clone.lt_one() {
+                self_clone.mul_i32_mut(1_000_000_000);
+                exp -= 9;
+            }
+
+            let mut self_int = self_clone.mul_i32(1_000_000_000).truncate_bi();
+            exp -= 9;
+
+            let sign_part = if is_neg { "-" } else { "" };
+            let mut digits = Vec::with_capacity(20);
+
+            while self_int.gt_i32(0) {
+                digits.push(self_int.rem_i32(10).to_i32().unwrap());
+                self_int.div_i32_mut(10);
+                exp += 1;
+            }
+
+            digits.reverse();
+            let exp = format!("e{exp}");
+            let mut curr_len = sign_part.len() + exp.len() + 1;
+
+            while curr_len > max_len && digits.len() > 0 {
+                digits.pop().unwrap();
+                curr_len -= 1;
+            }
+
+            while digits.len() > 0 && digits[digits.len() - 1] == 0 {
+                digits.pop().unwrap();
+            }
+
+            let digits = if digits.len() > 1 {
+                format!("{}.{}", digits[0], digits[1..].iter().map(|c| c.to_string()).collect::<Vec<String>>().join(""))
+            } else {
+                format!("{}", digits[0])
+            };
+            format!("{sign_part}{digits}{exp}")
         }
 
         else {
@@ -398,7 +466,7 @@ impl Ratio {
             let mut frac_part = self.abs().frac();
             let sign_part = if is_neg {"-"} else {""};
 
-            let mut digits = vec![];
+            let mut digits = Vec::with_capacity(20);
             let mut curr_len = int_part.len() + 1 + sign_part.len();
 
             while curr_len < max_len {
@@ -553,6 +621,7 @@ mod tests {
     use super::{inspect_f32, inspect_f64};
     use crate::{Ratio, BigInt};
     use crate::consts::RUN_ALL_TESTS;
+    use crate::err::ConversionError;
 
     #[test]
     fn string_test() {
@@ -625,6 +694,26 @@ mod tests {
     }
 
     #[test]
+    fn exp_number_test() {
+        let samples = vec![
+            "1.234e-80",
+            "1.004e-65",
+            "1.23e-120",
+            "1.2345e-9",
+            "3e-1200",
+            "3.141e7"
+        ];
+
+        for sample in samples.into_iter() {
+            let n = Ratio::from_string(sample).unwrap();
+
+            assert_eq!(sample, n.to_approx_string(sample.len()));
+            assert_eq!(sample, n.to_approx_string(sample.len() + 1));
+        }
+
+    }
+
+    #[test]
     fn ieee754_test() {
 
         if !RUN_ALL_TESTS { return; }
@@ -662,6 +751,74 @@ mod tests {
             let nf64 = n.parse::<f64>().unwrap();
             assert_eq!(Ratio::from_ieee754_f32(nf32).unwrap(), rat);
             assert_eq!(Ratio::from_ieee754_f64(nf64).unwrap(), rat);
+        }
+
+    }
+
+    #[test]
+    fn ieee754_fuzzing() {
+
+        #[cfg(feature = "rand")] {
+
+            let iter_count = if RUN_ALL_TESTS {
+                240
+            } else {
+                12
+            };
+
+            for _ in 0..iter_count {
+                let n32 = rand::random::<u32>();
+                let nf32 = unsafe { *(&n32 as *const u32 as *const f32) };
+                let res32 = Ratio::from_ieee754_f32(nf32);
+
+                if nf32.is_nan() {
+                    assert_eq!(res32, Err(ConversionError::NotANumber), "{n32}");
+                }
+
+                else if nf32.is_infinite() {
+                    assert_eq!(res32, Err(ConversionError::NotANumber), "{n32}");
+                }
+
+                else {
+                    let nf32_ = match res32 {
+                        Ok(n_) => match n_.to_ieee754_f32() {
+                            Ok(n__) => n__,
+                            Err(e) => panic!("{n32}, {e:?}")
+                        },
+                        Err(e) => panic!("{n32}, {e:?}")
+                    };
+
+                    let n32_ = unsafe { *(&nf32_ as *const f32 as *const u32) };
+                    assert_eq!(n32, n32_);
+                }
+
+                let n64 = rand::random::<u64>();
+                let nf64 = unsafe { *(&n64 as *const u64 as *const f64) };
+                let res64 = Ratio::from_ieee754_f64(nf64);
+
+                if nf64.is_nan() {
+                    assert_eq!(res64, Err(ConversionError::NotANumber), "{n64}");
+                }
+
+                else if nf64.is_infinite() {
+                    assert_eq!(res64, Err(ConversionError::NotANumber), "{n64}");
+                }
+
+                else {
+                    let nf64_ = match res64 {
+                        Ok(n_) => match n_.to_ieee754_f64() {
+                            Ok(n__) => n__,
+                            Err(e) => panic!("{n64}, {e:?}")
+                        },
+                        Err(e) => panic!("{n64}, {e:?}")
+                    };
+
+                    let n64_ = unsafe { *(&nf64_ as *const f64 as *const u64) };
+                    assert_eq!(n64, n64_);
+                }
+
+            }
+
         }
 
     }

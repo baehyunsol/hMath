@@ -1,5 +1,8 @@
 use crate::{BigInt, gcd_ubi};
 
+#[cfg(feature = "rand")]
+use crate::UBigInt;
+
 impl BigInt {
 
     /// It returns 0 when `self` is 0.
@@ -36,6 +39,21 @@ impl BigInt {
 
     pub fn abs_mut(&mut self) {
         self._is_neg = false;
+    }
+
+    /// It returns a random number whose absolute value is between 1..2^(32 * scale). It returns a negative number by 50%.\
+    /// If `scale` is 0, it returns 0.
+    #[cfg(feature = "rand")]
+    pub fn random(scale: usize) -> Self {
+
+        if scale == 0 {
+            BigInt::zero()
+        }
+
+        else {
+            BigInt::from_ubi(UBigInt::random(scale), rand::random::<bool>())
+        }
+
     }
 
 }
