@@ -331,12 +331,42 @@ impl Ratio {
         let mut result = Ratio::from_bi(integer_part);
         result.add_rat_mut(&fractional_part);
 
-        if exponential_part > 0 {
-            result.mul_bi_mut(&BigInt::from_i32(10).pow_u32(exponential_part as u32));
-        }
+        // exponential_part is a multiple of 2 and 5. So, it uses `rem_i32(2)` and `rem_i32(5)` instead of `rem_bi` for gcd
+        // -> that's much faster
+        if exponential_part != 0 {
+            let mut exponential_part_bi = BigInt::from_i32(10).pow_u32(exponential_part.abs() as u32);
 
-        else if exponential_part < 0 {
-            result.div_bi_mut(&BigInt::from_i32(10).pow_u32(exponential_part.abs() as u32));
+            if exponential_part > 0 {
+
+                while result.denom.rem_pow2(2).is_zero() && exponential_part_bi.rem_pow2(2).is_zero() {
+                    result.denom.div_i32_mut(2);
+                    exponential_part_bi.div_i32_mut(2);
+                }
+
+                while result.denom.rem_i32(5).is_zero() && exponential_part_bi.rem_i32(5).is_zero() {
+                    result.denom.div_i32_mut(5);
+                    exponential_part_bi.div_i32_mut(5);
+                }
+
+                result.numer.mul_bi_mut(&exponential_part_bi);
+            }
+
+            else if exponential_part < 0 {
+
+                while result.numer.rem_pow2(2).is_zero() && exponential_part_bi.rem_pow2(2).is_zero() {
+                    result.numer.div_i32_mut(2);
+                    exponential_part_bi.div_i32_mut(2);
+                }
+
+                while result.numer.rem_i32(5).is_zero() && exponential_part_bi.rem_i32(5).is_zero() {
+                    result.numer.div_i32_mut(5);
+                    exponential_part_bi.div_i32_mut(5);
+                }
+
+                result.denom.mul_bi_mut(&exponential_part_bi);
+            }
+
+            #[cfg(test)] assert!(result.is_valid());
         }
 
         Ok(result)
@@ -353,13 +383,25 @@ impl Ratio {
     ///
     /// TODO: This function is very expensive.
     pub fn to_approx_string(&self, max_len: usize) -> String {
-        let max_len = max_len.max(6);
+        let mut max_len = max_len.max(6);
+
+        let log2 = self.numer.log2_accurate().sub_bi(&self.denom.log2_accurate());
 
         // 2^70777 = 10^21306 + small
-        let log10 = self.numer.log2_accurate().sub_bi(&self.denom.log2_accurate()).mul_i32(21306).div_i32(70777).div_i32(16777216).to_i64().unwrap();
+        let log10i64 = log2.mul_i32(21306).div_i32(70777).div_i32(16777216).to_i64().unwrap();
         let is_neg = self.is_neg();
 
-        let result = if log10 > max_len as i64 - 3 {
+        if log10i64.abs() > 8600 {
+            let log10 = Ratio::from_denom_and_numer(
+                BigInt::from_i32(70777).mul_i32(16777216),
+                log2.mul_i32(21306)
+            );
+
+            // TODO: use log function to calc the approx representation
+            panic!("{}", log10.to_approx_string(24));
+        }
+
+        let result = if log10i64 > max_len as i64 - 3 {
             // we don't need the fractional part
 
             let mut bi = self.truncate_bi();
@@ -406,6 +448,9 @@ impl Ratio {
             let exp = format!("e{exp}");
             let neg = if is_neg { "-" } else { "" };
 
+            // At least 2 digits
+            max_len = max_len.max(exp.len() + 3);
+
             if digits.len() + exp.len() + neg.len() > max_len {
                 digits = digits.get(0..(max_len - exp.len() - neg.len())).unwrap().to_string();
 
@@ -419,7 +464,7 @@ impl Ratio {
             format!("{neg}{digits}{exp}")
         }
 
-        else if log10 < -(max_len as i64 - 3) {
+        else if log10i64 < -(max_len as i64 - 3) {
             let mut self_clone = self.abs();
             let mut exp = -1;
 
@@ -442,6 +487,10 @@ impl Ratio {
 
             digits.reverse();
             let exp = format!("e{exp}");
+
+            // At least 2 digits
+            max_len = max_len.max(exp.len() + 3);
+
             let mut curr_len = sign_part.len() + exp.len() + 1;
 
             while curr_len > max_len && digits.len() > 0 {
@@ -458,6 +507,7 @@ impl Ratio {
             } else {
                 format!("{}", digits[0])
             };
+
             format!("{sign_part}{digits}{exp}")
         }
 
@@ -488,7 +538,6 @@ impl Ratio {
 
         };
 
-        // TODO: how about `123e10000000.to_approx_string(6)`? len(exp) is greater than 6!
         #[cfg(test)] assert!(result.len() <= max_len);
 
         result
@@ -643,7 +692,7 @@ mod tests {
         );
         assert_eq!(
             Ratio::from_string("3.141592e720").unwrap().to_approx_string(6),
-            "3e720"
+            "3.1e720"
         );
         assert_eq!(
             Ratio::from_string("-3.141592e720").unwrap().to_approx_string(6),
@@ -711,6 +760,11 @@ mod tests {
             assert_eq!(sample, n.to_approx_string(sample.len() + 1));
         }
 
+        assert_eq!("3.1e120000", Ratio::from_string("3.14159e120000").unwrap().to_approx_string(8));
+
+        // TODO: it panics (stack overflow)
+        // possible workaround: use log functions for gigantic divisions
+        assert_eq!("3.1e-120000", Ratio::from_string("3.14159e-120000").unwrap().to_approx_string(8));
     }
 
     #[test]

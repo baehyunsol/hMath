@@ -21,9 +21,9 @@ impl UBigInt {
         }
 
         else if self.len() > other.len() {
-            let self_approx = self.0[self.len() - 1] as u64 * U32_OVER + self.0[self.len() - 2] as u64;
-            let other_approx = other.0[other.len() - 1] as u64;
-            let mut approx = UBigInt::from_u64(self_approx / (other_approx + 1));
+            let self_approx = self.0[self.len() - 1] as u128 * U32_OVER as u128 * U32_OVER as u128 + self.0[self.len() - 2] as u128 * U32_OVER as u128 + self.0[self.len() - 3] as u128;
+            let other_approx = other.0[other.len() - 1] as u128 * U32_OVER as u128 + other.0[other.len() - 2] as u128;
+            let mut approx = UBigInt::from_u128(self_approx / (other_approx + 1));
             approx.shift_left_mut(self.len() - other.len() - 1);
 
             // self / other = approx + (self - other * approx) / other
