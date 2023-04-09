@@ -1,5 +1,9 @@
 use crate::{Ratio, BigInt};
 
+mod exp;
+
+pub use exp::exp_iter;
+
 impl Ratio {
 
     #[must_use = "method returns a new number and does not mutate the original value"]

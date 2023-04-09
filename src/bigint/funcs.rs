@@ -19,6 +19,12 @@ impl BigInt {
         BigInt::from_ubi(self.val.log2_accurate(), false)
     }
 
+    /// It returns (sign * sqrt(self.abs()))
+    #[must_use = "method returns a new number and does not mutate the original value"]
+    pub fn sqrt(&self) -> Self {
+        BigInt::from_ubi(self.val.sqrt(), self.is_neg())
+    }
+
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn neg(&self) -> Self {
         //   self.is_neg()      self.val.is_zero()       result

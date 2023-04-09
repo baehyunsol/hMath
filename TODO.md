@@ -20,6 +20,23 @@ Optional: Very Big Number
 
 ---
 
+prime_factorial
+
+```rust
+fn pf(n: BigInt) -> Vec<BigInt> {
+  let mut result = vec![];
+
+  while n.rem_pow2(2).is_zero() {
+    n.div_i32_mut(2);
+    result.push(BigInt::from_i32(2));
+  }
+
+  // .. TODO
+}
+```
+
+---
+
 Eval function
 
 `Ratio::eval("/ 3 4")` -> `Ratio { 4, 3 }`

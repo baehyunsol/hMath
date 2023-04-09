@@ -4,7 +4,7 @@ mod arith;
 mod comp;
 mod convert;
 pub mod e;
-mod funcs;
+pub mod funcs;
 pub mod ln2;
 pub mod pi;
 

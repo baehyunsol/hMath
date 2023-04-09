@@ -391,14 +391,38 @@ impl Ratio {
         let log10i64 = log2.mul_i32(21306).div_i32(70777).div_i32(16777216).to_i64().unwrap();
         let is_neg = self.is_neg();
 
+        let sign_part = if is_neg { "-" } else { "" };
+
         if log10i64.abs() > 8600 {
             let log10 = Ratio::from_denom_and_numer(
-                BigInt::from_i32(70777).mul_i32(16777216),
+                BigInt::from_i64(70777 * 16777216),
                 log2.mul_i32(21306)
             );
 
-            // TODO: use log function to calc the approx representation
-            panic!("{}", log10.to_approx_string(24));
+            // `truncate` and `frac` does the same operation twice
+            let mut exp = log10.truncate_bi();
+            let mut frac = log10.frac();
+
+            if exp.is_neg() && !frac.is_zero() {
+                exp.sub_i32_mut(1);
+                frac.abs_mut();
+                frac = Ratio::one().sub_rat(&frac);
+            }
+
+            let digits = Ratio::from_denom_and_numer(
+                BigInt::from_i32(16777216),
+                BigInt::from_i32(exp10(&frac))
+            ).mul_i32(100).truncate_bi().to_i32().unwrap();  // take only 3 digits
+
+            let digits = if digits % 100 == 0 {
+                format!("{}", digits / 100)
+            } else if digits % 10 == 0 {
+                format!("{}.{}", digits / 100, digits / 10 % 10)
+            } else {
+                format!("{}.{:02}", digits / 100, digits % 100)
+            };
+
+            return format!("{sign_part}{digits}e{exp}");
         }
 
         let result = if log10i64 > max_len as i64 - 3 {
@@ -446,13 +470,12 @@ impl Ratio {
             };
 
             let exp = format!("e{exp}");
-            let neg = if is_neg { "-" } else { "" };
 
             // At least 2 digits
             max_len = max_len.max(exp.len() + 3);
 
-            if digits.len() + exp.len() + neg.len() > max_len {
-                digits = digits.get(0..(max_len - exp.len() - neg.len())).unwrap().to_string();
+            if digits.len() + exp.len() + sign_part.len() > max_len {
+                digits = digits.get(0..(max_len - exp.len() - sign_part.len())).unwrap().to_string();
 
                 // '3.e720' doesn't make sense; it should be `3e720`
                 if digits.ends_with('.') {
@@ -461,22 +484,34 @@ impl Ratio {
 
             }
 
-            format!("{neg}{digits}{exp}")
+            format!("{sign_part}{digits}{exp}")
         }
 
         else if log10i64 < -(max_len as i64 - 3) {
             let mut self_clone = self.abs();
             let mut exp = -1;
 
+            // In order to avoid unnecessary gcds and divs
             while self_clone.lt_one() {
-                self_clone.mul_i32_mut(1_000_000_000);
+                let mut billion = 1_000_000_000;
+
+                while self_clone.denom.rem_pow2(2).is_zero() && billion % 2 == 0 {
+                    self_clone.denom.div_i32_mut(2);
+                    billion /= 2;
+                }
+
+                while self_clone.denom.rem_i32(5).is_zero() && billion % 5 == 0 {
+                    self_clone.denom.div_i32_mut(5);
+                    billion /= 5;
+                }
+
+                self_clone.numer.mul_i32_mut(billion);
                 exp -= 9;
             }
 
             let mut self_int = self_clone.mul_i32(1_000_000_000).truncate_bi();
             exp -= 9;
 
-            let sign_part = if is_neg { "-" } else { "" };
             let mut digits = Vec::with_capacity(20);
 
             while self_int.gt_i32(0) {
@@ -657,6 +692,37 @@ fn inspect_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> {  // (neg, 
     Ok((neg, exp, frac))
 }
 
+// truncate(10^n * 16777216), n is between 0 and 1
+// internal function
+// It's very inaccurate and very inefficient
+fn exp10(n: &Ratio) -> i32 {
+    // binary search
+    // sqrt(10^a * 10^b) = 10^((a+b)/2)
+    let mut small = BigInt::from_i32(16777216);  // 10^0 * 16777216
+    let mut small_exp = Ratio::zero();
+
+    let mut big = BigInt::from_i32(10).mul_i32(16777216);  // 10^1 * 16777216
+    let mut big_exp = Ratio::one();
+
+    for _ in 0..16 {
+        let mid = small.mul_bi(&big).sqrt();
+        let mid_exp = small_exp.add_rat(&big_exp).div_i32(2);
+
+        if mid_exp.lt_rat(n) {
+            small = mid;
+            small_exp = mid_exp;
+        }
+
+        else {
+            big = mid;
+            big_exp = mid_exp;
+        }
+
+    }
+
+    small.to_i32().unwrap()
+}
+
 impl std::fmt::Display for Ratio {
 
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -670,6 +736,8 @@ mod tests {
     use super::{inspect_f32, inspect_f64};
     use crate::{Ratio, BigInt};
     use crate::consts::RUN_ALL_TESTS;
+
+    #[cfg(feature = "rand")]
     use crate::err::ConversionError;
 
     #[test]
@@ -760,11 +828,8 @@ mod tests {
             assert_eq!(sample, n.to_approx_string(sample.len() + 1));
         }
 
-        assert_eq!("3.1e120000", Ratio::from_string("3.14159e120000").unwrap().to_approx_string(8));
-
-        // TODO: it panics (stack overflow)
-        // possible workaround: use log functions for gigantic divisions
-        assert_eq!("3.1e-120000", Ratio::from_string("3.14159e-120000").unwrap().to_approx_string(8));
+        assert_eq!("3.14e120000", Ratio::from_string("3.14159e120000").unwrap().to_approx_string(8));
+        assert_eq!("3.14e-120000", Ratio::from_string("3.14159e-120000").unwrap().to_approx_string(8));
     }
 
     #[test]
