@@ -400,8 +400,7 @@ impl Ratio {
             );
 
             // `truncate` and `frac` does the same operation twice
-            let mut exp = log10.truncate_bi();
-            let mut frac = log10.frac();
+            let (mut exp, mut frac) = log10.truncate_and_frac();
 
             if exp.is_neg() && !frac.is_zero() {
                 exp.sub_i32_mut(1);

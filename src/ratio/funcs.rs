@@ -99,6 +99,18 @@ impl Ratio {
         self.numer.rem_bi_mut(&self.denom);
     }
 
+    /// If you need both `self.truncate_bi` and `self.frac`, use this method. It's way cheaper.
+    pub fn truncate_and_frac(&self) -> (BigInt, Self) {
+        let trun = self.truncate_bi();
+
+        // Safety: (a % b) and b are coprime
+        let frac = Ratio::from_denom_and_numer_raw(self.denom.clone(), self.numer.sub_bi(&self.denom.mul_bi(&trun)));
+
+        #[cfg(test)] assert_eq!(frac, self.frac());
+
+        (trun, frac)
+    }
+
     /// It returns a number between 0 and 1 (both exclusive).
     #[cfg(feature = "rand")]
     pub fn random() -> Self {
