@@ -1,8 +1,8 @@
 use crate::{Ratio, e_iter};
 
 /// It returns `e^x`. It gets more accurate as `iter` gets bigger.\
+/// TODO: It doesn't work if `x` is greater than `2^31`.
 pub fn exp_iter(x: &Ratio, iter: usize) -> Ratio {
-
     let (trun, frac) = x.truncate_and_frac();
 
     // e^x = sigma{n=0}{inf} x^n / n!
@@ -17,7 +17,6 @@ pub fn exp_iter(x: &Ratio, iter: usize) -> Ratio {
         n += 1;
     }
 
-    // TODO: what if `trun` is greater than 2^31?
     result.mul_rat_mut(&e_iter(iter).pow_i32(trun.to_i32().unwrap()));
 
     result

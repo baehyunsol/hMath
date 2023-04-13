@@ -1,5 +1,7 @@
 use super::UBigInt;
 
+mod shift;
+
 impl UBigInt {
 
     /// It returns 0 when `self` is 0.
@@ -45,45 +47,6 @@ impl UBigInt {
 
         result.add_ubi_mut(&self_clone.log2());
         result
-    }
-
-    /// divide by 2^32
-    #[must_use = "method returns a new number and does not mutate the original value"]
-    pub fn shift_right(&self, n: usize) -> Self {
-        UBigInt::from_raw(self.0[n..].to_vec())
-    }
-
-    /// divide by 2^32
-    pub fn shift_right_mut(&mut self, n: usize) {
-        self.0 = self.0[n..].to_vec();
-    }
-
-    /// multiply 2^32
-    #[must_use = "method returns a new number and does not mutate the original value"]
-    pub fn shift_left(&self, n: usize) -> Self {
-        UBigInt::from_raw(vec![
-            vec![0; n],
-            self.0.clone()
-        ].concat())
-    }
-
-    /// multiply 2^32
-    pub fn shift_left_mut(&mut self, n: usize) {
-        self.0 = vec![
-            vec![0; n],
-            self.0.clone()
-        ].concat();
-    }
-
-    /// modulo 2^32
-    #[must_use = "method returns a new number and does not mutate the original value"]
-    pub fn slice_right(&self, n: usize) -> Self {
-        UBigInt::from_raw(self.0[0..n].to_vec())
-    }
-
-    /// modulo 2^32
-    pub fn slice_right_mut(&mut self, n: usize) {
-        self.0 = self.0[0..n].to_vec();
     }
 
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -219,6 +182,122 @@ impl UBigInt {
             result
         }
 
+    }
+
+    pub fn is_prime(&self) -> bool {
+
+        if self.0[0] % 2 == 0 {
+
+            if self.0[0] == 2 && self.0.len() == 1 {
+                true
+            }
+
+            // According to ChatGPT, 0 is not a prime number
+            else {
+                false
+            }
+
+        }
+
+        else if self.is_one() {
+            false
+        }
+
+        else {
+            let iter_until = self.sqrt().add_u32(1);
+            let mut div = 3;
+
+            match iter_until.to_u32() {
+                Ok(n) => {
+
+                    // Safety: if (sqrt(self) + 1) is smaller than (2^32 - 1), self is smaller than (2^64 - 1)
+                    let self_ = self.to_u64().unwrap();
+
+                    while div < n {
+
+                        if self_ % div as u64 == 0 {
+                            return false;
+                        }
+
+                        div += 2;
+                    }
+
+                    true
+                }
+                _ => {
+
+                    for _ in 0..(u32::MAX / 2 - 1) {
+
+                        if self.rem_u32(div).is_zero() {
+                            return false;
+                        }
+
+                        div += 2;
+                    }
+
+                    let mut div = u32::MAX as u64;
+                    div = div + div % 2 + 1;
+
+                    let mut div = UBigInt::from_u64(div);
+
+                    // TODO: this loop is not tested
+                    while div.mul_ubi(&div).leq_ubi(self) {
+
+                        if self.rem_ubi(&div).is_zero() {
+                            return false;
+                        }
+
+                        div.add_u32_mut(2);
+                    }
+
+                    true
+                }
+
+            }
+
+        }
+
+    }
+
+    pub fn prime_factorial(&self) -> Vec<Self> {
+        let mut self_clone = self.clone();
+        let mut result = vec![];
+
+        while self_clone.gt_u32(1) && self_clone.rem_pow2(2).is_zero() {
+            self_clone.div_u32_mut(2);
+            result.push(UBigInt::from_u32(2));
+        }
+
+        let mut div = 3;
+
+        while self_clone.geq_ubi(&UBigInt::from_u64(div as u64 * div as u64)) {
+
+            while self_clone.rem_u32(div).is_zero() {
+                self_clone.div_u32_mut(div);
+                result.push(UBigInt::from_u32(div));
+            }
+
+            div += 2;
+        }
+
+        let mut div = UBigInt::from_u32(u32::MAX);
+
+        // TODO: this loop is not tested
+        while self_clone.geq_ubi(&div.mul_ubi(&div)) {
+
+            while self_clone.rem_ubi(&div).is_zero() {
+                self_clone.div_ubi_mut(&div);
+                result.push(div.clone());
+            }
+
+            div.add_u32_mut(2);
+        }
+
+        if self_clone.gt_u32(1) || result.len() == 0 {
+            result.push(self_clone);
+        }
+
+        result
     }
 
     /// It returns a random number between 1..2^(32 * scale).\
@@ -395,6 +474,48 @@ mod tests {
             UBigInt::from_string("1").unwrap().sqrt(),
             UBigInt::from_string("1").unwrap(),
         );
+    }
+
+    #[test]
+    fn prime_factorial_test() {
+        if !RUN_ALL_TESTS { return; }
+
+        for i in 1..100000 {
+            prime_factorial_test_unit(&UBigInt::from_u32(i));
+        }
+
+        let pns = vec![
+            2, 3, 5, 7, 11, 13, 17, 19,
+            23, 29, 31, 37, 41, 43, 47,
+            53, 59, 61, 67, 71, 73, 79,
+            83, 89, 97, 101, 103, 107, 109
+        ];
+
+        for pn in pns.into_iter() {
+            assert!(UBigInt::from_u32(pn).is_prime());
+        }
+
+    }
+
+    fn prime_factorial_test_unit(number: &UBigInt) {
+        let result = number.prime_factorial();
+        let mut answer = UBigInt::one();
+
+        for pf in result.iter() {
+            answer.mul_ubi_mut(pf);
+
+            if !pf.is_prime() && !(pf.is_one() && number.is_one()) {
+                panic!("{pf}, {number}, {result:?}");
+            }
+
+        }
+
+        assert_eq!(&answer, number);
+
+        if ((result.len() == 1) != number.is_prime()) && !number.is_one() {
+            panic!("{number:?}, {result:?}");
+        }
+
     }
 
     #[test]
