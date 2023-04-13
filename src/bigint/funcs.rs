@@ -47,6 +47,18 @@ impl BigInt {
         self._is_neg = false;
     }
 
+    /// Sign of `self` doesn't make any difference
+    pub fn is_prime(&self) -> bool {
+        self.val.is_prime()
+    }
+
+    /// Sign of `self` doesn't make any difference
+    pub fn prime_factorial(&self) -> Vec<Self> {
+        self.val.prime_factorial().into_iter().map(
+            |n| BigInt::from_ubi(n, false)
+        ).collect()
+    }
+
     /// It returns a random number whose absolute value is between 1..2^(32 * scale). It returns a negative number by 50%.\
     /// If `scale` is 0, it returns 0.
     #[cfg(feature = "rand")]
