@@ -36,7 +36,8 @@ impl Ratio {
     }
 
     pub fn sub_bi_mut(&mut self, other: &BigInt) {
-        todo!()
+        self.numer.sub_bi_mut(&self.denom.mul_bi(other));
+        #[cfg(test)] assert!(self.is_valid());
     }
 
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -54,7 +55,8 @@ impl Ratio {
     }
 
     pub fn sub_i32_mut(&mut self, other: i32) {
-        todo!()
+        self.numer.sub_bi_mut(&self.denom.mul_i32(other));
+        #[cfg(test)] assert!(self.is_valid());
     }
 
 }

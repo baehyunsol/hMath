@@ -3,7 +3,7 @@ use crate::utils::remove_suffix_0;
 
 impl UBigInt {
 
-    /// it panics when `other` > `self` (TODO: it doesn't panic on release mode)
+    /// it panics when `other` > `self`
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn sub_ubi(&self, other: &UBigInt) -> Self {
         let mut result = self.clone();
@@ -12,7 +12,7 @@ impl UBigInt {
         result
     }
 
-    /// it panics when `other` > `self` (TODO: it doesn't panic on release mode)
+    /// it panics when `other` > `self`
     pub fn sub_ubi_mut(&mut self, other: &UBigInt) {
         let mut carry = false;
 
@@ -21,12 +21,12 @@ impl UBigInt {
             if carry {
 
                 if other.0[i] != u32::MAX && self.0[i] >= other.0[i] + 1 {
-                    self.0[i] -= other.0[i] + 1;
+                    self.0[i] = self.0[i].checked_sub(other.0[i] + 1).expect("UBigInt::sub_ubi panics when `other` > `self`");
                     carry = false;
                 }
 
                 else {
-                    self.0[i] = u32::MAX - (other.0[i] - self.0[i]);
+                    self.0[i] = u32::MAX - (other.0[i].checked_sub(self.0[i]).expect("UBigInt::sub_ubi panics when `other` > `self`"));
                 }
 
             }
@@ -34,11 +34,11 @@ impl UBigInt {
             else {
 
                 if self.0[i] >= other.0[i] {
-                    self.0[i] -= other.0[i];
+                    self.0[i] = self.0[i].checked_sub(other.0[i]).expect("UBigInt::sub_ubi panics when `other` > `self`");
                 }
 
                 else {
-                    self.0[i] = u32::MAX - (other.0[i] - self.0[i]) + 1;
+                    self.0[i] = u32::MAX - (other.0[i].checked_sub(self.0[i]).expect("UBigInt::sub_ubi panics when `other` > `self`")) + 1;
                     carry = true;
                 }
 
@@ -47,6 +47,10 @@ impl UBigInt {
         }
 
         if carry {
+
+            if self.len() <= other.len() {
+                panic!("UBigInt::sub_ubi panics when `other` > `self`");
+            }
 
             for i in other.len()..self.len() {
 
@@ -135,6 +139,33 @@ mod tests {
             pow2.sub_u32_mut(1);
             pow2.add_u32_mut(1);
             assert_eq!(pow2, UBigInt::from_u32(256).pow_u32(i + 1));
+        }
+
+    }
+
+    #[test]
+    #[should_panic]
+    fn sub_panic_test() {
+
+        #[cfg(feature = "rand")]
+        let (x, y) = (
+                UBigInt::random(rand::random::<usize>() % 6 + 1),
+                UBigInt::random(rand::random::<usize>() % 6 + 1)
+        );
+
+        #[cfg(not(feature = "rand"))]
+        let (x, y) = (UBigInt::from_u128(0x16227766123), UBigInt::from_u128(0x16777216123));
+
+        match x.comp_ubi(&y) {
+            std::cmp::Ordering::Greater => {
+                let _ = y.sub_ubi(&x);  // should panic
+            }
+            std::cmp::Ordering::Less => {
+                let _ = x.sub_ubi(&y);  // should panic
+            }
+            _ => {
+                panic!();
+            }
         }
 
     }

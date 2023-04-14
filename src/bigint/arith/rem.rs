@@ -43,7 +43,6 @@ impl BigInt {
     }
 
     /// `other` must be a power of 2
-    // TODO: write a unit test
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn rem_pow2(&self, other: i32) -> Self {
         let new_val = self.val.rem_pow2(other.abs() as u32);

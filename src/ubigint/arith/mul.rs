@@ -2,11 +2,34 @@ use crate::UBigInt;
 use crate::consts::U32_OVER;
 use crate::utils::{v64_to_v32, remove_suffix_0};
 
+const KARATSUBA_THRES: usize = 64;
+
 impl UBigInt {
 
-    // TODO: https://en.wikipedia.org/wiki/Karatsuba_algorithm
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn mul_ubi(&self, other: &UBigInt) -> Self {
+
+        // https://en.wikipedia.org/wiki/Karatsuba_algorithm
+        if self.len() > KARATSUBA_THRES && other.len() > KARATSUBA_THRES {
+
+            // self: a, other: b
+            // naive: O(a * b)
+            // karatsuba: O(a + b + (a - m) * (b - m) + m * m + a1 * b1)
+            // a + b + (a - min(a / 2, b / 2)) * (b - min(a / 2, b / 2)) + min(a / 2, b / 2) * min(a / 2, b / 2) + max(min(a / 2, b / 2), a - min(a / 2, b / 2)) * max(min(a / 2, b / 2), b - min(a / 2, b / 2))
+            let m = (self.len() / 2).min(other.len() / 2);
+            let x1 = self.shift_right(m);   // O(a - m)
+            let x0 = self.slice_right(m);   // O(m)
+            let y1 = other.shift_right(m);  // O(b - m)
+            let y0 = other.slice_right(m);  // O(m)
+            let z2 = x1.mul_ubi(&y1);  // O((a - m) * (b - m))
+            let z0 = x0.mul_ubi(&y0);  // O(m * m)
+
+            // a1 = max(m, a - m), b1 = max(m, b - m)
+            let z1 = x1.add_ubi(&x0).mul_ubi(&y1.add_ubi(&y0)).sub_ubi(&z2).sub_ubi(&z0);  // O(a1 * b1 + 3 * (a1 + b1))
+
+            return z2.shift_left(2 * m).add_ubi(&z1.shift_left(m)).add_ubi(&z0);
+        }
+
         let mut result = vec![0; self.len() + other.len()];
 
         for i in 0..self.len() {

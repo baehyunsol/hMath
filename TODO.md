@@ -1,7 +1,7 @@
 - [X] `UBigInt`
 - [X] `BigInt`
   - `UBigInt`, is_neg: `bool`
-- [ ] `Ratio`
+- [X] `Ratio`
   - denom: `BigInt`, numer: `BigInt`
   - convert to/from IEEE floating point numbers
 - [ ] `Number`
@@ -29,3 +29,5 @@ Lisp-like syntax
 ---
 
 https://doc.rust-lang.org/stable/std/fmt/index.html#traits
+https://doc.rust-lang.org/stable/std/iter/trait.Sum.html
+https://doc.rust-lang.org/stable/std/iter/trait.Product.html

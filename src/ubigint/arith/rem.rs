@@ -65,9 +65,14 @@ impl UBigInt {
     /// `other` must be a power of 2
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn rem_pow2(&self, other: u32) -> Self {
-        #[cfg(test)] assert!(is_pow2(other));
+        let result = UBigInt::from_u32(self.0[0] % other);
 
-        UBigInt::from_u32(self.0[0] % other)
+        #[cfg(test)] {
+            assert!(is_pow2(other));
+            assert_eq!(result, self.rem_u32(other));
+        }
+
+        result
     }
 
 }
