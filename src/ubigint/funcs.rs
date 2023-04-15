@@ -133,10 +133,11 @@ impl UBigInt {
             for i in 129..(n as u64 + 1) {
                 buffer.mul_u32_mut(i as u32);
 
-                if buffer.len() > 3 {
+                if buffer.len() > 6 {
                     result.mul_ubi_mut(&buffer);
                     buffer = UBigInt::one();
                 }
+
             }
 
             result.mul_ubi_mut(&buffer);

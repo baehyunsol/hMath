@@ -1,5 +1,5 @@
 use crate::UBigInt;
-use crate::consts::U32_OVER;
+use crate::consts::{U64_32, U128_32, U128_64};
 use crate::utils::remove_suffix_0;
 
 impl UBigInt {
@@ -21,8 +21,14 @@ impl UBigInt {
         }
 
         else if self.len() > other.len() {
-            let self_approx = self.0[self.len() - 1] as u128 * U32_OVER as u128 * U32_OVER as u128 + self.0[self.len() - 2] as u128 * U32_OVER as u128 + self.0[self.len() - 3] as u128;
-            let other_approx = other.0[other.len() - 1] as u128 * U32_OVER as u128 + other.0[other.len() - 2] as u128;
+            let self_approx =
+                self.0[self.len() - 1] as u128 * U128_64
+                + self.0[self.len() - 2] as u128 * U128_32
+                + self.0[self.len() - 3] as u128;
+            let other_approx =
+                other.0[other.len() - 1] as u128 * U128_32
+                + other.0[other.len() - 2] as u128;
+
             let mut approx = UBigInt::from_u128(self_approx / (other_approx + 1));
             approx.shift_left_mut(self.len() - other.len() - 1);
 
@@ -31,8 +37,8 @@ impl UBigInt {
         }
 
         else {
-            let self_approx = self.0[self.len() - 1] as u64 * U32_OVER + self.0[self.len() - 2] as u64;
-            let other_approx = other.0[other.len() - 1] as u64 * U32_OVER + other.0[other.len() - 2] as u64;
+            let self_approx = self.0[self.len() - 1] as u64 * U64_32 + self.0[self.len() - 2] as u64;
+            let other_approx = other.0[other.len() - 1] as u64 * U64_32 + other.0[other.len() - 2] as u64;
 
             if self_approx < other_approx {
                 UBigInt::zero()
@@ -89,7 +95,7 @@ impl UBigInt {
         for n in self.0.iter_mut().rev() {
             let curr = *n as u64 + carry;
             *n = (curr / other) as u32;
-            carry = curr % other * U32_OVER;
+            carry = curr % other * U64_32;
         }
 
         remove_suffix_0(&mut self.0);

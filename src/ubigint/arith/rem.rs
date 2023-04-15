@@ -1,5 +1,5 @@
 use crate::UBigInt;
-use crate::consts::U32_OVER;
+use crate::consts::U64_32;
 
 impl UBigInt {
 
@@ -21,7 +21,7 @@ impl UBigInt {
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn rem_u32(&self, other: u32) -> Self {
         let other = other as u64;
-        let unit = U32_OVER % other;
+        let unit = U64_32 % other;
         let mut curr_power = 1;
         let mut result: u64 = 0;
 
@@ -43,7 +43,7 @@ impl UBigInt {
     }
 
     pub fn rem_u32_mut(&mut self, other: u32) {
-        let unit = (U32_OVER % other as u64) as u32;
+        let unit = (U64_32 % other as u64) as u32;
         let mut curr_power = 1;
         let mut result = 0;
 

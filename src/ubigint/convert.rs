@@ -1,5 +1,5 @@
 use crate::UBigInt;
-use crate::consts::U32_OVER;
+use crate::consts::U64_32;
 use crate::err::ConversionError;
 
 impl UBigInt {
@@ -24,8 +24,8 @@ impl UBigInt {
     #[inline]
     pub fn from_u64(n: u64) -> Self {
 
-        if n >= U32_OVER {
-            UBigInt::from_raw(vec![(n % U32_OVER) as u32, (n / U32_OVER) as u32])
+        if n >= U64_32 {
+            UBigInt::from_raw(vec![(n % U64_32) as u32, (n / U64_32) as u32])
         }
 
         else {

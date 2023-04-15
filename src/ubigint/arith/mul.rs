@@ -1,5 +1,5 @@
 use crate::UBigInt;
-use crate::consts::U32_OVER;
+use crate::consts::U64_32;
 use crate::utils::{v64_to_v32, remove_suffix_0};
 
 const KARATSUBA_THRES: usize = 64;
@@ -15,7 +15,6 @@ impl UBigInt {
             // self: a, other: b
             // naive: O(a * b)
             // karatsuba: O(a + b + (a - m) * (b - m) + m * m + a1 * b1)
-            // a + b + (a - min(a / 2, b / 2)) * (b - min(a / 2, b / 2)) + min(a / 2, b / 2) * min(a / 2, b / 2) + max(min(a / 2, b / 2), a - min(a / 2, b / 2)) * max(min(a / 2, b / 2), b - min(a / 2, b / 2))
             let m = (self.len() / 2).min(other.len() / 2);
             let x1 = self.shift_right(m);   // O(a - m)
             let x0 = self.slice_right(m);   // O(m)
@@ -36,8 +35,8 @@ impl UBigInt {
 
             for j in 0..other.len() {
                 let curr = self.0[i] as u64 * other.0[j] as u64;
-                result[i + j] += curr % U32_OVER;
-                result[i + j + 1] += curr / U32_OVER;
+                result[i + j] += curr % U64_32;
+                result[i + j + 1] += curr / U64_32;
             }
 
         }
@@ -83,14 +82,14 @@ impl UBigInt {
                         carry = 0;
                     }
                     _ => {
-                        carry = (n as u64 + carry) / U32_OVER;
-                        self.0[i] = ((n as u64 + carry) % U32_OVER) as u32;
+                        carry = (n as u64 + carry) / U64_32;
+                        self.0[i] = ((n as u64 + carry) % U64_32) as u32;
                     }
                 }
                 _ => {
                     let curr = self.0[i] as u64 * other as u64 + carry;
-                    carry = curr / U32_OVER;
-                    self.0[i] = (curr % U32_OVER) as u32;
+                    carry = curr / U64_32;
+                    self.0[i] = (curr % U64_32) as u32;
                 }
             }
 
