@@ -1,6 +1,6 @@
 use crate::UBigInt;
 use crate::consts::{U64_32, U128_32, U128_64};
-use crate::utils::remove_suffix_0;
+use crate::utils::{remove_suffix_0, v64_to_v32};
 
 impl UBigInt {
 
@@ -21,16 +21,42 @@ impl UBigInt {
         }
 
         else if self.len() > other.len() {
-            let self_approx =
-                self.0[self.len() - 1] as u128 * U128_64
-                + self.0[self.len() - 2] as u128 * U128_32
-                + self.0[self.len() - 3] as u128;
-            let other_approx =
-                other.0[other.len() - 1] as u128 * U128_32
-                + other.0[other.len() - 2] as u128;
+            let other_approx = other.0[other.len() - 1] as u128 * U128_32 + other.0[other.len() - 2] as u128 + 1;
+            let mut curr = self.0[self.len() - 1] as u128 * U128_64 + self.0[self.len() - 2] as u128 * U128_32 + self.0[self.len() - 3] as u128;
+            let mut result = vec![];
+            let mut index = self.len() - 4;
 
-            let mut approx = UBigInt::from_u128(self_approx / (other_approx + 1));
-            approx.shift_left_mut(self.len() - other.len() - 1);
+            /*
+             *           index
+             *             |
+             *             |
+             *   self      V
+             *       a a a b b b b c c c
+             *   other
+             *         a a b b b b
+             *
+             *   a: approximation
+             *   b: other.len() - 2
+             *   c: self.len() - other.len() - 1
+             *
+             *   self / other ~= (self >> b) / other_approx
+             *   has to run the below loop ((self.len() - other.len() + 1) / 2) times
+             */
+            for _ in 0..((self.len() - other.len() + 1) / 2) {
+                result.push((curr / other_approx) as u64);
+                result.push(0);  // `result` is 32bit-based, but `curr` is 64bit-based.
+                curr %= other_approx;
+                curr <<= 64;
+                curr += self.0[index] as u128 * U128_32 + self.0[index - 1] as u128;
+                index -= 2;
+            }
+
+            if (self.len() - other.len()) % 2 == 1 {
+                result.pop().unwrap();
+            }
+
+            result.reverse();
+            let approx = UBigInt::from_raw(v64_to_v32(result));
 
             // self / other = approx + (self - other * approx) / other
             approx.add_ubi(&self.sub_ubi(&other.mul_ubi(&approx)).div_ubi(&other))
@@ -45,6 +71,7 @@ impl UBigInt {
             }
 
             else if self_approx > other_approx {
+                // TODO: what if `other_approx == U64::MAX`?
                 let approx = UBigInt::from_u64(self_approx / (other_approx + 1));
 
                 // self / other = approx + (self - other * approx) / other
@@ -122,6 +149,10 @@ mod tests {
             UBigInt::from_string("316227766016837933199889").unwrap()
         );
         assert_eq!(
+            UBigInt::from_u32(8).pow_u32(888).div_ubi(&UBigInt::from_u32(8).pow_u32(886)),
+            UBigInt::from_u32(64)
+        );
+        assert_eq!(
             UBigInt::from_u32(7).pow_u32(777).div_ubi(&UBigInt::from_u32(7).pow_u32(775)),
             UBigInt::from_u32(49)
         );
@@ -133,6 +164,22 @@ mod tests {
             UBigInt::from_raw(vec![1, 2, 3, 4, 5, 5, 5]).div_ubi(&UBigInt::from_raw(vec![1, 1, 1, 1, 5, 5, 5])),
             UBigInt::one()
         );
+        assert_eq!(
+            UBigInt::from_raw(vec![u32::MAX; 18]).div_ubi(&UBigInt::from_raw(vec![u32::MAX; 8])),
+            todo!()
+        );
+
+        for a in 6..12 {
+
+            for b in (a + 1)..18 {
+                assert_eq!(
+                    UBigInt::from_u32(17).pow_u32(b * 300).div_ubi(&UBigInt::from_u32(17).pow_u32(a * 300)),
+                    UBigInt::from_u32(17).pow_u32((b - a) * 300)
+                );
+            }
+
+        }
+
     }
 
 }
