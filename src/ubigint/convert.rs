@@ -1,5 +1,4 @@
 use crate::UBigInt;
-use crate::consts::U64_32;
 use crate::err::ConversionError;
 
 impl UBigInt {
@@ -24,8 +23,8 @@ impl UBigInt {
     #[inline]
     pub fn from_u64(n: u64) -> Self {
 
-        if n >= U64_32 {
-            UBigInt::from_raw(vec![(n % U64_32) as u32, (n / U64_32) as u32])
+        if n >= (1 << 32) {
+            UBigInt::from_raw(vec![(n % (1 << 32)) as u32, (n >> 32) as u32])
         }
 
         else {
@@ -339,6 +338,7 @@ mod tests {
     fn string_conversion_test() {
 
         if !RUN_ALL_TESTS { return; }
+        assert_eq!(UBigInt::from_raw(vec![0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]), UBigInt::from_string("2135987035920910082395021706169552114602704522356652769947041607822219725780658996767035796488192").unwrap());
 
         let samples = vec![
             ("0", 0),

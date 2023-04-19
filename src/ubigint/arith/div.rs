@@ -1,5 +1,4 @@
 use crate::UBigInt;
-use crate::consts::{U64_32, U128_32, U128_64};
 use crate::utils::{remove_suffix_0, v64_to_v32};
 
 impl UBigInt {
@@ -21,57 +20,64 @@ impl UBigInt {
         }
 
         else if self.len() > other.len() {
-            let other_approx = other.0[other.len() - 1] as u128 * U128_32 + other.0[other.len() - 2] as u128 + 1;
-            let mut curr = self.0[self.len() - 1] as u128 * U128_64 + self.0[self.len() - 2] as u128 * U128_32 + self.0[self.len() - 3] as u128;
-            let mut result = vec![];
-            let mut index = self.len() - 4;
+            let other_approx = ((other.0[other.len() - 1] as u64) << 32) + other.0[other.len() - 2] as u64;
+            let self_approx = &self.0[(self.len() - 5)..];
 
-            /*
-             *           index
-             *             |
-             *             |
-             *   self      V
-             *       a a a b b b b c c c
-             *   other
-             *         a a b b b b
-             *
-             *   a: approximation
-             *   b: other.len() - 2
-             *   c: self.len() - other.len() - 1
-             *
-             *   self / other ~= (self >> b) / other_approx
-             *   has to run the below loop ((self.len() - other.len() + 1) / 2) times
-             */
-            for _ in 0..((self.len() - other.len() + 1) / 2) {
-                result.push((curr / other_approx) as u64);
-                result.push(0);  // `result` is 32bit-based, but `curr` is 64bit-based.
-                curr %= other_approx;
-                curr <<= 64;
-                curr += self.0[index] as u128 * U128_32 + self.0[index - 1] as u128;
-                index -= 2;
+            let approx1 = if other_approx == u64::MAX {
+                UBigInt::from_raw(self_approx[2..].to_vec())
+            } else {
+                div_approx(self_approx.to_vec(), other_approx + 1)
+            };
+
+            if self.len() - other.len() < 3 {
+                let approx = approx1.shift_right(3 - self.len() + other.len());
+
+                // self / other = approx + (self - other * approx) / other
+                approx.add_ubi(&self.sub_ubi(&other.mul_ubi(&approx)).div_ubi(&other))
             }
 
-            if (self.len() - other.len()) % 2 == 1 {
-                result.pop().unwrap();
+            else if other.len() == 2 {
+                let approx = approx1.shift_left(self.len() - other.len() - 3);
+
+                // self / other = approx + (self - other * approx) / other
+                approx.add_ubi(&self.sub_ubi(&other.mul_ubi(&approx1).shift_left(self.len() - other.len() - 3)).div_ubi(&other))
             }
 
-            result.reverse();
-            let approx = UBigInt::from_raw(v64_to_v32(result));
+            else {
+                // approx1 <= answer <= approx2
+                let approx2 = div_approx(self_approx.to_vec(), other_approx);
 
-            // self / other = approx + (self - other * approx) / other
-            approx.add_ubi(&self.sub_ubi(&other.mul_ubi(&approx)).div_ubi(&other))
+                if approx2.eq_ubi(&approx1) {
+                    let approx = approx2.shift_left(self.len() - other.len() - 3);
+
+                    // self / other = approx + (self - other * approx) / other
+                    approx.add_ubi(&self.sub_ubi(&other.mul_ubi(&approx2).shift_left(self.len() - other.len() - 3)).div_ubi(&other))
+                }
+
+                else {
+                    // if other[-3] is small enough, the answer is close to approx2
+                    // if other[-3] is big enough, the answer is close to approx1
+                    let ratio = ((other.0[other.len() - 3] as u64 >> 24) + 1) as u32;  // 1 ~ 256
+                    let approx3 = approx1.mul_u32(ratio).add_ubi(&approx2.mul_u32(256 - ratio)).div_u32(256);
+                    let approx = approx3.shift_left(self.len() - other.len() - 3);
+
+                    // self / other = approx + (self - other * approx) / other
+                    approx.add_ubi(&self.sub_ubi(&other.mul_ubi(&approx3).shift_left(self.len() - other.len() - 3)).div_ubi(&other))
+                }
+
+            }
+
         }
 
         else {
-            let self_approx = self.0[self.len() - 1] as u64 * U64_32 + self.0[self.len() - 2] as u64;
-            let other_approx = other.0[other.len() - 1] as u64 * U64_32 + other.0[other.len() - 2] as u64;
+            let self_approx = ((self.0[self.len() - 1] as u64) << 32) + self.0[self.len() - 2] as u64;
+            let other_approx = ((other.0[other.len() - 1] as u64) << 32) + other.0[other.len() - 2] as u64;
 
             if self_approx < other_approx {
                 UBigInt::zero()
             }
 
             else if self_approx > other_approx {
-                // TODO: what if `other_approx == U64::MAX`?
                 let approx = UBigInt::from_u64(self_approx / (other_approx + 1));
 
                 // self / other = approx + (self - other * approx) / other
@@ -122,7 +128,7 @@ impl UBigInt {
         for n in self.0.iter_mut().rev() {
             let curr = *n as u64 + carry;
             *n = (curr / other) as u32;
-            carry = curr % other * U64_32;
+            carry = (curr % other) << 32;
         }
 
         remove_suffix_0(&mut self.0);
@@ -130,6 +136,17 @@ impl UBigInt {
         #[cfg(test)] assert!(self.is_valid());
     }
 
+}
+
+fn div_approx(divend: Vec<u32>, divisor: u64) -> UBigInt {
+    let mut curr = ((divend[4] as u128) << 64) + ((divend[3] as u128) << 32) + divend[2] as u128;
+    let quotient1 = (curr / divisor as u128) as u64;
+    curr %= divisor as u128;
+    curr <<= 64;
+    curr += ((divend[1] as u128) << 32) + divend[0] as u128;
+    let quotient2 = (curr / divisor as u128) as u64;
+
+    UBigInt::from_raw(v64_to_v32(vec![quotient2, 0, quotient1]))
 }
 
 #[cfg(test)]
@@ -166,7 +183,7 @@ mod tests {
         );
         assert_eq!(
             UBigInt::from_raw(vec![u32::MAX; 18]).div_ubi(&UBigInt::from_raw(vec![u32::MAX; 8])),
-            todo!()
+            UBigInt::from_string("2135987035920910082395021706169552114602704522356652769947041607822219725780658996767035796488192").unwrap()
         );
 
         for a in 6..12 {

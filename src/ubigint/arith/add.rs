@@ -1,5 +1,4 @@
 use crate::UBigInt;
-use crate::consts::U64_32;
 use crate::utils::{v32_to_v64, v64_to_v32};
 
 impl UBigInt {
@@ -51,16 +50,16 @@ impl UBigInt {
                             carry = false;
                         }
                         _ => {
-                            self.0[i] = ((self.0[i] as u64 + other.0[i] as u64 + 1) % U64_32) as u32;
+                            self.0[i] = ((self.0[i] as u64 + other.0[i] as u64 + 1) % (1 << 32)) as u32;
                         }
                     }
                 } else {
                     self.0[i] = n;
                 }
                 _ => if carry {
-                    self.0[i] = ((self.0[i] as u64 + other.0[i] as u64 + 1) % U64_32) as u32;
+                    self.0[i] = ((self.0[i] as u64 + other.0[i] as u64 + 1) % (1 << 32)) as u32;
                 } else {
-                    self.0[i] = ((self.0[i] as u64 + other.0[i] as u64) % U64_32) as u32;
+                    self.0[i] = ((self.0[i] as u64 + other.0[i] as u64) % (1 << 32)) as u32;
                     carry = true;
                 }
             }

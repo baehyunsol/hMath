@@ -1,5 +1,3 @@
-use crate::consts::U64_32;
-
 pub fn v32_to_v64(v32: &Vec<u32>) -> Vec<u64> {
     #[cfg(test)] assert!(v32.len() > 0);
 
@@ -11,21 +9,21 @@ pub fn v64_to_v32(mut v64: Vec<u64>) -> Vec<u32> {
 
     for i in 0..(v64.len() - 1) {
 
-        if v64[i] >= U64_32 {
-            v64[i + 1] += v64[i] / U64_32;
-            v64[i] %= U64_32;
+        if v64[i] >= (1 << 32) {
+            v64[i + 1] += v64[i] >> 32;
+            v64[i] %= 1 << 32;
         }
 
     }
 
     let v64_len = v64.len() - 1;
 
-    if v64[v64_len] >= U64_32 {
-        v64.push(v64[v64_len] / U64_32);
-        v64[v64_len] %= U64_32;
+    if v64[v64_len] >= (1 << 32) {
+        v64.push(v64[v64_len] >> 32);
+        v64[v64_len] %= 1 << 32;
     }
 
-    #[cfg(test)] assert!(v64.iter().all(|n| *n < U64_32));
+    #[cfg(test)] assert!(v64.iter().all(|n| *n < (1 << 32)));
 
     v64.into_iter().map(|n| n as u32).collect()
 }

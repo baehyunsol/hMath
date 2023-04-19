@@ -1,5 +1,4 @@
 use crate::UBigInt;
-use crate::consts::U64_32;
 use crate::utils::{v64_to_v32, remove_suffix_0};
 
 const KARATSUBA_THRES: usize = 64;
@@ -35,8 +34,8 @@ impl UBigInt {
 
             for j in 0..other.len() {
                 let curr = self.0[i] as u64 * other.0[j] as u64;
-                result[i + j] += curr % U64_32;
-                result[i + j + 1] += curr / U64_32;
+                result[i + j] += curr % (1 << 32);
+                result[i + j + 1] += curr >> 32;
             }
 
         }
@@ -82,14 +81,14 @@ impl UBigInt {
                         carry = 0;
                     }
                     _ => {
-                        carry = (n as u64 + carry) / U64_32;
-                        self.0[i] = ((n as u64 + carry) % U64_32) as u32;
+                        self.0[i] = ((n as u64 + carry) % (1 << 32)) as u32;
+                        carry = (n as u64 + carry) >> 32;
                     }
                 }
                 _ => {
                     let curr = self.0[i] as u64 * other as u64 + carry;
-                    carry = curr / U64_32;
-                    self.0[i] = (curr % U64_32) as u32;
+                    carry = curr >> 32;
+                    self.0[i] = (curr % (1 << 32)) as u32;
                 }
             }
 
@@ -99,6 +98,7 @@ impl UBigInt {
             self.0.push(carry as u32);
         }
 
+        remove_suffix_0(&mut self.0);
         #[cfg(test)] assert!(self.is_valid());
     }
 
