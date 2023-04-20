@@ -9,41 +9,30 @@ impl UBigInt {
         UBigInt::from_u64((self.len() as u64 - 1) * 32 + log2_u32(self.0[self.len() - 1]) as u64)
     }
 
-    /// It returns `truncate(log2(self) * 16777216)`.
-    /// Warning: This function is very expensive.
+    /// It returns `truncate(log2(self) * 1073741824)`. It returns 0 when `self` is 0.
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn log2_accurate(&self) -> Self {
         let mut result = UBigInt::zero();
-        let mut self_clone = if self.len() > 3 {
-            result.add_ubi_mut(&UBigInt::from_u64((self.len() - 3) as u64).mul_u32(32));
-            self.shift_right(self.len() - 3)
+        let mut self_clone = if self.len() > 8 {
+            result.add_u32_mut((self.len() - 8) as u32 * 32);
+            self.shift_right(self.len() - 8)
         } else {
             self.clone()
         };
 
-        // self = self^256
-        for _ in 0..8 {
+        for _ in 0..15 {
             self_clone = self_clone.mul_ubi(&self_clone);
-        }
+            self_clone = self_clone.mul_ubi(&self_clone);
+            result.mul_u32_mut(4);
 
-        result.mul_u32_mut(256);
-
-        for _ in 0..2 {
-
-            if self_clone.len() > 3 {
-                result.add_ubi_mut(&UBigInt::from_u64((self_clone.len() - 3) as u64).mul_u32(32));
-                self_clone.shift_right_mut(self_clone.len() - 3);
+            if self_clone.len() > 4 {
+                result.add_u32_mut((self_clone.len() - 4) as u32 * 32);
+                self_clone.shift_right_mut(self_clone.len() - 4);
             }
 
-            // self = self^256
-            for _ in 0..8 {
-                self_clone = self_clone.mul_ubi(&self_clone);
-            }
-
-            result.mul_u32_mut(256);
         }
 
-        result.add_ubi_mut(&self_clone.log2());
+        result.add_u32_mut((self_clone.len() as u32 - 1) * 32 + log2_u32(self_clone.0[self_clone.len() - 1]) as u32);
         result
     }
 
@@ -80,6 +69,9 @@ mod tests {
     fn log_test() {
         if !RUN_ALL_TESTS { return; }
 
+        assert_eq!(UBigInt::zero().log2(), UBigInt::zero());
+        assert_eq!(UBigInt::zero().log2_accurate(), UBigInt::zero());
+
         let mut n = UBigInt::from_u32(2);
         let mut i = 1;
 
@@ -92,14 +84,14 @@ mod tests {
         }
 
         use crate::{Ratio, BigInt};
-        let denom = BigInt::from_i32(16777216);
+        let denom = BigInt::from_i32(1 << 30);
 
         assert_eq!(
             Ratio::from_denom_and_numer(
                 denom.clone(),
                 BigInt::from_i32(3).log2_accurate()
-            ).to_approx_string(6),
-            "1.5849"
+            ).to_approx_string(10),
+            "1.5849625"
         );
         assert_eq!(
             Ratio::from_denom_and_numer(

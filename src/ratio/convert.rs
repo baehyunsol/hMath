@@ -388,14 +388,14 @@ impl Ratio {
         let log2 = self.numer.log2_accurate().sub_bi(&self.denom.log2_accurate());
 
         // 2^70777 = 10^21306 + small
-        let log10i64 = log2.mul_i32(21306).div_i32(70777).div_i32(16777216).to_i64().unwrap();
+        let log10i64 = log2.mul_i32(21306).div_i32(70777).div_i32(1 << 30).to_i64().unwrap();
         let is_neg = self.is_neg();
 
         let sign_part = if is_neg { "-" } else { "" };
 
         if log10i64.abs() > 8600 {
             let log10 = Ratio::from_denom_and_numer(
-                BigInt::from_i64(70777 * 16777216),
+                BigInt::from_i64(70777 * (1 << 30)),
                 log2.mul_i32(21306)
             );
 
@@ -408,17 +408,26 @@ impl Ratio {
                 frac = Ratio::one().sub_rat(&frac);
             }
 
-            let digits = Ratio::from_denom_and_numer(
-                BigInt::from_i32(16777216),
-                BigInt::from_i32(exp10(&frac))
-            ).mul_i32(100).truncate_bi().to_i32().unwrap();  // take only 3 digits
+            // it takes only 4 digits
+            let mut digits = Ratio::from_denom_and_numer(
+                BigInt::from_i32(1 << 30),
+                BigInt::from_i64(exp10(&frac))
+            ).mul_i32(100_000).truncate_bi().to_i32().unwrap();
 
-            let digits = if digits % 100 == 0 {
-                format!("{}", digits / 100)
+            if digits % 100 == 99 {
+                digits += 1;
+            }
+
+            digits /= 100;
+
+            let digits = if digits % 1000 == 0 {
+                format!("{}", digits / 1000)
+            } else if digits % 100 == 0 {
+                format!("{}.{}", digits / 1000, digits / 100 % 10)
             } else if digits % 10 == 0 {
-                format!("{}.{}", digits / 100, digits / 10 % 10)
+                format!("{}.{:02}", digits / 1000, digits % 1000 / 10)
             } else {
-                format!("{}.{:02}", digits / 100, digits % 100)
+                format!("{}.{:03}", digits / 1000, digits % 1000)
             };
 
             return format!("{sign_part}{digits}e{exp}");
@@ -691,19 +700,19 @@ fn inspect_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> {  // (neg, 
     Ok((neg, exp, frac))
 }
 
-// truncate(10^n * 16777216), n is between 0 and 1
+// truncate(10^n * 1073741824), n is between 0 and 1
 // internal function
 // It's very inaccurate and very inefficient
-fn exp10(n: &Ratio) -> i32 {
+fn exp10(n: &Ratio) -> i64 {
     // binary search
     // sqrt(10^a * 10^b) = 10^((a+b)/2)
-    let mut small = BigInt::from_i32(16777216);  // 10^0 * 16777216
+    let mut small = BigInt::from_i32(1 << 30);  // 10^0 * 1073741824
     let mut small_exp = Ratio::zero();
 
-    let mut big = BigInt::from_i32(10).mul_i32(16777216);  // 10^1 * 16777216
+    let mut big = BigInt::from_i32(10).mul_i32(1 << 30);  // 10^1 * 1073741824
     let mut big_exp = Ratio::one();
 
-    for _ in 0..16 {
+    for _ in 0..32 {
         let mid = small.mul_bi(&big).sqrt();
         let mid_exp = small_exp.add_rat(&big_exp).div_i32(2);
 
@@ -719,7 +728,7 @@ fn exp10(n: &Ratio) -> i32 {
 
     }
 
-    small.to_i32().unwrap()
+    small.to_i64().unwrap()
 }
 
 impl std::fmt::Display for Ratio {
@@ -827,8 +836,14 @@ mod tests {
             assert_eq!(sample, n.to_approx_string(sample.len() + 1));
         }
 
-        assert_eq!("3.14e120000", Ratio::from_string("3.14159e120000").unwrap().to_approx_string(8));
-        assert_eq!("3.14e-120000", Ratio::from_string("3.14159e-120000").unwrap().to_approx_string(8));
+        assert_eq!("3.141e120000", Ratio::from_string("3.14159e120000").unwrap().to_approx_string(8));
+        assert_eq!("3.141e-120000", Ratio::from_string("3.14159e-120000").unwrap().to_approx_string(8));
+        assert_eq!("1e10000", Ratio::from_string("1.0001e10000").unwrap().to_approx_string(8));
+        assert_eq!("1e-10000", Ratio::from_string("1.0001e-10000").unwrap().to_approx_string(8));
+        assert_eq!("1.1e10000", Ratio::from_string("1.1001e10000").unwrap().to_approx_string(8));
+        assert_eq!("1.1e-10000", Ratio::from_string("1.1001e-10000").unwrap().to_approx_string(8));
+        assert_eq!("1.01e10000", Ratio::from_string("1.01e10000").unwrap().to_approx_string(8));
+        assert_eq!("1.01e-10000", Ratio::from_string("1.01e-10000").unwrap().to_approx_string(8));
     }
 
     #[test]

@@ -12,7 +12,7 @@ impl BigInt {
         BigInt::from_ubi(self.val.log2(), false)
     }
 
-    /// It returns `truncate(log2(self.abs()) * 16777216)`. It returns 0 when `self` is 0.
+    /// It returns `truncate(log2(self.abs()) * 1073741824)`. It returns 0 when `self` is 0.
     /// Warning: This function is very expensive.
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn log2_accurate(&self) -> Self {

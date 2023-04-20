@@ -154,7 +154,7 @@ mod tests {
         );
 
         #[cfg(not(feature = "rand"))]
-        let (x, y) = (UBigInt::from_u128(0x16227766123), UBigInt::from_u128(0x16777216123));
+        let (x, y) = (UBigInt::from_u128(0x16227766123), UBigInt::from_u128(0x16229416032));
 
         match x.comp_ubi(&y) {
             std::cmp::Ordering::Greater => {
