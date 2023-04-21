@@ -70,7 +70,6 @@ impl UBigInt {
 
             for i in self.len()..other.len() {
 
-                // TODO: branches are expensive
                 if carry {
 
                     match other.0[i].checked_add(1) {

@@ -95,7 +95,14 @@ impl Ratio {
             exp -= 1;
         }
 
-        let mut frac = self_clone.sub_i32(1).mul_i32(1 << 23).truncate_bi().to_i32().unwrap() as u32;
+        let (mut frac, frac_rem) = self_clone.sub_i32(1).mul_i32(1 << 23).truncate_and_frac();
+
+        // IEEE754 chooses the closest approximation
+        if frac_rem.gt_rat(&Ratio::from_denom_and_numer_i32(2, 1)) {
+            frac.add_i32_mut(1);
+        }
+
+        let mut frac = frac.to_i32().unwrap() as u32;
 
         if exp < -126 {
             frac += 1 << 23;
@@ -180,7 +187,14 @@ impl Ratio {
             exp -= 1;
         }
 
-        let mut frac = self_clone.sub_i32(1).mul_bi(&BigInt::from_i64(1 << 52)).truncate_bi().to_i64().unwrap() as u64;
+        let (mut frac, frac_rem) = self_clone.sub_i32(1).mul_bi(&BigInt::from_i64(1 << 52)).truncate_and_frac();
+
+        // IEEE754 chooses the closest approximation
+        if frac_rem.gt_rat(&Ratio::from_denom_and_numer_i32(2, 1)) {
+            frac.add_i32_mut(1);
+        }
+
+        let mut frac = frac.to_i64().unwrap() as u64;
 
         if exp < -1022 {
             frac += 1 << 52;
@@ -393,7 +407,7 @@ impl Ratio {
 
         let sign_part = if is_neg { "-" } else { "" };
 
-        if log10i64.abs() > 8600 {
+        if log10i64.abs() > 9900 {
             let log10 = Ratio::from_denom_and_numer(
                 BigInt::from_i64(70777 * (1 << 30)),
                 log2.mul_i32(21306)
@@ -412,13 +426,13 @@ impl Ratio {
             let mut digits = Ratio::from_denom_and_numer(
                 BigInt::from_i32(1 << 30),
                 BigInt::from_i64(exp10(&frac))
-            ).mul_i32(100_000).truncate_bi().to_i32().unwrap();
+            ).mul_i32(1000_000).truncate_bi().to_i32().unwrap();
 
-            if digits % 100 == 99 {
-                digits += 1;
+            if digits % 1000 > 992 {
+                digits += 1000 - digits % 1000;
             }
 
-            digits /= 100;
+            digits /= 1000;
 
             let digits = if digits % 1000 == 0 {
                 format!("{}", digits / 1000)
@@ -438,12 +452,12 @@ impl Ratio {
 
             let mut bi = self.truncate_bi();
             bi.abs_mut();
-            let big_decimal = BigInt::from_i32(10).pow_u32(16);
+            let big_decimal = BigInt::from_i64(100_000_000_000_000_000);
             let mut exp = 0;
 
             while bi.gt_bi(&big_decimal) {
-                bi.div_i32_mut(1_000_000);
-                exp += 6;
+                bi.div_i32_mut(100_000_000);
+                exp += 8;
             }
 
             while bi.gt_i32(1_000_000_000) {
@@ -836,6 +850,8 @@ mod tests {
             assert_eq!(sample, n.to_approx_string(sample.len() + 1));
         }
 
+        assert_eq!("1.099e20000", Ratio::from_string("1.09999999999e20000").unwrap().to_approx_string(8));
+        assert_eq!("9.099e20000", Ratio::from_string("9.09999999999e20000").unwrap().to_approx_string(8));
         assert_eq!("3.141e120000", Ratio::from_string("3.14159e120000").unwrap().to_approx_string(8));
         assert_eq!("3.141e-120000", Ratio::from_string("3.14159e-120000").unwrap().to_approx_string(8));
         assert_eq!("1e10000", Ratio::from_string("1.0001e10000").unwrap().to_approx_string(8));
@@ -860,7 +876,9 @@ mod tests {
             "0.01171875", "15.640625",
             "625e-3", "15.625e-2", "12e3",
             "16.3e2",
-            // TODO: denormalized numbers (2^n, where n < -126)
+
+            // 19 * 2^(-129)
+            "0.000000000000000000000000000000000000027917990832029328314257492759028334848193306973337078635832853024112409912049770355224609375",
         ];
 
         let samples: Vec<String> = vec![
@@ -884,6 +902,23 @@ mod tests {
             let nf64 = n.parse::<f64>().unwrap();
             assert_eq!(Ratio::from_ieee754_f32(nf32).unwrap(), rat);
             assert_eq!(Ratio::from_ieee754_f64(nf64).unwrap(), rat);
+        }
+
+
+        // numbers that IEEE 754 cannot represent perfectly
+        let samples2 = vec![
+            "3.1", "3.14", "3.141", "3.1415", "3.14159",
+            "2.7", "2.71", "2.718", "2.7182", "2.71828"
+        ];
+
+        for n in samples2.into_iter() {
+            let num1 = Ratio::from_ieee754_f32(n.parse::<f32>().unwrap()).unwrap();
+            let num2 = Ratio::from_ieee754_f32(Ratio::from_string(n).unwrap().to_ieee754_f32().unwrap()).unwrap();
+            assert_eq!(num1, num2);
+
+            let num3 = Ratio::from_ieee754_f64(n.parse::<f64>().unwrap()).unwrap();
+            let num4 = Ratio::from_ieee754_f64(Ratio::from_string(n).unwrap().to_ieee754_f64().unwrap()).unwrap();
+            assert_eq!(num3, num4);
         }
 
     }
