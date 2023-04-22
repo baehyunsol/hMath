@@ -10,6 +10,7 @@ impl Ratio {
         result
     }
 
+    // TODO: use `gcd_i32` instead of `gcd_bi`
     pub fn from_denom_and_numer_i32(denom: i32, numer: i32) -> Self {
         Ratio::from_denom_and_numer(BigInt::from_i32(denom), BigInt::from_i32(numer))
     }
@@ -402,14 +403,14 @@ impl Ratio {
         let log2 = self.numer.log2_accurate().sub_bi(&self.denom.log2_accurate());
 
         // 2^70777 = 10^21306 + small
-        let log10i64 = log2.mul_i32(21306).div_i32(70777).div_i32(1 << 30).to_i64().unwrap();
+        let log10i64 = log2.mul_i32(21306).div_i32(70777).shift_right(1).to_i64().unwrap();
         let is_neg = self.is_neg();
 
         let sign_part = if is_neg { "-" } else { "" };
 
-        if log10i64.abs() > 9900 {
+        if log10i64.abs() > 9990 {
             let log10 = Ratio::from_denom_and_numer(
-                BigInt::from_i64(70777 * (1 << 30)),
+                BigInt::from_i64(70777 << 32),
                 log2.mul_i32(21306)
             );
 
@@ -424,7 +425,7 @@ impl Ratio {
 
             // it takes only 4 digits
             let mut digits = Ratio::from_denom_and_numer(
-                BigInt::from_i32(1 << 30),
+                BigInt::from_i64(1 << 32),
                 BigInt::from_i64(exp10(&frac))
             ).mul_i32(1000_000).truncate_bi().to_i32().unwrap();
 
@@ -714,16 +715,16 @@ fn inspect_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> {  // (neg, 
     Ok((neg, exp, frac))
 }
 
-// truncate(10^n * 1073741824), n is between 0 and 1
+// truncate(10^n * 4294967296), n is between 0 and 1
 // internal function
 // It's very inaccurate and very inefficient
 fn exp10(n: &Ratio) -> i64 {
     // binary search
     // sqrt(10^a * 10^b) = 10^((a+b)/2)
-    let mut small = BigInt::from_i32(1 << 30);  // 10^0 * 1073741824
+    let mut small = BigInt::from_raw(vec![0, 1], false);  // 10^0 * 4294967296
     let mut small_exp = Ratio::zero();
 
-    let mut big = BigInt::from_i32(10).mul_i32(1 << 30);  // 10^1 * 1073741824
+    let mut big = BigInt::from_i32(10).shift_left(1);  // 10^1 * 4294967296
     let mut big_exp = Ratio::one();
 
     for _ in 0..32 {

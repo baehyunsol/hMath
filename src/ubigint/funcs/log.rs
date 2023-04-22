@@ -9,36 +9,36 @@ impl UBigInt {
         UBigInt::from_u64((self.len() as u64 - 1) * 32 + log2_u32(self.0[self.len() - 1]) as u64)
     }
 
-    /// It returns `truncate(log2(self) * 1073741824)`. It returns 0 when `self` is 0.
+    /// It returns `truncate(log2(self) * 4294967296)`. It returns 0 when `self` is 0.
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn log2_accurate(&self) -> Self {
-        let mut result = UBigInt::zero();
+        let mut result = 0;
         let mut self_clone = if self.len() > 8 {
-            result.add_u32_mut((self.len() - 8) as u32 * 32);
+            result += (self.len() - 8) as u64 * 32;
             self.shift_right(self.len() - 8)
         } else {
             self.clone()
         };
 
-        for _ in 0..15 {
+        for _ in 0..16 {
             self_clone = self_clone.mul_ubi(&self_clone);
             self_clone = self_clone.mul_ubi(&self_clone);
-            result.mul_u32_mut(4);
+            result *= 4;
 
-            if self_clone.len() > 4 {
-                result.add_u32_mut((self_clone.len() - 4) as u32 * 32);
-                self_clone.shift_right_mut(self_clone.len() - 4);
+            if self_clone.len() > 6 {
+                result += (self_clone.len() - 6) as u64 * 32;
+                self_clone.shift_right_mut(self_clone.len() - 6);
             }
 
         }
 
-        result.add_u32_mut((self_clone.len() as u32 - 1) * 32 + log2_u32(self_clone.0[self_clone.len() - 1]) as u32);
-        result
+        result += (self_clone.len() as u64 - 1) * 32 + log2_u32(self_clone.0[self_clone.len() - 1]) as u64;
+        UBigInt::from_u64(result)
     }
 
 }
 
-// floor(log2(n))
+/// truncate(log2(n))
 pub fn log2_u32(mut n: u32) -> u32 {
     let mut result = 0;
 
@@ -84,7 +84,7 @@ mod tests {
         }
 
         use crate::{Ratio, BigInt};
-        let denom = BigInt::from_i32(1 << 30);
+        let denom = BigInt::from_raw(vec![0, 1], false);
 
         assert_eq!(
             Ratio::from_denom_and_numer(

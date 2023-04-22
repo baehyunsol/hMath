@@ -1,5 +1,6 @@
 use super::UBigInt;
 
+mod exp;
 pub mod log;
 mod shift;
 

@@ -1,7 +1,9 @@
 use crate::{Ratio, BigInt};
 
 mod exp;
+mod ln;
 
+pub use ln::ln_iter;
 pub use exp::exp_iter;
 
 impl Ratio {

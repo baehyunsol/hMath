@@ -30,7 +30,7 @@ impl UBigInt {
             };
 
             if self.len() - other.len() < 3 {
-                let approx = approx1.shift_right(3 - self.len() + other.len());
+                let approx = approx1.shift_right(3 + other.len() - self.len());
 
                 // self / other = approx + (self - other * approx) / other
                 approx.add_ubi(&self.sub_ubi(&other.mul_ubi(&approx)).div_ubi(&other))
