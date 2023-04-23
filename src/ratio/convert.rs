@@ -456,7 +456,10 @@ impl Ratio {
             let big_decimal = BigInt::from_i64(100_000_000_000_000_000);
             let mut exp = 0;
 
+            // TODO: use fast log function instead of expensive `gt_bi`
             while bi.gt_bi(&big_decimal) {
+
+                // TODO: use the fast algorithm, like above
                 bi.div_i32_mut(100_000_000);
                 exp += 8;
             }

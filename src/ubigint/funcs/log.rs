@@ -39,25 +39,8 @@ impl UBigInt {
 }
 
 /// truncate(log2(n))
-pub fn log2_u32(mut n: u32) -> u32 {
-    let mut result = 0;
-
-    while n > 1024 {
-        n /= 1024;
-        result += 10;
-    }
-
-    while n > 32 {
-        n /= 32;
-        result += 5;
-    }
-
-    while n > 1 {
-        n /= 2;
-        result += 1;
-    }
-
-    result
+pub fn log2_u32(n: u32) -> u32 {
+    if n == 0 { 0 } else { n.ilog2() }
 }
 
 #[cfg(test)]
