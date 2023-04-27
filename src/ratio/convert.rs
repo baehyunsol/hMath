@@ -1,5 +1,6 @@
 use crate::{Ratio, BigInt};
 use crate::err::ConversionError;
+use crate::utils::gcd_i32;
 
 impl Ratio {
 
@@ -10,9 +11,15 @@ impl Ratio {
         result
     }
 
-    // TODO: use `gcd_i32` instead of `gcd_bi`
-    pub fn from_denom_and_numer_i32(denom: i32, numer: i32) -> Self {
-        Ratio::from_denom_and_numer(BigInt::from_i32(denom), BigInt::from_i32(numer))
+    pub fn from_denom_and_numer_i32(mut denom: i32, mut numer: i32) -> Self {
+        let r = gcd_i32(denom, numer);
+
+        if r != 1 {
+            denom /= r;
+            numer /= r;
+        }
+
+        Ratio::from_denom_and_numer_raw(BigInt::from_i32(denom), BigInt::from_i32(numer))
     }
 
     /// This function does not do any safety checks. Use this function only when you're sure that the properties below are satisfied.
@@ -116,7 +123,7 @@ impl Ratio {
             }
 
             if frac == 0 {
-                return Err(ConversionError::NotInRange);
+                return Err(ConversionError::NotInRange { permitted: "1.18e-38~3.4e38".to_string(), error: self.to_scientific_notation() });
             }
 
         }
@@ -124,7 +131,7 @@ impl Ratio {
         exp += 127;
 
         if exp < 0 || exp > 255 {
-            return Err(ConversionError::NotInRange);
+            return Err(ConversionError::NotInRange { permitted: "1.18e-38~3.4e38".to_string(), error: self.to_scientific_notation() });
         }
 
         let result = ((neg as u32) << 31) | ((exp as u32) << 23) | frac;
@@ -208,7 +215,7 @@ impl Ratio {
             }
 
             if frac == 0 {
-                return Err(ConversionError::NotInRange);
+                return Err(ConversionError::NotInRange { permitted: "2.23e-308~1.8e308".to_string(), error: self.to_scientific_notation() });
             }
 
         }
@@ -216,7 +223,7 @@ impl Ratio {
         exp += 1023;
 
         if exp < 0 || exp > 2047 {
-            return Err(ConversionError::NotInRange);
+            return Err(ConversionError::NotInRange { permitted: "2.23e-308~1.8e308".to_string(), error: self.to_scientific_notation() });
         }
 
         let result = ((neg as u64) << 63) | ((exp as u64) << 52) | frac;
@@ -456,15 +463,12 @@ impl Ratio {
             let big_decimal = BigInt::from_i64(100_000_000_000_000_000);
             let mut exp = 0;
 
-            // TODO: use fast log function instead of expensive `gt_bi`
-            while bi.gt_bi(&big_decimal) {
-
-                // TODO: use the fast algorithm, like above
-                bi.div_i32_mut(100_000_000);
-                exp += 8;
+            if log10i64 > 15 {
+                bi.div_bi_mut(&BigInt::from_i32(10).pow_u32(log10i64 as u32 - 10));
+                exp += log10i64 - 10;
             }
 
-            while bi.gt_i32(1_000_000_000) {
+            while bi.len() > 1 || bi.gt_i32(1_000_000_000) {
                 bi.div_i32_mut(10);
                 exp += 1;
             }
@@ -517,22 +521,23 @@ impl Ratio {
             let mut self_clone = self.abs();
             let mut exp = -1;
 
-            // In order to avoid unnecessary gcds and divs
-            while self_clone.lt_one() {
-                let mut billion = 1_000_000_000;
+            if log10i64 < -6 {
+                let pow10 = -log10i64;
+                let mut pow2 = pow10;
+                let mut pow5 = pow10;
 
-                while self_clone.denom.rem_pow2(2).is_zero() && billion % 2 == 0 {
+                while pow2 > 0 && self_clone.denom.rem_pow2(2).is_zero() {
                     self_clone.denom.div_i32_mut(2);
-                    billion /= 2;
+                    pow2 -= 1;
                 }
 
-                while self_clone.denom.rem_i32(5).is_zero() && billion % 5 == 0 {
+                while pow5 > 0 && self_clone.denom.rem_i32(5).is_zero() {
                     self_clone.denom.div_i32_mut(5);
-                    billion /= 5;
+                    pow5 -= 1;
                 }
 
-                self_clone.numer.mul_i32_mut(billion);
-                exp -= 9;
+                self_clone.numer.mul_bi_mut(&BigInt::exp2(pow2 as u64).mul_bi(&BigInt::from_i32(5).pow_u32(pow5 as u32)));
+                exp -= pow10;
             }
 
             let mut self_int = self_clone.mul_i32(1_000_000_000).truncate_bi();
@@ -602,6 +607,33 @@ impl Ratio {
         #[cfg(test)] assert!(result.len() <= max_len);
 
         result
+    }
+
+    /// '9.8e'
+    pub fn to_scientific_notation(&self) -> String {
+        let len_min = self.numer.len().min(self.denom.len());
+        let mut self_clone = if len_min > 4 {
+            Ratio::from_denom_and_numer(
+                self.denom.shift_right(len_min - 4),
+                self.numer.shift_right(len_min - 4)
+            )
+        }
+
+        else {
+            self.clone()
+        };
+
+        self_clone.abs_mut();
+
+        while self_clone.numer.len() < self_clone.denom.len() + 2 {
+            // todo: multiply 10^9
+        }
+
+        let mut self_bi = self_clone.truncate_bi();
+
+        // todo: extract digits from `self_bi`
+
+        todo!();
     }
 
     /// `self.to_approx_string(12)`

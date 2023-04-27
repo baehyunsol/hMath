@@ -2,7 +2,7 @@
 pub enum ConversionError {
     NoData,
     InvalidChar(char),
-    NotInRange,
+    NotInRange { permitted: String, error: String },
 
     UnexpectedEnd,
 

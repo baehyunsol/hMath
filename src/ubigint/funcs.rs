@@ -10,12 +10,24 @@ impl UBigInt {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn sqrt(&self) -> Self {
-        let mut div = if self.len() > 2 {
-            self.shift_right(1)
-        } else {
-            UBigInt::from_u32(1 << 30)
-        };
-        let mut result = UBigInt::zero();
+
+        if self.len() < 3 {
+            return UBigInt::from_u64(sqrt_u64(self.to_u64().unwrap()));
+        }
+
+        let mut approx = sqrt_u64(self.shift_right(self.len() - 2).to_u64().unwrap());
+
+        if self.len() % 2 != 0 {
+            approx *= 65536;
+        }
+
+        let mut result = UBigInt::from_u64(approx);
+        result.shift_left_mut(self.len() / 2 - 1);
+        let mut div = result.div_u32(1024);
+
+        if div.is_zero() {
+            div = UBigInt::from_u32(4);
+        }
 
         loop {
 
@@ -25,6 +37,7 @@ impl UBigInt {
 
             div.div_u32_mut(4);
 
+            // it guarantees that the result is always `truncate(sqrt(self))`, not `round(sqrt(self))`
             if div.lt_u32(4) {
                 div = UBigInt::one();
             }
@@ -36,12 +49,11 @@ impl UBigInt {
             div.div_u32_mut(4);
 
             if div.is_zero() {
-                break;
+                return result;
             }
 
         }
 
-        result
     }
 
     pub fn factorial(n: u32) -> UBigInt {
@@ -278,6 +290,61 @@ impl UBigInt {
     }
 }
 
+fn sqrt_u64(n: u64) -> u64 {
+
+    if n == 0 { return 0; }
+
+    let l2 = n.ilog2();
+
+    let mut frac = if l2 > 28 {
+        n >> (l2 - 28)
+    }
+
+    else {
+        n << (28 - l2)
+    };
+
+    #[cfg(test)] assert!((1 << 28) <= frac && frac < (1 << 29));
+
+    // n = 2^l2 * frac / 2^28
+    // frac = 1.xxx
+    // sqrt(1 + x) = 1 + x/2 - x^2/8
+    frac -= 1 << 28;
+    let mut s = (1 << 28) + frac / 2 - frac * frac / (1 << 31);  // sqrt(frac / 2^28) * 2^28
+
+    if l2 % 2 == 1 {
+        s *= 379625062;  // 2^28.5
+        s /= 1 << 28;
+    }
+
+    let d = (1 << (l2 / 2)) * s;
+
+    let mut result = d / (1 << 28);
+    let mut div = (result / 64).max(1);
+
+    loop {
+
+        while result * result < n {
+            result += div;
+        }
+
+        div /= 4;
+
+        if div < 4 { div = 1; }
+
+        while result * result > n {
+            result -= div;
+        }
+
+        div /= 4;
+
+        if div == 0 {
+            return result;
+        }
+
+    }
+}
+
 pub fn gcd_ubi(a: &UBigInt, b: &UBigInt) -> UBigInt {
 
     if a.is_zero() {
@@ -301,6 +368,7 @@ pub fn gcd_ubi(a: &UBigInt, b: &UBigInt) -> UBigInt {
 mod tests {
     use crate::UBigInt;
     use crate::consts::RUN_ALL_TESTS;
+    use super::sqrt_u64;
 
     #[test]
     fn factorial_test() {
@@ -335,6 +403,20 @@ mod tests {
 
     #[test]
     fn sqrt_test() {
+
+        assert_eq!(sqrt_u64(10), 3);
+        assert_eq!(sqrt_u64(100), 10);
+        assert_eq!(sqrt_u64(1000), 31);
+        assert_eq!(sqrt_u64(10000), 100);
+        assert_eq!(sqrt_u64(100000), 316);
+        assert_eq!(sqrt_u64(1000000), 1000);
+        assert_eq!(sqrt_u64(10000000), 3162);
+        assert_eq!(sqrt_u64(100000000), 10000);
+        assert_eq!(sqrt_u64(1000000000), 31622);
+        assert_eq!(sqrt_u64(10000000000), 100000);
+        assert_eq!(sqrt_u64(100000000000), 316227);
+        assert_eq!(sqrt_u64(1000000000000), 1000000);
+
         if !RUN_ALL_TESTS { return; }
         assert_eq!(
             UBigInt::from_string("1000").unwrap().sqrt(),

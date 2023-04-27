@@ -11,7 +11,7 @@ impl UBigInt {
     pub fn to_u32(&self) -> Result<u32, ConversionError> {
 
         if self.len() > 1 {
-            Err(ConversionError::NotInRange)
+            Err(ConversionError::NotInRange { permitted: "0~4.29e9".to_string(), error: self.to_scientific_notation() })
         }
 
         else {
@@ -36,7 +36,7 @@ impl UBigInt {
     pub fn to_u64(&self) -> Result<u64, ConversionError> {
 
         if self.len() > 2 {
-            Err(ConversionError::NotInRange)
+            Err(ConversionError::NotInRange { permitted: "0~1.84e19".to_string(), error: self.to_scientific_notation() })
         }
 
         else if self.len() == 2 {
@@ -76,7 +76,7 @@ impl UBigInt {
             2 => Ok(self.0[0] as u128 + ((self.0[1] as u128) << 32)),
             3 => Ok(self.0[0] as u128 + ((self.0[1] as u128) << 32) + ((self.0[2] as u128) << 64)),
             4 => Ok(self.0[0] as u128 + ((self.0[1] as u128) << 32) + ((self.0[2] as u128) << 64) + ((self.0[3] as u128) << 96)),
-            _ => Err(ConversionError::NotInRange)
+            _ => Err(ConversionError::NotInRange { permitted: "0~3.4e38".to_string(), error: self.to_scientific_notation() })
         }
 
     }
@@ -194,6 +194,57 @@ impl UBigInt {
             StringToNumFSM::InitNum => Err(ConversionError::NoData),  // no number
         }
 
+    }
+
+    /// `9.8e5`
+    pub fn to_scientific_notation(&self) -> String {
+        let mut n = self.clone();
+        let mut exp = 0;
+        let mut digits = Vec::with_capacity(20);
+
+        if n.len() > 8 {
+            // 10^64
+            let big_number = UBigInt::from_raw(vec![0, 0, 3211403009, 1849224548, 3668416493, 3913284084, 1593091]);
+
+            while n.len() > 8 {
+                n.div_ubi_mut(&big_number);
+                exp += 64;
+            }
+
+        }
+
+        while n.len() > 2 {
+            n.div_u32_mut(1_000_000_000);
+            exp += 9;
+        }
+
+        let mut n = n.to_u64().unwrap();
+
+        while n > 0 {
+            digits.push(n % 10);
+            n /= 10;
+            exp += 1;
+        }
+
+        if digits.len() > 0 {
+            exp -= 1;
+        }
+
+        digits.reverse();
+
+        while digits.len() > 8 || digits.len() > 1 && digits[digits.len() - 1] == 0 {
+            digits.pop().unwrap();
+        }
+
+        let digits = if digits.len() == 0 {
+            format!("0")
+        } else if digits.len() == 1 {
+            format!("{}", digits[0])
+        } else {
+            format!("{}.{}", digits[0], digits[1..].iter().map(|c| c.to_string()).collect::<Vec<String>>().join(""))
+        };
+
+        format!("{digits}e{exp}")
     }
 
     pub fn to_string_dec(&self) -> String {
@@ -330,6 +381,24 @@ mod tests {
 
             n *= 2;
             n += 1;
+        }
+
+    }
+
+    #[test]
+    fn scientific_notation_test() {
+        use crate::Ratio;
+
+        let samples = vec![
+            "1e0", "1e1", "0e0",
+            "2e1", "2e0", "3.14e2",
+            "3.14e6", "3.1415e200",
+            "2.7182e20000", "3e3"
+        ];
+
+        for sample in samples.iter() {
+            let n = Ratio::from_string(sample).unwrap().truncate_bi().to_ubi().unwrap();
+            assert_eq!(sample.to_string(), n.to_scientific_notation());
         }
 
     }

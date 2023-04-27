@@ -1,9 +1,11 @@
 use crate::{BigInt, gcd_ubi, UBigInt};
 
-#[cfg(feature = "rand")]
-use crate::UBigInt;
-
 impl BigInt {
+
+    /// It returns `2^n`
+    pub fn exp2(n: u64) -> Self {
+        BigInt::from_ubi(UBigInt::exp2(n), false)
+    }
 
     /// It returns 0 when `self` is 0.
     /// It returns `log2(abs(self))`.

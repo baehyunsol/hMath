@@ -10,8 +10,9 @@ pub struct UBigInt(pub Vec<u32>);
 
 impl UBigInt {
 
+    /// size of its internal vector
     #[inline]
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.0.len()
     }
 

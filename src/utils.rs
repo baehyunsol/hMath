@@ -35,3 +35,42 @@ pub fn remove_suffix_0(vec: &mut Vec<u32>) {
     }
 
 }
+
+pub fn gcd_i32(mut a: i32, mut b: i32) -> i32 {
+    a = a.abs();
+    b = b.abs();
+
+    while a != 0 {
+        let r = b % a;
+        b = a;
+        a = r;
+    }
+
+    b
+}
+
+#[cfg(test)]
+mod tests {
+    use super::gcd_i32;
+
+    #[test]
+    fn gcd_i32_test() {
+        let samples = vec![
+            (24, 17, 1),
+            (0, 0, 0),
+            (0, 8, 8),
+            (1728, 93, 3),
+            (1048576, 84, 4),
+            (3003, 343, 7)
+        ];
+
+        for (a, b, c) in samples.into_iter() {
+            assert_eq!(gcd_i32(a, b), c);
+            assert_eq!(gcd_i32(-a, b), c);
+            assert_eq!(gcd_i32(a, -b), c);
+            assert_eq!(gcd_i32(-a, -b), c);
+        }
+
+    }
+
+} 

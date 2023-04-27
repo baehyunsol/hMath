@@ -14,6 +14,12 @@ pub struct BigInt {
 
 impl BigInt {
 
+    /// size of its internal vector
+    #[inline]
+    pub fn len(&self) -> usize {
+        self.val.len()
+    }
+
     #[inline]
     pub fn zero() -> Self {
         BigInt { val: UBigInt::zero(), _is_neg: false }

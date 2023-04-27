@@ -5,10 +5,22 @@
   - denom: `BigInt`, numer: `BigInt`
   - convert to/from IEEE floating point numbers
 
+---
+
 Optional: Very Big Number
-- `(1, 4)` -> 2\^4
-- `(2, 5)` -> 2\^(2\^5)
-- `(3, 7)` -> 2\^(2\^(2\^5))
+
+`struct VeryBig(BigInt)` -> `n = 2^(d/4294967296)` where `n: VeryBig` and `d: BigInt`
+
+```
+let a: logged, b: logged, c: int
+let a >= b
+
+a*b -> a+b
+a/b -> a-b
+a+b -> a + ln(1+2^(b-a))
+a-b -> a + ln(1-2^(b-a))
+a^c -> a*c
+```
 
 ---
 
