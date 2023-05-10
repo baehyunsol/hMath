@@ -20,7 +20,7 @@ impl BigInt {
             } else if self.is_neg() && n <= (i32::MIN as i64).abs() as u32 {
                 Ok((-(n as i64)) as i32)  // i32::MIN.abs() > i32::MAX.abs()
             } else {
-                Err(ConversionError::NotInRange { permitted: "-2.14e-9~2.14e9".to_string(), error: self.to_scientific_notation() })
+                Err(ConversionError::NotInRange { permitted: "-2.14e-9~2.14e9".to_string(), error: self.to_scientific_notation(5) })
             },
             Err(e) => Err(e)
         }
@@ -44,7 +44,7 @@ impl BigInt {
             } else if self.is_neg() && n <= (i64::MIN as i128).abs() as u64 {
                 Ok((-(n as i128)) as i64)  // i64::MIN.abs() > i64::MAX.abs()
             } else {
-                Err(ConversionError::NotInRange { permitted: "9.22e-18~9.22e18".to_string(), error: self.to_scientific_notation() })
+                Err(ConversionError::NotInRange { permitted: "9.22e-18~9.22e18".to_string(), error: self.to_scientific_notation(5) })
             },
             Err(e) => Err(e)
         }
@@ -68,7 +68,7 @@ impl BigInt {
             } else if self.is_neg() && n < (1 << 127) {
                 Ok(-(n as i128))
             } else {
-                Err(ConversionError::NotInRange { permitted: "-1.7e38~1.7e38".to_string(), error: self.to_scientific_notation() })
+                Err(ConversionError::NotInRange { permitted: "-1.7e38~1.7e38".to_string(), error: self.to_scientific_notation(5) })
             },
             Err(e) => Err(e)
         }
@@ -83,7 +83,7 @@ impl BigInt {
     pub fn to_ubi(&self) -> Result<UBigInt, ConversionError> {
 
         if self.is_neg() {
-            Err(ConversionError::NotInRange { permitted: "0~inf".to_string(), error: self.to_scientific_notation() })
+            Err(ConversionError::NotInRange { permitted: "0~inf".to_string(), error: self.to_scientific_notation(5) })
         }
 
         else {
@@ -140,11 +140,11 @@ impl BigInt {
     }
 
     /// '9.8e5'
-    pub fn to_scientific_notation(&self) -> String {
+    pub fn to_scientific_notation(&self, digits_max_len: usize) -> String {
         format!(
             "{}{}",
             if self.is_neg() { "-" } else { "" },
-            self.val.to_scientific_notation()
+            self.val.to_scientific_notation(digits_max_len)
         )
     }
 

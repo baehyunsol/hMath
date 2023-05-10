@@ -12,3 +12,5 @@ pub use ratio::{
     funcs::exp_iter, funcs::ln_iter, funcs::pow_iter,
     e::e_iter, ln2::ln2_iter, pi::pi_iter,
 };
+pub use consts::{pi_const, e_const, ln2_const};
+pub use err::ConversionError;

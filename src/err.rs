@@ -6,7 +6,12 @@ pub enum ConversionError {
 
     UnexpectedEnd,
 
-    // ieee754 numbers
+    /// f32::INFINITY, f64::INFINITY
     Infinity,
+
+    /// f32::NEG_INFINITY, f64::NEG_INFINITY
+    NegInfinity,
+
+    /// f32::NAN, f64::NAN
     NotANumber
 }

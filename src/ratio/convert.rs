@@ -1,6 +1,7 @@
 use crate::{Ratio, BigInt};
 use crate::err::ConversionError;
 use crate::utils::gcd_i32;
+use crate::ubigint::convert::_to_scientific_notation;
 
 impl Ratio {
 
@@ -89,7 +90,7 @@ impl Ratio {
         let mut self_clone = self.clone();
 
         let neg = self_clone.is_neg();
-        let mut exp = 0;
+        let mut exp = 0i32;
 
         if neg { self_clone.neg_mut(); }
 
@@ -123,7 +124,7 @@ impl Ratio {
             }
 
             if frac == 0 {
-                return Err(ConversionError::NotInRange { permitted: "1.18e-38~3.4e38".to_string(), error: self.to_scientific_notation() });
+                return Err(ConversionError::NotInRange { permitted: "1.18e-38~3.4e38".to_string(), error: self.to_scientific_notation(5) });
             }
 
         }
@@ -131,7 +132,7 @@ impl Ratio {
         exp += 127;
 
         if exp < 0 || exp > 255 {
-            return Err(ConversionError::NotInRange { permitted: "1.18e-38~3.4e38".to_string(), error: self.to_scientific_notation() });
+            return Err(ConversionError::NotInRange { permitted: "1.18e-38~3.4e38".to_string(), error: self.to_scientific_notation(5) });
         }
 
         let result = ((neg as u32) << 31) | ((exp as u32) << 23) | frac;
@@ -181,7 +182,7 @@ impl Ratio {
         let mut self_clone = self.clone();
 
         let neg = self_clone.is_neg();
-        let mut exp = 0;
+        let mut exp = 0i32;
 
         if neg { self_clone.neg_mut(); }
 
@@ -215,7 +216,7 @@ impl Ratio {
             }
 
             if frac == 0 {
-                return Err(ConversionError::NotInRange { permitted: "2.23e-308~1.8e308".to_string(), error: self.to_scientific_notation() });
+                return Err(ConversionError::NotInRange { permitted: "2.23e-308~1.8e308".to_string(), error: self.to_scientific_notation(5) });
             }
 
         }
@@ -223,7 +224,7 @@ impl Ratio {
         exp += 1023;
 
         if exp < 0 || exp > 2047 {
-            return Err(ConversionError::NotInRange { permitted: "2.23e-308~1.8e308".to_string(), error: self.to_scientific_notation() });
+            return Err(ConversionError::NotInRange { permitted: "2.23e-308~1.8e308".to_string(), error: self.to_scientific_notation(5) });
         }
 
         let result = ((neg as u64) << 63) | ((exp as u64) << 52) | frac;
@@ -434,7 +435,7 @@ impl Ratio {
             let mut digits = Ratio::from_denom_and_numer(
                 BigInt::from_i64(1 << 32),
                 BigInt::from_i64(exp10(&frac))
-            ).mul_i32(1000_000).truncate_bi().to_i32().unwrap();
+            ).mul_i32(1_000_000).truncate_bi().to_i32().unwrap();
 
             if digits % 1000 > 992 {
                 digits += 1000 - digits % 1000;
@@ -460,7 +461,6 @@ impl Ratio {
 
             let mut bi = self.truncate_bi();
             bi.abs_mut();
-            let big_decimal = BigInt::from_i64(100_000_000_000_000_000);
             let mut exp = 0;
 
             if log10i64 > 15 {
@@ -610,7 +610,7 @@ impl Ratio {
     }
 
     /// '9.8e'
-    pub fn to_scientific_notation(&self) -> String {
+    pub fn to_scientific_notation(&self, digits_max_len: usize) -> String {
         let len_min = self.numer.len().min(self.denom.len());
         let mut self_clone = if len_min > 4 {
             Ratio::from_denom_and_numer(
@@ -625,15 +625,26 @@ impl Ratio {
 
         self_clone.abs_mut();
 
-        while self_clone.numer.len() < self_clone.denom.len() + 2 {
-            // todo: multiply 10^9
-        }
+        // truncate(log10(abs(self)))
+        let approx_digits = self_clone.numer.log2_accurate().sub_bi(&self_clone.denom.log2_accurate()).mul_i32(21306).div_i32(70777).shift_right(1).to_i64().unwrap();
 
-        let mut self_bi = self_clone.truncate_bi();
+        let mut exp = 0;
 
-        // todo: extract digits from `self_bi`
+        let self_bi = if approx_digits < 17 {
+            exp -= 17 - approx_digits;
+            self_clone.numer.mul_bi(&BigInt::from_i32(10).pow_u32((17 - approx_digits) as u32)).div_bi(&self_clone.denom).to_i64().unwrap()
+        } else {
+            exp += approx_digits - 17;
+            self_clone.numer.div_bi(&self_clone.denom.mul_bi(&BigInt::from_i32(10).pow_u32(approx_digits as u32 - 17))).to_i64().unwrap()
+        };
 
-        todo!();
+        let (digits, new_exp) = _to_scientific_notation(self_bi as u64, digits_max_len);
+
+        format!(
+            "{}{digits}e{}",
+            if self.is_neg() { "-" } else { "" },
+            exp + new_exp as i64
+        )
     }
 
     /// `self.to_approx_string(12)`
@@ -692,7 +703,15 @@ fn inspect_f32(n: f32) -> Result<(bool, i32, u32), ConversionError> {  // (neg, 
     else if exp == 128 {
 
         if frac == 0 {
-            return Err(ConversionError::Infinity);
+
+            if neg {
+                return Err(ConversionError::NegInfinity);
+            }
+
+            else {
+                return Err(ConversionError::Infinity);
+            }
+
         }
 
         else {
@@ -737,7 +756,15 @@ fn inspect_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> {  // (neg, 
     else if exp == 1024 {
 
         if frac == 0 {
-            return Err(ConversionError::Infinity);
+
+            if neg {
+                return Err(ConversionError::NegInfinity);
+            }
+
+            else {
+                return Err(ConversionError::Infinity);
+            }
+
         }
 
         else {
@@ -1046,6 +1073,23 @@ mod tests {
         assert_eq!((false, i32::MIN, 0), inspect_f32(-0.0).unwrap());
         assert_eq!((false, i32::MIN, 0), inspect_f64(0.0).unwrap());
         assert_eq!((false, i32::MIN, 0), inspect_f64(-0.0).unwrap());
+    }
+
+    #[test]
+    fn ratio_scientific_notation_test() {
+        let exp = -1024;
+
+        for i in 0..64 {
+            let s = Ratio::from_string(&format!("3.1415926535e{}", exp + i * 32)).unwrap();
+            let s2 = s.neg();
+
+            let ans = format!("3.14159e{}", exp + i * 32);
+            let ans2 = format!("-{ans}");
+
+            assert_eq!(ans, s.to_scientific_notation(6));
+            assert_eq!(ans2, s2.to_scientific_notation(6));
+        }
+
     }
 
 }

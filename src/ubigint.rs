@@ -1,6 +1,6 @@
 mod arith;
-mod convert;
 mod comp;
+pub mod convert;
 pub mod funcs;
 
 // data is always in the most reduced form

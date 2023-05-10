@@ -14,13 +14,13 @@ impl BigInt {
         BigInt::from_ubi(self.val.log2(), false)
     }
 
-    /// It returns `truncate(log2(self.abs()) * 4294967296)`. It returns 0 when `self` is 0.
+    /// It returns `truncate(log2(abs(self)) * 4294967296)`. It returns 0 when `self` is 0.
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn log2_accurate(&self) -> Self {
         BigInt::from_ubi(self.val.log2_accurate(), false)
     }
 
-    /// It returns (sign * sqrt(self.abs()))
+    /// It returns (sign * sqrt(abs(self)))
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn sqrt(&self) -> Self {
         BigInt::from_ubi(self.val.sqrt(), self.is_neg())
