@@ -32,6 +32,5 @@ Lisp-like syntax
 
 ---
 
-https://doc.rust-lang.org/stable/std/fmt/index.html#traits
 https://doc.rust-lang.org/stable/std/iter/trait.Sum.html
 https://doc.rust-lang.org/stable/std/iter/trait.Product.html

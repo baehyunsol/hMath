@@ -1,5 +1,6 @@
 use crate::UBigInt;
 use crate::err::ConversionError;
+use std::fmt;
 
 impl UBigInt {
 
@@ -239,13 +240,14 @@ impl UBigInt {
         buffer.concat()
     }
 
-    /// it always starts with '0x'
-    pub fn to_string_hex(&self) -> String {
+    /// `prefix` is for "0x"
+    pub fn to_string_hex(&self, prefix: bool) -> String {
         let mut buffer = self.0.iter().map(
             |n| format!("{:08x}", n)
         ).collect::<Vec<String>>();
 
-        buffer.push("0x".to_string());
+        if prefix { buffer.push("0x".to_string()); } else { buffer.push(String::new()); }
+
         buffer.reverse();
         buffer[1] = buffer[1].trim_start_matches('0').to_string();
 
@@ -256,8 +258,8 @@ impl UBigInt {
         buffer.concat()
     }
 
-    /// it always starts with '0o'
-    pub fn to_string_oct(&self) -> String {
+    /// `prefix` is for '0o'
+    pub fn to_string_oct(&self, prefix: bool) -> String {
         let mut n = self.clone();
         let mut buffer = Vec::with_capacity(self.len());
 
@@ -267,7 +269,9 @@ impl UBigInt {
         }
 
         buffer.push(format!("{:o}", n.0[0]));
-        buffer.push("0o".to_string());
+
+        if prefix { buffer.push("0o".to_string()); } else { buffer.push(String::new()); }
+
         buffer.reverse();
         buffer[1] = buffer[1].trim_start_matches('0').to_string();
 
@@ -278,13 +282,14 @@ impl UBigInt {
         buffer.concat()
     }
 
-    /// it always starts with '0b'
-    pub fn to_string_bin(&self) -> String {
+    /// `prefix` is for '0b'
+    pub fn to_string_bin(&self, prefix: bool) -> String {
         let mut buffer = self.0.iter().map(
             |n| format!("{:032b}", n)
         ).collect::<Vec<String>>();
 
-        buffer.push("0b".to_string());
+        if prefix { buffer.push("0b".to_string()); } else { buffer.push(String::new()); }
+
         buffer.reverse();
         buffer[1] = buffer[1].trim_start_matches('0').to_string();
 
@@ -305,10 +310,42 @@ enum StringToNumFSM {
     ReadNum,
 }
 
-impl std::fmt::Display for UBigInt {
+impl fmt::Display for UBigInt {
 
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}", self.to_string_dec())
+    }
+
+}
+
+impl fmt::LowerHex for UBigInt {
+
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{}", self.to_string_hex(fmt.alternate()))
+    }
+
+}
+
+impl fmt::Octal for UBigInt {
+
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{}", self.to_string_oct(fmt.alternate()))
+    }
+
+}
+
+impl fmt::Binary for UBigInt {
+
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{}", self.to_string_bin(fmt.alternate()))
+    }
+
+}
+
+impl fmt::LowerExp for UBigInt {
+
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{}", self.to_scientific_notation(5))
     }
 
 }
@@ -520,9 +557,9 @@ mod tests {
             let ubi2 = UBigInt::from_u32(number);
             assert_eq!(ubi, ubi2);
             assert_eq!(UBigInt::from_string(&ubi.to_string_dec()).unwrap(), ubi2);
-            assert_eq!(UBigInt::from_string(&ubi.to_string_hex()).unwrap(), ubi2);
-            assert_eq!(UBigInt::from_string(&ubi.to_string_oct()).unwrap(), ubi2);
-            assert_eq!(UBigInt::from_string(&ubi.to_string_bin()).unwrap(), ubi2);
+            assert_eq!(UBigInt::from_string(&ubi.to_string_hex(true)).unwrap(), ubi2);
+            assert_eq!(UBigInt::from_string(&ubi.to_string_oct(true)).unwrap(), ubi2);
+            assert_eq!(UBigInt::from_string(&ubi.to_string_bin(true)).unwrap(), ubi2);
 
             assert_eq!(UBigInt::from_string(string).unwrap().to_string_dec().parse::<u32>().unwrap(), number);
         }
@@ -530,9 +567,9 @@ mod tests {
         for big_number in big_numbers.into_iter() {
             let ubi = UBigInt::from_string(big_number).unwrap();
             assert_eq!(UBigInt::from_string(&ubi.to_string_dec()).unwrap(), ubi);
-            assert_eq!(UBigInt::from_string(&ubi.to_string_hex()).unwrap(), ubi);
-            assert_eq!(UBigInt::from_string(&ubi.to_string_oct()).unwrap(), ubi);
-            assert_eq!(UBigInt::from_string(&ubi.to_string_bin()).unwrap(), ubi);
+            assert_eq!(UBigInt::from_string(&ubi.to_string_hex(true)).unwrap(), ubi);
+            assert_eq!(UBigInt::from_string(&ubi.to_string_oct(true)).unwrap(), ubi);
+            assert_eq!(UBigInt::from_string(&ubi.to_string_bin(true)).unwrap(), ubi);
         }
 
         for sample in invalid_samples.into_iter() {
@@ -541,24 +578,3 @@ mod tests {
 
     }
 }
-
-// ---
-// 0b1001000110100010101100111100
-// 0b0
-// 0b1001000110100010101100111100
-// ---
-// ---
-// 0b0100110101011110011011110111
-// 0b1001000110100010101100111100
-// 0b10010001101000101011001111000100110101011110011011110111
-// ---
-// ---
-// 0b1000100000001000100010010000
-// 0b10010001101000101011001111000100110101011110011011110111
-// 0b100100011010001010110011110001001101010111100110111101111000100000001000100010010000
-// ---
-// ---
-// 0b1001100010100000101010001011
-// 0b100100011010001010110011110001001101010111100110111101111000100000001000100010010000
-// 0b1001000110100010101100111100010011010101111001101111011110001000000010001000100100001001100010100000101010001011
-// ---

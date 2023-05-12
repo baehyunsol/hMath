@@ -1,5 +1,6 @@
 use crate::{BigInt, UBigInt};
 use crate::err::ConversionError;
+use std::fmt;
 
 impl BigInt {
 
@@ -158,38 +159,70 @@ impl BigInt {
     }
 
     /// see `UBigInt::to_string_hex`
-    pub fn to_string_hex(&self) -> String {
+    pub fn to_string_hex(&self, prefix: bool) -> String {
         format!(
             "{}{}",
             if self.is_neg() { "-" } else { "" },
-            self.val.to_string_hex()
+            self.val.to_string_hex(prefix)
         )
     }
 
     /// see `UBigInt::to_string_oct`
-    pub fn to_string_oct(&self) -> String {
+    pub fn to_string_oct(&self, prefix: bool) -> String {
         format!(
             "{}{}",
             if self.is_neg() { "-" } else { "" },
-            self.val.to_string_oct()
+            self.val.to_string_oct(prefix)
         )
     }
 
     /// see `UBigInt::to_string_bin`
-    pub fn to_string_bin(&self) -> String {
+    pub fn to_string_bin(&self, prefix: bool) -> String {
         format!(
             "{}{}",
             if self.is_neg() { "-" } else { "" },
-            self.val.to_string_bin()
+            self.val.to_string_bin(prefix)
         )
     }
 
 }
 
-impl std::fmt::Display for BigInt {
+impl fmt::Display for BigInt {
 
-    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}", self.to_string_dec())
+    }
+
+}
+
+impl fmt::LowerHex for BigInt {
+
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{}", self.to_string_hex(fmt.alternate()))
+    }
+
+}
+
+impl fmt::Octal for BigInt {
+
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{}", self.to_string_oct(fmt.alternate()))
+    }
+
+}
+
+impl fmt::Binary for BigInt {
+
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{}", self.to_string_bin(fmt.alternate()))
+    }
+
+}
+
+impl fmt::LowerExp for BigInt {
+
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        write!(fmt, "{}", self.to_scientific_notation(5))
     }
 
 }
