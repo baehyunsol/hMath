@@ -7,6 +7,10 @@ pub fn ln_iter(x: &Ratio, iter: usize) -> Ratio {
         panic!("logarithm of a negative number is undefined");
     }
 
+    else if x.is_zero() {
+        panic!("logarithm of 0 is undefined");
+    }
+
     // ln(x) = ln(1 + a) = sum{k=1}{inf} -(-a)^k/k = a - a^2/2 + a^3/3 - a^4/4...
     // it's best when a is close to 0 -> log_2(1 + a) = log_2(x) is close to 0
     // approximation of log_2 is very easily calculated: log2_accurate

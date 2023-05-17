@@ -50,6 +50,23 @@ pub fn gcd_i32(mut a: i32, mut b: i32) -> i32 {
 }
 
 #[cfg(test)]
+pub fn are_close(a: &crate::Ratio, b: &crate::Ratio, thres: f32) -> bool {
+
+    if b.is_zero() {
+        return a.is_zero();
+    }
+
+    let diff = match a.div_rat(b).abs().to_ieee754_f32() {
+        Ok(n) => n,
+        _ => {
+            return false;
+        }
+    };
+
+    1.0 - thres <= diff && diff <= 1.0 + thres
+}
+
+#[cfg(test)]
 mod tests {
     use super::gcd_i32;
 

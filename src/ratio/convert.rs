@@ -49,6 +49,11 @@ impl Ratio {
         Ratio::from_denom_and_numer_raw(BigInt::one(), BigInt::from_i64(n))
     }
 
+    pub fn from_i128(n: i128) -> Self {
+        // Safety: 1 and another integer are always coprime. 1 is positive. denom is 1 when n is 0.
+        Ratio::from_denom_and_numer_raw(BigInt::one(), BigInt::from_i128(n))
+    }
+
     /// If you don't know what `ieee754` is, you're okay to use this function.
     /// Though the ieee 754 standard distinguishes negative 0 and positive 0, it doesn't distinguish between them.
     /// It returns an error if `n` is NaN or Inf.

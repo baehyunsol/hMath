@@ -3,10 +3,14 @@ use crate::{Ratio, BigInt};
 mod exp;
 mod ln;
 mod pow;
+mod root;
+mod trigo;
 
 pub use exp::exp_iter;
 pub use ln::ln_iter;
 pub use pow::pow_iter;
+pub use root::{sqrt_iter, cbrt_iter};
+pub use trigo::{sin_iter, cos_iter, tan_iter};
 
 impl Ratio {
 

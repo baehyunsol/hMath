@@ -7,7 +7,7 @@ impl UBigInt {
         UBigInt::from_u32(1 << ((n % 32) as u32)).shift_left((n / 32) as usize)
     }
 
-    /// It's the inverse function of `log2_accurate`. It returns `truncate(2^(n/4294967296))`. It may have a small error when `n` is large.
+    /// It's the inverse function of `log2_accurate`. It returns `truncate(2^(n/4294967296))`. **It may have a small error when `n` is large.**
     pub fn exp2_accurate(n: &UBigInt) -> Self {
         let trunc = n.shift_right(1);
 
@@ -68,6 +68,7 @@ mod tests {
             assert_eq!(UBigInt::from_u64(n), UBigInt::exp2_accurate(&UBigInt::from_u64(n).log2_accurate()));
         }
 
+        assert_eq!(UBigInt::one(), UBigInt::exp2_accurate(&UBigInt::zero()));
     }
 
 }
