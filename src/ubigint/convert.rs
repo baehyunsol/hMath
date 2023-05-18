@@ -82,10 +82,10 @@ impl UBigInt {
 
     }
 
-    /// ('0' '_'*) | ([1-9] ([0-9] | '_')*)
-    /// ('0x' | '0X') ([0-9a-fA-F] | '_')+
-    /// ('0b' | '0B') ('0' | '1' | '_')+
-    /// ('0o' | '0O') ([0-7] | '_')+
+    /// `('0' '_'*) | ([1-9] ([0-9] | '_')*)`\
+    /// `('0x' | '0X') ([0-9a-fA-F] | '_')+`\
+    /// `('0b' | '0B') ('0' | '1' | '_')+`\
+    /// `('0o' | '0O') ([0-7] | '_')+`
     pub fn from_string(s: &str) -> Result<Self, ConversionError> {
         let mut curr_state = StringToNumFSM::Init;
         let mut int_buffer = 0;
@@ -240,7 +240,7 @@ impl UBigInt {
         buffer.concat()
     }
 
-    /// `prefix` is for "0x"
+    /// `prefix` is for '0x'
     pub fn to_string_hex(&self, prefix: bool) -> String {
         let mut buffer = self.0.iter().map(
             |n| format!("{:08x}", n)

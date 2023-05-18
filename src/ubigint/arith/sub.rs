@@ -16,6 +16,11 @@ impl UBigInt {
     pub fn sub_ubi_mut(&mut self, other: &UBigInt) {
         let mut carry = false;
 
+        #[cfg(test)]
+        if other.gt_ubi(self) {
+            panic!("{} > {}", other.to_scientific_notation(12), self.to_scientific_notation(12));
+        }
+
         for i in 0..other.len() {
 
             if carry {
@@ -111,6 +116,30 @@ impl UBigInt {
 
         else {
             panic!("attempt to subtract with overflow");
+        }
+
+    }
+
+    pub fn abs_diff_ubi(&self, other: &UBigInt) -> Self {
+
+        if self.geq_ubi(other) {
+            self.sub_ubi(other)
+        }
+
+        else {
+            other.sub_ubi(self)
+        }
+
+    }
+
+    pub fn abs_diff_u32(&self, other: u32) -> Self {
+
+        if self.geq_u32(other) {
+            self.sub_u32(other)
+        }
+
+        else {
+            UBigInt::from_u32(other - self.to_u32().unwrap())
         }
 
     }

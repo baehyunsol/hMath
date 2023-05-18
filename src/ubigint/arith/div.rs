@@ -61,14 +61,19 @@ impl UBigInt {
                     let approx3 = approx1.mul_u32(ratio).add_ubi(&approx2.mul_u32(256 - ratio)).div_u32(256);
                     let approx = approx3.shift_left(self.len() - other.len() - 3);
 
-                    // TODO: `1` is supposed to be greater than `2`, but it's slightly smaller
-                    // see `extra_div_test` below
-                    // println!("1: {:?}", self);
-                    // println!("2: {:?}", other.mul_ubi(&approx3).shift_left(self.len() - other.len() - 3));
-                    // println!("3: {:?}", self.sub_ubi(&other.mul_ubi(&approx3).shift_left(self.len() - other.len() - 3)));
-
                     // self / other = approx + (self - other * approx) / other
-                    approx.add_ubi(&self.sub_ubi(&other.mul_ubi(&approx3).shift_left(self.len() - other.len() - 3)).div_ubi(&other))
+                    let tmp = other.mul_ubi(&approx3).shift_left(self.len() - other.len() - 3);
+
+                    if self.geq_ubi(&tmp) {
+                        let tmp2 = self.sub_ubi(&tmp).div_ubi(&other);
+                        approx.add_ubi(&tmp2)
+                    }
+
+                    else {
+                        let tmp2 = tmp.sub_ubi(&self).div_ubi(&other);
+                        approx.sub_ubi(&tmp2)
+                    }
+
                 }
 
             }

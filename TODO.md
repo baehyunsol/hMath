@@ -34,3 +34,14 @@ Lisp-like syntax
 
 https://doc.rust-lang.org/stable/std/iter/trait.Sum.html
 https://doc.rust-lang.org/stable/std/iter/trait.Product.html
+
+---
+
+Test Failures
+
+extra_div_test
+exp2_test
+root_test
+sin_test
+
+something must be wrong with `UBigInt::sqrt`!!

@@ -15,40 +15,67 @@ impl UBigInt {
             return UBigInt::from_u64(sqrt_u64(self.to_u64().unwrap()));
         }
 
-        let mut approx = sqrt_u64(self.shift_right(self.len() - 2).to_u64().unwrap());
+        let approx = sqrt_u64(self.shift_right(self.len() - 2).to_u64().unwrap());
+
+        // result = sqrt(self) - alpha, where alpha << sqrt(self)
+        // self - result^2 = 2 * alpha * sqrt(self) - alpha^2 ~= 2 * alpha * sqrt(self)
+        let mut result = UBigInt::from_u64(approx);
 
         if self.len() % 2 != 0 {
-            approx *= 65536;
+            result.mul_u32_mut(65536);
         }
 
-        let mut result = UBigInt::from_u64(approx);
         result.shift_left_mut(self.len() / 2 - 1);
-        let mut div = result.div_u32(1024);
 
-        if div.is_zero() {
-            div = UBigInt::from_u32(4);
+        let mut div = self.sub_ubi(&result.mul_ubi(&result)).div_u32(2).div_ubi(&result);
+        result.add_ubi_mut(&div);
+
+        loop {
+            let result_sqr = result.mul_ubi(&result);
+
+            if self.geq_ubi(&result_sqr) {
+                div = self.sub_ubi(&result_sqr).div_u32(2).div_ubi(&result);
+                result.add_ubi_mut(&div);
+            }
+
+            else {
+                div = result_sqr.sub_ubi(&self).div_u32(2).div_ubi(&result);
+                result.sub_ubi_mut(&div);
+            }
+
+            if div.len() < 2 {
+                break;
+            }
+
+        }
+
+        // Safety: div.len() < 2;
+        let mut div = div.to_u32().unwrap();
+
+        if div == 0 {
+            div = 2;
         }
 
         loop {
 
             while result.mul_ubi(&result).lt_ubi(self) {
-                result.add_ubi_mut(&div);
+                result.add_u32_mut(div);
             }
 
-            div.div_u32_mut(4);
+            div /= 4;
 
             // it guarantees that the result is always `truncate(sqrt(self))`, not `round(sqrt(self))`
-            if div.lt_u32(4) {
-                div = UBigInt::one();
+            if div < 4 {
+                div = 1;
             }
 
             while result.mul_ubi(&result).gt_ubi(self) {
-                result.sub_ubi_mut(&div);
+                result.sub_u32_mut(div);
             }
 
-            div.div_u32_mut(4);
+            div /= 4;
 
-            if div.is_zero() {
+            if div == 0 {
                 return result;
             }
 
@@ -320,7 +347,30 @@ fn sqrt_u64(n: u64) -> u64 {
     let d = (1 << (l2 / 2)) * s;
 
     let mut result = d / (1 << 28);
-    let mut div = (result / 64).max(1);
+
+    // see the comments in `UBigInt::sqrt`
+    let mut div = (n.abs_diff(result * result) / (2 * result)).max(1);
+
+    if n > result * result {
+        result += div;
+    }
+
+    else {
+        result -= div;
+    }
+
+    if result == 0 {
+        div = 2;
+    }
+
+    else {
+        div = n.abs_diff(result * result) / (2 * result);
+
+        if div == 0 {
+            div = 2;
+        }
+
+    }
 
     loop {
 
@@ -339,6 +389,8 @@ fn sqrt_u64(n: u64) -> u64 {
         div /= 4;
 
         if div == 0 {
+            #[cfg(test)] assert!(result * result <= n && n <= (result + 1) * (result + 1));
+
             return result;
         }
 

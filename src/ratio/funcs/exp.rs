@@ -1,7 +1,6 @@
 use crate::{Ratio, e_iter};
 
-/// It returns `e^x`. It gets more accurate as `iter` gets bigger.\
-/// TODO: It doesn't work if `x` is greater than `2^31`.
+/// It returns `e^x`. It gets more accurate as `iter` gets bigger.
 pub fn exp_iter(x: &Ratio, iter: usize) -> Ratio {
     let (trun, mut frac) = x.truncate_and_frac();
 

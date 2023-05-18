@@ -1,7 +1,7 @@
 use crate::Ratio;
 
 #[cfg(test)]
-pub const RUN_ALL_TESTS: bool = false;
+pub const RUN_ALL_TESTS: bool = true;
 
 /// pre-calculated value of pi. It's equal to `pi_iter(7)`.
 pub fn pi_const() -> Ratio {

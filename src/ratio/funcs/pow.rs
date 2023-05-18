@@ -1,6 +1,6 @@
 use crate::{Ratio, exp_iter, ln_iter};
 
-// It returns `a^b`. It gets more accurate as `iter` gets bigger. If `b` is an integer, try `Ratio::pow_i32` instead. It panics when `a` is less than 0. `0^0` is 0.
+/// It returns `a^b`. It gets more accurate as `iter` gets bigger. If `b` is an integer, try `Ratio::pow_i32` instead. It panics when `a` is less than 0. `0^0` is 0.
 pub fn pow_iter(a: &Ratio, b: &Ratio, iter: usize) -> Ratio {
 
     if a.is_zero() {

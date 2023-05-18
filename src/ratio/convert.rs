@@ -408,8 +408,6 @@ impl Ratio {
     /// Ratio { 4, 7 } -> "1.75".
     /// The length of the returned string is less or equal to `digits`.
     /// If `digits` is less than 6, it'll count that as 6.
-    ///
-    /// TODO: This function is very expensive.
     pub fn to_approx_string(&self, max_len: usize) -> String {
         let mut max_len = max_len.max(6);
 
@@ -614,7 +612,7 @@ impl Ratio {
         result
     }
 
-    /// '9.8e'
+    /// '9.8e5'
     pub fn to_scientific_notation(&self, digits_max_len: usize) -> String {
         let len_min = self.numer.len().min(self.denom.len());
         let mut self_clone = if len_min > 4 {

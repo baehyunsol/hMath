@@ -93,7 +93,7 @@ impl BigInt {
 
     }
 
-    /// ('-')? UBigInt
+    /// `('-')? UBigInt`\
     /// see `UBigInt::from_string`
     pub fn from_string(s: &str) -> Result<Self, ConversionError> {
 
