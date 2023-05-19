@@ -50,13 +50,13 @@ pub fn gcd_i32(mut a: i32, mut b: i32) -> i32 {
 }
 
 #[cfg(test)]
-pub fn are_close(a: &crate::Ratio, b: &crate::Ratio, thres: f32) -> bool {
+pub fn are_close(a: &crate::Ratio, b: &crate::Ratio, thres: f64) -> bool {
 
     if b.is_zero() {
         return a.is_zero();
     }
 
-    let diff = match a.div_rat(b).abs().to_ieee754_f32() {
+    let diff = match a.div_rat(b).abs().to_ieee754_f64() {
         Ok(n) => n,
         _ => {
             return false;

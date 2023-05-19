@@ -3,13 +3,24 @@ use crate::utils::{v64_to_v32, remove_suffix_0};
 
 const KARATSUBA_THRES: usize = 64;
 
+#[cfg(test)]
+const KARATSUBA_TEST: bool = crate::consts::RUN_ALL_TESTS & true;
+
+#[cfg(test)]
+static mut KARATSUBA_ENABLE: bool = true;
+
 impl UBigInt {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn mul_ubi(&self, other: &UBigInt) -> Self {
 
+        #[cfg(test)]
+        let go_kara = unsafe { KARATSUBA_ENABLE };
+        #[cfg(not(test))]
+        let go_kara = true;
+
         // https://en.wikipedia.org/wiki/Karatsuba_algorithm
-        if self.len() > KARATSUBA_THRES && other.len() > KARATSUBA_THRES {
+        if self.len() > KARATSUBA_THRES && other.len() > KARATSUBA_THRES && go_kara {
 
             // self: a, other: b
             // naive: O(a * b)
@@ -25,7 +36,21 @@ impl UBigInt {
             // a1 = max(m, a - m), b1 = max(m, b - m)
             let z1 = x1.add_ubi(&x0).mul_ubi(&y1.add_ubi(&y0)).sub_ubi(&z2).sub_ubi(&z0);  // O(a1 * b1 + 3 * (a1 + b1))
 
-            return z2.shift_left(2 * m).add_ubi(&z1.shift_left(m)).add_ubi(&z0);
+            let result = z2.shift_left(2 * m).add_ubi(&z1.shift_left(m)).add_ubi(&z0);
+
+            #[cfg(test)] unsafe {
+
+                if KARATSUBA_TEST {
+                    KARATSUBA_ENABLE = false;
+                    let result2 = self.mul_ubi(&other);
+                    KARATSUBA_ENABLE = true;
+
+                    assert_eq!(result, result2);
+                }
+
+            }
+
+            return result;
         }
 
         let mut result = vec![0; self.len() + other.len()];

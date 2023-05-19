@@ -44,17 +44,26 @@ mod tests {
             (11, 12, sqrt_iter(&Ratio::from_i32(6), iter).sub_rat(&sqrt_iter(&Ratio::from_i32(2), iter)).div_i32(4)),  // sin(11*pi/12) = (sqrt(6) - sqrt(2))/4
             (12, 12, Ratio::zero()),                                     // sin(pi) = 0
             (13, 12, sqrt_iter(&Ratio::from_i32(6), iter).sub_rat(&sqrt_iter(&Ratio::from_i32(2), iter)).div_i32(4).neg()),  // sin(13*pi/12) = -(sqrt(6) - sqrt(2))/4
+            (14, 12, Ratio::from_denom_and_numer_i32(2, -1)),            // sin(7*pi/6) = -0.5
         ];
         let pi = pi_iter(iter);
         let cos_coeff = Ratio::from_denom_and_numer_i32(-2, 1);
-        let accuracy = 0.001;
+        let accuracy = 0.0005;
 
         for (numer, denom, value) in samples.into_iter() {
             let sin_val = sin_iter(&Ratio::from_denom_and_numer_i32(denom, numer).mul_rat(&pi), iter);
+            let sin_val2 = sin_iter(&Ratio::from_denom_and_numer_i32(denom, numer).add_i32(4).mul_rat(&pi), iter);
+            let sin_val3 = sin_iter(&Ratio::from_denom_and_numer_i32(denom, numer).add_i32(-4).mul_rat(&pi), iter);
             let cos_val = cos_iter(&Ratio::from_denom_and_numer_i32(denom, numer).add_rat(&cos_coeff).mul_rat(&pi), iter);
+            let cos_val2 = cos_iter(&Ratio::from_denom_and_numer_i32(denom, numer).add_rat(&cos_coeff).add_i32(4).mul_rat(&pi), iter);
+            let cos_val3 = cos_iter(&Ratio::from_denom_and_numer_i32(denom, numer).add_rat(&cos_coeff).add_i32(-4).mul_rat(&pi), iter);
 
             assert!(are_close(&sin_val, &value, accuracy));
+            assert!(are_close(&sin_val2, &value, accuracy));
+            assert!(are_close(&sin_val3, &value, accuracy));
             assert!(are_close(&cos_val, &value, accuracy));
+            assert!(are_close(&cos_val2, &value, accuracy));
+            assert!(are_close(&cos_val3, &value, accuracy));
         }
 
     }

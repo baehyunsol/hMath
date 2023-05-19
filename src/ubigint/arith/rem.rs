@@ -5,15 +5,18 @@ impl UBigInt {
     // self - self / other * other
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn rem_ubi(&self, other: &UBigInt) -> Self {
-        let mut sdo = self.div_ubi(other);
-        sdo.mul_ubi_mut(other);
+        let sdo = self.div_ubi(other).mul_ubi(other);
+
+        #[cfg(test)] assert!(self.geq_ubi(&sdo));
 
         self.sub_ubi(&sdo)
     }
 
     pub fn rem_ubi_mut(&mut self, other: &UBigInt) {
-        let mut sdo = self.div_ubi(other);
-        sdo.mul_ubi_mut(other);
+        let sdo = self.div_ubi(other).mul_ubi(other);
+
+        #[cfg(test)] assert!(self.geq_ubi(&sdo));
+
         self.sub_ubi_mut(&sdo);
     }
 
