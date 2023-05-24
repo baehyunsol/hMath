@@ -7,7 +7,7 @@ mod root;
 mod trigo;
 
 pub use exp::exp_iter;
-pub use ln::ln_iter;
+pub use ln::{ln_iter, log_iter};
 pub use pow::pow_iter;
 pub use root::{sqrt_iter, cbrt_iter};
 pub use trigo::{sin_iter, cos_iter, tan_iter};
@@ -119,6 +119,32 @@ impl Ratio {
         (trun, frac)
     }
 
+    /// It returns the largest integer less than or equal to `self`.
+    pub fn floor(&self) -> Ratio {
+        Ratio::from_bi(self.floor_bi())
+    }
+
+    /// It returns the largest integer less than or equal to `self`.
+    pub fn floor_bi(&self) -> BigInt {
+
+        if self.is_neg() {
+
+            if self.is_integer() {
+                self.numer.clone()
+            }
+
+            else {
+                self.truncate_bi().sub_i32(1)
+            }
+
+        }
+
+        else {
+            self.truncate_bi()
+        }
+
+    }
+
     /// It returns a number between 0 and 1 (both exclusive).
     #[cfg(feature = "rand")]
     pub fn random() -> Self {
@@ -145,25 +171,29 @@ mod tests {
     use crate::Ratio;
 
     #[test]
-    fn frac_trunc_test() {
+    fn frac_trunc_floor_test() {
         let samples = vec![
-            ("3.7", "3.0"),
-            ("-3.7", "-3.0"),
-            ("4.0", "4.0"),
-            ("-4.0", "-4.0"),
-            ("0.0", "0.0"),
-            ("-0.0", "-0.0"),
+            ("3.7", "3.0", "3.0"),
+            ("-3.7", "-3.0", "-4.0"),
+            ("4.0", "4.0", "4.0"),
+            ("-4.0", "-4.0", "-4.0"),
+            ("0.0", "0.0", "0.0"),
+            ("-0.0", "-0.0", "-0.0"),
         ];
 
-        for (before, after) in samples.into_iter() {
+        for (before, trun, floor) in samples.into_iter() {
             assert_eq!(
                 Ratio::from_string(before).unwrap().truncate(),
-                Ratio::from_string(after).unwrap()
+                Ratio::from_string(trun).unwrap()
+            );
+            assert_eq!(
+                Ratio::from_string(before).unwrap().floor(),
+                Ratio::from_string(floor).unwrap()
             );
 
             // test code is inside the `.frac()` method
             let _ = Ratio::from_string(before).unwrap().frac();
-            let _ = Ratio::from_string(after).unwrap().frac();
+            let _ = Ratio::from_string(trun).unwrap().frac();
         }
 
     }

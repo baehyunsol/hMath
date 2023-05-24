@@ -68,6 +68,11 @@ pub fn ln_iter(x: &Ratio, iter: usize) -> Ratio {
     result.add_rat(&ln2_iter(iter).mul_bi(&BigInt::from_i64(log2_approx)))
 }
 
+/// It returns log(x) with base `base`. It gets more accurate as `iter` gets bigger. It panics when `x` or `base` is less than or equal 0.
+pub fn log_iter(base: &Ratio, x: &Ratio, iter: usize) -> Ratio {
+    ln_iter(x, iter).div_rat(&ln_iter(base, iter))
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{Ratio, ln_iter, exp_iter};

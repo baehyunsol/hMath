@@ -60,6 +60,10 @@ impl Ratio {
         self.denom.is_one() && self.numer.is_zero()
     }
 
+    pub fn is_integer(&self) -> bool {
+        self.denom.is_one()
+    }
+
     #[cfg(test)]
     pub fn is_valid(&self) -> bool {
         self.denom.is_valid() && self.numer.is_valid() && !self.denom.is_neg() && (!self.numer.is_zero() || self.denom.is_one()) && gcd_bi(&self.denom, &self.numer).is_one()
