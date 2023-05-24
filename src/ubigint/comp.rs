@@ -196,4 +196,65 @@ impl Ord for UBigInt {
 
 }
 
-// TODO: more tests
+#[cfg(test)]
+mod tests {
+    use crate::UBigInt;
+    use std::cmp::Ordering;
+
+    #[test]
+    fn ubi_cmp_test() {
+        let numbers = vec![
+            UBigInt::zero(), UBigInt::one(), UBigInt::from_u32(2), UBigInt::from_u32(3),
+            UBigInt::from_u32(u32::MAX),
+            UBigInt::from_u64(u64::MAX),
+            UBigInt::from_u128(u128::MAX),
+            UBigInt::exp2(130),
+            UBigInt::exp2(131),
+            UBigInt::exp2(132),
+            UBigInt::from_u32(19).pow_u32(23),
+            UBigInt::from_u32(23).pow_u32(19),
+            UBigInt::from_u32(100).pow_u32(99),
+            UBigInt::from_u32(100).pow_u32(100),
+            UBigInt::from_u32(100).pow_u32(101),
+            UBigInt::from_u32(100).pow_u32(102),
+            UBigInt::from_u32(100).pow_u32(103),
+            UBigInt::from_u32(100).pow_u32(104),
+            UBigInt::from_u32(100).pow_u32(105),
+            UBigInt::from_u32(100).pow_u32(106),
+        ];
+
+        for i in 0..numbers.len() {
+
+            for j in (i + 1)..numbers.len() {
+
+                match numbers[i].comp_ubi(&numbers[j]) {
+                    Ordering::Greater => {
+                        assert!(numbers[i].gt_ubi(&numbers[j]));
+                        assert!(!numbers[i].eq_ubi(&numbers[j]));
+                        assert!(!numbers[i].lt_ubi(&numbers[j]));
+
+                        if let Ok(n) = numbers[j].to_u32() {
+                            assert!(numbers[i].gt_u32(n));
+                        }
+
+                    },
+                    Ordering::Equal => panic!("No same numbers"),
+                    Ordering::Less => {
+                        assert!(!numbers[i].gt_ubi(&numbers[j]));
+                        assert!(!numbers[i].eq_ubi(&numbers[j]));
+                        assert!(numbers[i].lt_ubi(&numbers[j]));
+
+                        if let Ok(n) = numbers[i].to_u32() {
+                            assert!(numbers[j].gt_u32(n));
+                        }
+
+                    },
+                }
+
+            }
+
+        }
+
+    }
+
+}

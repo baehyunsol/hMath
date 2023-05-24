@@ -84,6 +84,78 @@ impl Ratio {
             self.numer.div_bi_mut(&r);
         }
 
+        #[cfg(test)] assert!(self.is_valid());
+    }
+
+    // TODO: test this function
+    /// It shrinks the size of `self.numer` and `self.denom` until they're less than or equal to `2^(limit * 32)`. It may lose accuracy.
+    /// If `denom` and `numer` are already small enough, it returns `Ok(0)`.
+    /// If it successfully shrinks, it returns `Ok(n)` where `n` is how much numbers it removed.
+    /// Sometimes, the shrinked result doesn't satisfy the limit. It returns `Err(n)` in those cases where `n` is how much numbers it removed.
+    pub fn shrink(&mut self, limit: usize) -> Result<usize, usize> {
+
+        if limit < 3 {
+            return Err(0);
+        }
+
+        let numer_shrink = self.numer.len().max(limit) - limit;
+        let denom_shrink = self.denom.len().max(limit) - limit;
+        let shrink = numer_shrink.max(denom_shrink);
+
+        if shrink == 0 {
+            Ok(0)
+        }
+
+        else if shrink + 2 < self.numer.len().min(self.denom.len()) {
+            self.numer.shift_right_mut(shrink);
+            self.denom.shift_right_mut(shrink);
+            self.fit();
+
+            Ok(shrink)
+        }
+
+        else if self.numer.len() + 4 < self.denom.len() {
+            let shrink = self.numer.len();
+            self.denom.div_bi_mut(&self.numer);
+
+            if self.denom.is_neg() {
+                self.denom.abs_mut();
+                self.numer = BigInt::one().neg();
+            }
+
+            else {
+                self.numer = BigInt::one();
+            }
+
+            if self.denom.len() > limit {
+                Err(shrink - 1)
+            }
+
+            else {
+                Ok(shrink - 1)
+            }
+
+        }
+
+        else if self.denom.len() + 4 < self.numer.len() {
+            let shrink = self.denom.len();
+            self.numer.div_bi_mut(&self.denom);
+            self.denom = BigInt::one();
+
+            if self.numer.len() > limit {
+                Err(shrink - 1)
+            }
+
+            else {
+                Ok(shrink - 1)
+            }
+
+        }
+
+        else {
+            Err(0)
+        }
+
     }
 
 }
