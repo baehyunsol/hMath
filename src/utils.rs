@@ -53,7 +53,11 @@ pub fn gcd_i32(mut a: i32, mut b: i32) -> i32 {
 pub fn are_close(a: &crate::Ratio, b: &crate::Ratio, thres: f64) -> bool {
 
     if b.is_zero() {
-        return a.is_zero();
+        let thres_to_rat = match crate::Ratio::from_ieee754_f64(thres) {
+            Ok(n) => n,
+            _ => { return false; }
+        };
+        return a.abs().leq_rat(&thres_to_rat);
     }
 
     let diff = match a.div_rat(b).abs().to_ieee754_f64() {

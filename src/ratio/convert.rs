@@ -1,4 +1,4 @@
-use crate::{Ratio, BigInt};
+use crate::{Ratio, BigInt, UBigInt};
 use crate::err::ConversionError;
 use crate::utils::gcd_i32;
 use crate::ubigint::convert::_to_scientific_notation;
@@ -39,6 +39,13 @@ impl Ratio {
 
         // Safety: 1 and another integer are always coprime. 1 is positive. denom is 1 when n is 0.
         Ratio::from_denom_and_numer_raw(BigInt::one(), n)
+    }
+
+    pub fn from_ubi(n: UBigInt) -> Self {
+        #[cfg(test)] assert!(n.is_valid());
+
+        // Safety: 1 and another integer are always coprime. 1 is positive. denom is 1 when n is 0.
+        Ratio::from_denom_and_numer_raw(BigInt::one(), BigInt::from_ubi(n, false))
     }
 
     pub fn from_i32(n: i32) -> Self {
@@ -378,7 +385,7 @@ impl Ratio {
             // At least 2 digits
             max_len = max_len.max(exp.len() + 3);
 
-            let mut curr_len = sign_part.len() + exp.len() + 1;
+            let mut curr_len = digits.len() + sign_part.len() + exp.len() + 1;
 
             while curr_len > max_len && digits.len() > 0 {
                 digits.pop().unwrap();

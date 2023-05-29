@@ -8,7 +8,7 @@ pub fn sqrt_iter(x: &Ratio, iter: usize) -> Ratio {
     )
 }
 
-/// It returns `cbrt(x)`. It gets more accurate as `iter` gets bigger.\
+/// It returns `cbrt(x)`. It gets more accurate as `iter` gets bigger.
 pub fn cbrt_iter(x: &Ratio, iter: usize) -> Ratio {
 
     // for now, ln2_accurate(0) returns 0, which makes the below code invalid

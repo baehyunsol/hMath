@@ -75,7 +75,8 @@ pub fn log_iter(base: &Ratio, x: &Ratio, iter: usize) -> Ratio {
 
 #[cfg(test)]
 mod tests {
-    use crate::{Ratio, ln_iter, exp_iter};
+    use crate::{Ratio, BigInt, ln_iter, exp_iter, log_iter};
+    use crate::utils::are_close;
 
     #[test]
     fn ln_test() {
@@ -84,6 +85,44 @@ mod tests {
         assert_eq!("1", ln_iter(&Ratio::from_string("2.718281828459045").unwrap(), 6).to_approx_string(8));
         assert_eq!("0.6931471", ln_iter(&Ratio::from_string("2").unwrap(), 6).to_approx_string(9));
         assert_eq!("-1.386294", ln_iter(&Ratio::from_string("0.25").unwrap(), 6).to_approx_string(9));
+    }
+
+    #[test]
+    fn log_test() {
+        let nums = vec![
+            0.5f64, 1.6, 3.2,
+            2.0, 1624.5, 4.9,
+            1.01, 9932.0, 0.1
+        ];
+        let accr = 3e-8;
+
+        for i in 0..nums.len() {
+
+            for j in 0..nums.len() {
+                let a = nums[i];
+                let b = nums[j];
+                let ans_f64 = b.log(a);
+                let a_rat = Ratio::from_ieee754_f64(a).unwrap();
+                let b_rat = Ratio::from_ieee754_f64(b).unwrap();
+                let ans_f64_rat = Ratio::from_ieee754_f64(ans_f64).unwrap();
+                let ans_rat_1 = Ratio::from_denom_and_numer(
+                    BigInt::from_raw(vec![0, 1], false),
+                    b_rat.numer.log2_accurate().sub_bi(&b_rat.denom.log2_accurate())
+                ).div_rat(&Ratio::from_denom_and_numer(
+                    BigInt::from_raw(vec![0, 1], false),
+                    a_rat.numer.log2_accurate().sub_bi(&a_rat.denom.log2_accurate())
+                ));
+                let ans_rat_2 = log_iter(
+                    &a_rat, &b_rat, 14
+                );
+
+                assert!(are_close(&ans_f64_rat, &ans_rat_1, accr));
+                assert!(are_close(&ans_f64_rat, &ans_rat_2, accr));
+                assert!(are_close(&ans_rat_1, &ans_rat_2, accr));
+            }
+
+        }
+
     }
 
 }
