@@ -3,6 +3,7 @@ use crate::err::ConversionError;
 use crate::utils::gcd_i32;
 use crate::ubigint::convert::_to_scientific_notation;
 
+mod from;
 mod ieee754;
 
 impl Ratio {

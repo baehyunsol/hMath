@@ -62,3 +62,7 @@ impl BigInt {
     }
 
 }
+
+impl Default for BigInt {
+    fn default() -> Self { BigInt::zero() }
+}

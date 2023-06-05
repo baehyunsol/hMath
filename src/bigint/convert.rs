@@ -2,6 +2,8 @@ use crate::{BigInt, UBigInt};
 use crate::err::ConversionError;
 use std::fmt;
 
+mod from;
+
 impl BigInt {
 
     pub fn from_i32(n: i32) -> Self {

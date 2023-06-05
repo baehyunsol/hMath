@@ -64,3 +64,7 @@ impl UBigInt {
     }
 
 }
+
+impl Default for UBigInt {
+    fn default() -> Self { UBigInt::zero() }
+}

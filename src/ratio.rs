@@ -159,3 +159,7 @@ impl Ratio {
     }
 
 }
+
+impl Default for Ratio {
+    fn default() -> Self { Ratio::zero() }
+}
