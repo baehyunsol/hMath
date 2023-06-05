@@ -2,6 +2,8 @@ use crate::UBigInt;
 use crate::err::ConversionError;
 use std::fmt;
 
+mod from;
+
 impl UBigInt {
 
     #[inline]

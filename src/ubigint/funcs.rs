@@ -470,6 +470,19 @@ mod tests {
         assert_eq!(sqrt_u64(1000000000000), 1000000);
 
         if !RUN_ALL_TESTS { return; }
+
+        for n in [
+            "0", "1", "2", "3",
+            "20", "300", "4000",
+            "50000", "600000",
+            "123456789"
+        ] {
+            let n = UBigInt::from_string(n).unwrap();
+            let nn = n.mul_ubi(&n);
+
+            assert_eq!(nn.sqrt(), n);
+        }
+
         assert_eq!(
             UBigInt::from_string("1000").unwrap().sqrt(),
             UBigInt::from_string("31").unwrap(),

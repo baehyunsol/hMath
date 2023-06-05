@@ -490,4 +490,111 @@ mod tests {
         assert_eq!((false, i32::MIN, 0), inspect_f64(-0.0).unwrap());
     }
 
+    // This test is not just for hmath::Ratio, but also for ieee754 implementation.
+    // A failed assertion is either due to (1) a bug in hmath or (2) my wrong assumption on iee754 implementation.
+    #[test]
+    fn ieee754_general_test() {
+        if !RUN_ALL_TESTS { return; }
+        let mut some_ints = vec![
+            0, 1, 2, 3i32,
+            4, 8, 16, 32, 64, 128,
+            9, 27, 81, 243, 729,
+            230716, 220331
+        ];
+        let mut some_floats = vec![
+            0.0, 1.0, 2.0, 3.0f32,
+            0.5, 1.5, 2.5, 3.5,
+            0.1, 1.1, 2.1, 3.1,
+            3.1415, 3.1622, 2.7181,
+            0.0078125, 0.0001234,
+            1414252536365959.0,
+            1234567890.1
+        ];
+        some_ints = append_negs(some_ints);
+        some_floats = append_negs(some_floats);
+
+        // Assumption 1: int -> float is lossless (roundtrip)
+        for i in some_ints.clone().into_iter() {
+            let a = Ratio::from(i);
+            let b = Ratio::from_ieee754_f32(i as f32).unwrap();
+            let c = Ratio::from_ieee754_f64(i as f64).unwrap();
+
+            assert_eq!(a, b);
+            assert_eq!(b, c);
+
+            let d = b.to_ieee754_f32().unwrap();
+            let e = c.to_ieee754_f32().unwrap();
+
+            assert_eq!(i, d as i32);
+            assert_eq!(i, e as i32);
+        }
+
+        // Assumption 2: dividing/multiplying power of 2 is lossless
+        let mut pow2 = 1;
+        let mut pow2f = 1.0f32;
+
+        for _ in 0..24 {
+
+            for fl in some_floats.clone().into_iter() {
+                let a = Ratio::from_ieee754_f32(fl).unwrap().mul_i32(pow2);
+                let b = Ratio::from_ieee754_f64(fl as f64).unwrap().mul_i32(pow2);
+                let c = Ratio::from_ieee754_f32(fl * pow2f).unwrap();
+                let d = Ratio::from_ieee754_f64(fl as f64 * pow2f as f64).unwrap();
+                let e = Ratio::from_ieee754_f32(fl * pow2 as f32).unwrap();
+                let f = Ratio::from_ieee754_f64(fl as f64 * pow2 as f64).unwrap();
+
+                assert_eq!(a, b);
+                assert_eq!(b, c);
+                assert_eq!(c, d);
+                assert_eq!(d, e);
+                assert_eq!(e, f);
+
+                let a = Ratio::from_ieee754_f32(fl).unwrap().div_i32(pow2);
+                let b = Ratio::from_ieee754_f64(fl as f64).unwrap().div_i32(pow2);
+                let c = Ratio::from_ieee754_f32(fl / pow2f).unwrap();
+                let d = Ratio::from_ieee754_f64(fl as f64 / pow2f as f64).unwrap();
+                let e = Ratio::from_ieee754_f32(fl / pow2 as f32).unwrap();
+                let f = Ratio::from_ieee754_f64(fl as f64 / pow2 as f64).unwrap();
+
+                assert_eq!(a, b);
+                assert_eq!(b, c);
+                assert_eq!(c, d);
+                assert_eq!(d, e);
+                assert_eq!(e, f);
+            }
+
+            pow2 *= 2;
+            pow2f *= 2.0;
+        }
+
+        // Assumption 3: f32 -> f64 -> f32 roundtrip is lossless
+        for f in some_floats.clone().into_iter() {
+            let a = Ratio::from_ieee754_f32(f).unwrap();
+            let b = Ratio::from_ieee754_f64(f as f64).unwrap();
+            let c = Ratio::from_ieee754_f32(
+                b.to_ieee754_f64().unwrap() as f32
+            ).unwrap();
+
+            assert_eq!(a, b);
+            assert_eq!(b, c);
+        }
+
+        // Assumption 4: rounding rules don't make problems in most cases
+        for n in 1..40 {
+            let a = Ratio::from_denom_and_numer_i32(n, 1).to_ieee754_f32().unwrap();
+
+            assert_eq!(Ratio::from_ieee754_f32(a * n as f32).unwrap(), Ratio::one());
+        }
+
+    }
+
+    use std::ops::Neg;
+
+    fn append_negs<T: Neg + Clone>(v: Vec<T>) -> Vec<T> where Vec<T>: FromIterator<<T as Neg>::Output> {
+        vec![
+            v.clone(),
+            v.into_iter().map(|n| -n).collect()
+        ].concat()
+    }
+
 }
