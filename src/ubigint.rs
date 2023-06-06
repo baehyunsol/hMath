@@ -5,7 +5,7 @@ pub mod funcs;
 
 // data is always in the most reduced form
 // [0] is the least-significant number
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct UBigInt(pub Vec<u32>);
 
 impl UBigInt {

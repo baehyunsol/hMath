@@ -11,7 +11,7 @@ pub mod pi;
 // denom is always a positive integer
 // when numer is 0, denom is 1
 // denom and numer are always coprime
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Ratio {
     denom: BigInt,
     numer: BigInt
