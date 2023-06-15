@@ -145,6 +145,33 @@ impl Ratio {
 
     }
 
+    /// If this method and [this method] behave differently, that's an error.
+    /// [this method]: https://doc.rust-lang.org/stable/std/primitive.f64.html#method.round
+    pub fn round(&self) -> Self {
+        Ratio::from_bi(self.round_bi())
+    }
+
+    pub fn round_bi(&self) -> BigInt {
+        let (trun, frac) = self.truncate_and_frac();
+
+        let numer_double_abs = frac.numer.mul_i32(2).abs();
+        use std::cmp::Ordering;
+
+        match numer_double_abs.comp_bi(&frac.denom) {
+            // less than 0.5
+            Ordering::Less => trun,
+
+            // half way between the two -> round away from 0.0
+            // greater than 0.5 -> round away from 0.0
+            _ => if self.is_neg() {
+                trun.sub_i32(1)
+            } else {
+                trun.add_i32(1)
+            }
+        }
+
+    }
+
     /// It returns a number between 0 and 1 (both exclusive).
     #[cfg(feature = "rand")]
     pub fn random() -> Self {
@@ -169,6 +196,19 @@ impl Ratio {
 #[cfg(test)]
 mod tests {
     use crate::Ratio;
+
+    #[test]
+    fn round_test() {
+        let mut curr = -8.0f64;
+
+        while curr < 8.0 {
+            let rounded = curr.round();
+            let rounded_rat = Ratio::from(curr).round();
+            assert_eq!(<f64 as Into<Ratio>>::into(rounded), rounded_rat);
+            curr += 0.125;
+        }
+
+    }
 
     #[test]
     fn frac_trunc_floor_test() {
