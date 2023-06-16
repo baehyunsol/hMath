@@ -34,6 +34,7 @@ impl Ratio {
 
     /// If you don't know what `ieee754` is, you're okay to use this function.
     /// This function does not return `f32::NAN` or `f32::INFINITY`, but it returns `ConversionError::NotInRange` instead.
+    /// For underflow numbers like `1-e20000`, it returns 0.
     pub fn to_ieee754_f32(&self) -> Result<f32, ConversionError> {
 
         if self.is_zero() {
@@ -49,7 +50,7 @@ impl Ratio {
 
         let approx_log2 = self.numer.log2().sub_bi(&self.denom.log2());
 
-        if approx_log2.abs().gt_i32(128) {
+        if approx_log2.gt_i32(128) {
             return Err(ConversionError::NotInRange { permitted: "1.18e-38~3.4e38".to_string(), error: self.to_scientific_notation(5) });
         }
 
@@ -86,16 +87,25 @@ impl Ratio {
 
         if exp < -126 {
             frac += 1 << 23;
-            frac /= 2;
-            exp += 1;
+            frac *= 16;
 
-            while exp < -127 {
-                exp += 1;
-                frac /= 2;
+            if exp < -127 {
+                frac >>= (-127 - exp).min(31);
+                exp = -127;
+            }
+
+            // it has choose the closest value
+            if frac % 32 > 15 {
+                frac /= 32;
+                frac += 1;
+            }
+
+            else {
+                frac /= 32;
             }
 
             if frac == 0 {
-                return Err(ConversionError::NotInRange { permitted: "1.18e-38~3.4e38".to_string(), error: self.to_scientific_notation(5) });
+                return Ok(0.0);
             }
 
         }
@@ -144,6 +154,7 @@ impl Ratio {
 
     /// If you don't know what `ieee754` is, you're okay to use this function.
     /// This function does not return `f64::NAN` or `f64::INFINITY`, but it returns `ConversionError::NotInRange` instead.
+    /// For underflow numbers like `1-e20000`, it returns 0.
     pub fn to_ieee754_f64(&self) -> Result<f64, ConversionError> {
 
         if self.is_zero() {
@@ -159,7 +170,7 @@ impl Ratio {
 
         let approx_log2 = self.numer.log2().sub_bi(&self.denom.log2());
 
-        if approx_log2.abs().gt_i32(1024) {
+        if approx_log2.gt_i32(1024) {
             return Err(ConversionError::NotInRange { permitted: "2.23e-308~1.8e308".to_string(), error: self.to_scientific_notation(5) });
         }
 
@@ -196,16 +207,25 @@ impl Ratio {
 
         if exp < -1022 {
             frac += 1 << 52;
-            frac /= 2;
-            exp += 1;
+            frac *= 16;
 
-            while exp < -1023 {
-                exp += 1;
-                frac /= 2;
+            if exp < -1023 {
+                frac >>= (-1023 - exp).min(63);
+                exp = -1023;
+            }
+
+            // it has choose the closest value
+            if frac % 32 > 15 {
+                frac /= 32;
+                frac += 1;
+            }
+
+            else {
+                frac /= 32;
             }
 
             if frac == 0 {
-                return Err(ConversionError::NotInRange { permitted: "2.23e-308~1.8e308".to_string(), error: self.to_scientific_notation(5) });
+                return Ok(0.0);
             }
 
         }
@@ -240,14 +260,16 @@ fn inspect_f32(n: f32) -> Result<(bool, i32, u32), ConversionError> {  // (neg, 
     // denormalized
     // if neg { -1 } else { 1 } * 2^(-126) * (frac / 2^23)
     if exp == -127 {
+        exp += 1;
 
         if frac == 0 {
             return Ok((false, i32::MIN, 0));
         }
 
-        while frac <= (1 << 23) {
-            frac *= 2;
-            exp -= 1;
+        if frac < (1 << 23) {
+            let to_shift = 23 - frac.ilog2();
+            frac <<= to_shift;
+            exp -= to_shift as i32;
         }
 
         frac -= 1 << 23;
@@ -293,14 +315,16 @@ fn inspect_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> {  // (neg, 
     // denormalized
     // if neg { -1 } else { 1 } * 2^(-1022) * (frac / 2^52)
     if exp == -1023 {
+        exp += 1;
 
         if frac == 0 {
             return Ok((false, i32::MIN, 0));
         }
 
-        while frac <= (1 << 52) {
-            frac *= 2;
-            exp -= 1;
+        if frac < (1 << 52) {
+            let to_shift = 52 - frac.ilog2();
+            frac <<= to_shift;
+            exp -= to_shift as i32;
         }
 
         frac -= 1 << 52;
@@ -356,6 +380,9 @@ mod tests {
 
             // 19 * 2^(-129)
             "0.000000000000000000000000000000000000027917990832029328314257492759028334848193306973337078635832853024112409912049770355224609375",
+
+            // 3 * 2^(-136)
+            "0.0000000000000000000000000000000000000000344383110592467043350215782389329788423437174835572516067017101448755056480877101421356201171875",
         ];
 
         let samples: Vec<String> = vec![
@@ -382,23 +409,70 @@ mod tests {
         }
 
 
-        // numbers that IEEE 754 cannot represent perfectly
+        // numbers that single precision IEEE754 cannot represent perfectly
         let samples2 = vec![
             "3.1", "3.14", "3.141", "3.1415", "3.14159",
             "2.7", "2.71", "2.718", "2.7182", "2.71828",
+            "4e-40", "4e-320", "4e-310", "4e-300",
             "1307674368000"
         ];
 
         for n in samples2.into_iter() {
             let num1 = Ratio::from_ieee754_f32(n.parse::<f32>().unwrap()).unwrap();
             let num2 = Ratio::from_ieee754_f32(Ratio::from_string(n).unwrap().to_ieee754_f32().unwrap()).unwrap();
-            assert_eq!(num1, num2);
+            assert_eq!(num1, num2);  // TODO: who do I blame?
 
             let num3 = Ratio::from_ieee754_f64(n.parse::<f64>().unwrap()).unwrap();
             let num4 = Ratio::from_ieee754_f64(Ratio::from_string(n).unwrap().to_ieee754_f64().unwrap()).unwrap();
             assert_eq!(num3, num4);
         }
 
+    }
+
+    #[test]
+    fn ieee754_subnormal_test() {
+        let sub_normal_f32 = vec![
+            0b0_00000000_00000000000000000000001,
+            0b0_00000000_00000000000000000000111u32,
+            0b1_00000000_01100000000001011010101,
+            0b1_00000000_01000000011100110101010,
+            0b1_00000000_00000010111101101010011,
+            0b1_00000000_00001100111010110000100,
+            0b0_00000000_00001010111101000101000,
+            0b0_00000000_01111011011111110101100,
+        ];
+
+        for n32 in sub_normal_f32.into_iter() {
+            let nf32 = unsafe { *(&n32 as *const u32 as *const f32) };
+            let rat32 = Ratio::from_ieee754_f32(nf32).unwrap();
+            let nf32_ = rat32.to_ieee754_f32().unwrap();
+            let rat32_ = Ratio::from_ieee754_f32(nf32_).unwrap();
+
+            assert_eq!(rat32, rat32_);
+            assert_eq!(nf32, nf32_);
+        }
+
+        let sub_normal_f64 = vec![
+            0b0_00000000000_0000000000000000000000000000000000000000000000000001u64,
+            0b1_00000000000_0000000000000000000000000000000000000000000000000001,
+            0b0_00000000000_0011001101000111010101010000110000001100110100111111,
+            0b1_00000000000_0100000000000000000000000000000000000000000000011111,
+            0b0_00000000000_0100000000000000000000000000000000000000000000011111,
+        ];
+
+        for n64 in sub_normal_f64.into_iter() {
+            let nf64 = unsafe { *(&n64 as *const u64 as *const f64) };
+            let rat64 = Ratio::from_ieee754_f64(nf64).unwrap();
+            let nf64_ = rat64.to_ieee754_f64().unwrap();
+            let rat64_ = Ratio::from_ieee754_f64(nf64_).unwrap();
+
+            assert_eq!(nf64, nf64_);
+            assert_eq!(rat64, rat64_);
+        }
+
+        // underflown numbers are converted to 0
+        assert_eq!(Ratio::from_string("1e-3000").unwrap().to_ieee754_f64().unwrap(), 0.0);
+        assert_eq!(Ratio::from_string("1e-3000").unwrap().to_ieee754_f32().unwrap(), 0.0);
     }
 
     #[test]
@@ -415,18 +489,18 @@ mod tests {
             for _ in 0..iter_count {
                 let n32 = rand::random::<u32>();
                 let nf32 = unsafe { *(&n32 as *const u32 as *const f32) };
-                let res32 = Ratio::from_ieee754_f32(nf32);
+                let rat32 = Ratio::from_ieee754_f32(nf32);
 
                 if nf32.is_nan() {
-                    assert_eq!(res32, Err(ConversionError::NotANumber), "{n32}");
+                    assert_eq!(rat32, Err(ConversionError::NotANumber), "{n32}");
                 }
 
                 else if nf32.is_infinite() {
-                    assert_eq!(res32, Err(ConversionError::NotANumber), "{n32}");
+                    assert_eq!(rat32, Err(ConversionError::NotANumber), "{n32}");
                 }
 
                 else {
-                    let nf32_ = match res32 {
+                    let nf32_ = match rat32 {
                         Ok(n_) => match n_.to_ieee754_f32() {
                             Ok(n__) => n__,
                             Err(e) => panic!("{n32}, {e:?}")
@@ -440,18 +514,18 @@ mod tests {
 
                 let n64 = rand::random::<u64>();
                 let nf64 = unsafe { *(&n64 as *const u64 as *const f64) };
-                let res64 = Ratio::from_ieee754_f64(nf64);
+                let rat64 = Ratio::from_ieee754_f64(nf64);
 
                 if nf64.is_nan() {
-                    assert_eq!(res64, Err(ConversionError::NotANumber), "{n64}");
+                    assert_eq!(rat64, Err(ConversionError::NotANumber), "{n64}");
                 }
 
                 else if nf64.is_infinite() {
-                    assert_eq!(res64, Err(ConversionError::NotANumber), "{n64}");
+                    assert_eq!(rat64, Err(ConversionError::NotANumber), "{n64}");
                 }
 
                 else {
-                    let nf64_ = match res64 {
+                    let nf64_ = match rat64 {
                         Ok(n_) => match n_.to_ieee754_f64() {
                             Ok(n__) => n__,
                             Err(e) => panic!("{n64}, {e:?}")
