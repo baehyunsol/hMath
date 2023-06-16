@@ -420,7 +420,7 @@ mod tests {
         for n in samples2.into_iter() {
             let num1 = Ratio::from_ieee754_f32(n.parse::<f32>().unwrap()).unwrap();
             let num2 = Ratio::from_ieee754_f32(Ratio::from_string(n).unwrap().to_ieee754_f32().unwrap()).unwrap();
-            assert_eq!(num1, num2);  // TODO: who do I blame?
+            assert_eq!(num1, num2);
 
             let num3 = Ratio::from_ieee754_f64(n.parse::<f64>().unwrap()).unwrap();
             let num4 = Ratio::from_ieee754_f64(Ratio::from_string(n).unwrap().to_ieee754_f64().unwrap()).unwrap();
@@ -481,7 +481,7 @@ mod tests {
         #[cfg(feature = "rand")] {
 
             let iter_count = if RUN_ALL_TESTS {
-                240
+                480
             } else {
                 12
             };
@@ -587,7 +587,7 @@ mod tests {
         some_ints = append_negs(some_ints);
         some_floats = append_negs(some_floats);
 
-        // Assumption 1: int -> float is lossless (roundtrip)
+        // Assumption 1: int -> float is lossless (also roundtrip)
         for i in some_ints.clone().into_iter() {
             let a = Ratio::from(i);
             let b = Ratio::from_ieee754_f32(i as f32).unwrap();
@@ -656,8 +656,10 @@ mod tests {
         // Assumption 4: rounding rules don't make problems in most cases
         for n in 1..40 {
             let a = Ratio::from_denom_and_numer_i32(n, 1).to_ieee754_f32().unwrap();
+            let b = Ratio::from_denom_and_numer_i32(n, 1).to_ieee754_f64().unwrap();
 
             assert_eq!(Ratio::from_ieee754_f32(a * n as f32).unwrap(), Ratio::one());
+            assert_eq!(Ratio::from_ieee754_f64(b * n as f64).unwrap(), Ratio::one());
         }
 
     }
