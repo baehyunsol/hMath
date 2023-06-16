@@ -1,3 +1,5 @@
+use std::num::TryFromIntError;
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum ConversionError {
     NoData,
@@ -13,5 +15,16 @@ pub enum ConversionError {
     NegInfinity,
 
     /// f32::NAN, f64::NAN
-    NotANumber
+    NotANumber,
+
+    /// `std::num::TryFromIntError` is always converted to `ConversionError::TryFromIntError`
+    TryFromIntError
+}
+
+impl From<TryFromIntError> for ConversionError {
+
+    fn from(_: TryFromIntError) -> Self {
+        ConversionError::TryFromIntError
+    }
+
 }

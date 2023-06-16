@@ -8,6 +8,8 @@ pub mod funcs;
 pub mod ln2;
 pub mod pi;
 
+pub use convert::{inspect_ieee754_f32, inspect_ieee754_f64};
+
 // denom is always a positive integer
 // when numer is 0, denom is 1
 // denom and numer are always coprime

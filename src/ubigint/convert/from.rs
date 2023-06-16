@@ -1,10 +1,28 @@
-use crate::{Ratio, BigInt, UBigInt};
+use crate::{Ratio, BigInt, UBigInt, ConversionError};
+use crate::{impl_from_for_ref, impl_tryfrom_for_ref};
 
-impl<T: Copy> From<&T> for UBigInt where UBigInt: From<T> {
-    fn from(n: &T) -> Self {
-        UBigInt::from(*n)
-    }
+macro_rules! impl_from_ref_ubigint {
+    ($t: ty) => (
+        impl_from_for_ref!(UBigInt, $t);
+    );
+    ($t: ty, $($u: ty), +) => (
+        impl_from_ref_ubigint!($t);
+        impl_from_ref_ubigint!($($u),+);
+    )
 }
+
+macro_rules! impl_tryfrom_ref_ubigint {
+    ($t: ty) => (
+        impl_tryfrom_for_ref!(UBigInt, $t);
+    );
+    ($t: ty, $($u: ty), +) => (
+        impl_tryfrom_ref_ubigint!($t);
+        impl_tryfrom_ref_ubigint!($($u),+);
+    )
+}
+
+impl_from_ref_ubigint!(bool, u8, u16, u32, u64, u128, usize);
+impl_tryfrom_ref_ubigint!(f32, f64, i8, i16, i32, i64, i128, isize);
 
 impl From<bool> for UBigInt {
     fn from(b: bool) -> Self {
@@ -17,52 +35,68 @@ impl From<bool> for UBigInt {
 }
 
 /// It returns the truncated value of `Ratio::from(n)`.
-impl From<f32> for UBigInt {
-    fn from(n: f32) -> Self {
-        Ratio::from(n).truncate_bi().into()
+impl TryFrom<f32> for UBigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: f32) -> Result<Self, Self::Error> {
+        Ok(Ratio::try_from(n)?.truncate_bi().try_into()?)
     }
 }
 
 /// It returns the truncated value of `Ratio::from(n)`.
-impl From<f64> for UBigInt {
-    fn from(n: f64) -> Self {
-        Ratio::from(n).truncate_bi().into()
+impl TryFrom<f64> for UBigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: f64) -> Result<Self, Self::Error> {
+        Ok(Ratio::try_from(n)?.truncate_bi().try_into()?)
     }
 }
 
-impl From<i8> for UBigInt {
-    fn from(n: i8) -> Self {
-        UBigInt::from_u32(n as u32)
+impl TryFrom<i8> for UBigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: i8) -> Result<Self, Self::Error> {
+        Ok(UBigInt::from_u32(u32::try_from(n)?))
     }
 }
 
-impl From<i16> for UBigInt {
-    fn from(n: i16) -> Self {
-        UBigInt::from_u32(n as u32)
+impl TryFrom<i16> for UBigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: i16) -> Result<Self, Self::Error> {
+        Ok(UBigInt::from_u32(u32::try_from(n)?))
     }
 }
 
-impl From<i32> for UBigInt {
-    fn from(n: i32) -> Self {
-        UBigInt::from_u32(n as u32)
+impl TryFrom<i32> for UBigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: i32) -> Result<Self, Self::Error> {
+        Ok(UBigInt::from_u32(u32::try_from(n)?))
     }
 }
 
-impl From<i64> for UBigInt {
-    fn from(n: i64) -> Self {
-        UBigInt::from_u64(n as u64)
+impl TryFrom<i64> for UBigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: i64) -> Result<Self, Self::Error> {
+        Ok(UBigInt::from_u64(u64::try_from(n)?))
     }
 }
 
-impl From<i128> for UBigInt {
-    fn from(n: i128) -> Self {
-        UBigInt::from_u128(n as u128)
+impl TryFrom<i128> for UBigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: i128) -> Result<Self, Self::Error> {
+        Ok(UBigInt::from_u128(u128::try_from(n)?))
     }
 }
 
-impl From<isize> for UBigInt {
-    fn from(n: isize) -> Self {
-        UBigInt::from_u64(n as u64)
+impl TryFrom<isize> for UBigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: isize) -> Result<Self, Self::Error> {
+        Ok(UBigInt::from_u64(u64::try_from(n)?))
     }
 }
 
@@ -102,26 +136,34 @@ impl From<usize> for UBigInt {
     }
 }
 
-impl From<String> for UBigInt {
-    fn from(n: String) -> Self {
-        UBigInt::from_string(&n).unwrap_or(UBigInt::zero())
+impl TryFrom<String> for UBigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: String) -> Result<Self, Self::Error> {
+        UBigInt::from_string(&n)
     }
 }
 
-impl From<&str> for UBigInt {
-    fn from(n: &str) -> Self {
-        UBigInt::from_string(n).unwrap_or(UBigInt::zero())
+impl TryFrom<&str> for UBigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: &str) -> Result<Self, Self::Error> {
+        UBigInt::from_string(n)
     }
 }
 
-impl From<Ratio> for UBigInt {
-    fn from(n: Ratio) -> Self {
-        n.truncate_bi().into()
+impl TryFrom<Ratio> for UBigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: Ratio) -> Result<Self, Self::Error> {
+        n.truncate_bi().try_into()
     }
 }
 
-impl From<BigInt> for UBigInt {
-    fn from(n: BigInt) -> Self {
-        n.to_ubi().unwrap()
+impl TryFrom<BigInt> for UBigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: BigInt) -> Result<Self, Self::Error> {
+        n.to_ubi()
     }
 }

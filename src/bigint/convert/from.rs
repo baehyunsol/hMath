@@ -1,10 +1,28 @@
-use crate::{Ratio, BigInt, UBigInt};
+use crate::{Ratio, BigInt, UBigInt, ConversionError};
+use crate::{impl_from_for_ref, impl_tryfrom_for_ref};
 
-impl<T: Copy> From<&T> for BigInt where BigInt: From<T> {
-    fn from(n: &T) -> Self {
-        BigInt::from(*n)
-    }
+macro_rules! impl_from_ref_bigint {
+    ($t: ty) => (
+        impl_from_for_ref!(BigInt, $t);
+    );
+    ($t: ty, $($u: ty), +) => (
+        impl_from_ref_bigint!($t);
+        impl_from_ref_bigint!($($u),+);
+    )
 }
+
+macro_rules! impl_tryfrom_ref_bigint {
+    ($t: ty) => (
+        impl_tryfrom_for_ref!(BigInt, $t);
+    );
+    ($t: ty, $($u: ty), +) => (
+        impl_tryfrom_ref_bigint!($t);
+        impl_tryfrom_ref_bigint!($($u),+);
+    )
+}
+
+impl_from_ref_bigint!(bool, u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
+impl_tryfrom_ref_bigint!(f32, f64);
 
 impl From<bool> for BigInt {
     fn from(b: bool) -> Self {
@@ -17,16 +35,20 @@ impl From<bool> for BigInt {
 }
 
 /// It returns the truncated value of `Ratio::from(n)`.
-impl From<f32> for BigInt {
-    fn from(n: f32) -> Self {
-        Ratio::from(n).truncate_bi()
+impl TryFrom<f32> for BigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: f32) -> Result<Self, Self::Error> {
+        Ok(Ratio::try_from(n)?.truncate_bi())
     }
 }
 
 /// It returns the truncated value of `Ratio::from(n)`.
-impl From<f64> for BigInt {
-    fn from(n: f64) -> Self {
-        Ratio::from(n).truncate_bi()
+impl TryFrom<f64> for BigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: f64) -> Result<Self, Self::Error> {
+        Ok(Ratio::try_from(n)?.truncate_bi())
     }
 }
 
@@ -102,15 +124,19 @@ impl From<usize> for BigInt {
     }
 }
 
-impl From<String> for BigInt {
-    fn from(n: String) -> Self {
-        BigInt::from_string(&n).unwrap_or(BigInt::zero())
+impl TryFrom<String> for BigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: String) -> Result<Self, Self::Error> {
+        BigInt::from_string(&n)
     }
 }
 
-impl From<&str> for BigInt {
-    fn from(n: &str) -> Self {
-        BigInt::from_string(n).unwrap_or(BigInt::zero())
+impl TryFrom<&str> for BigInt {
+    type Error = ConversionError;
+
+    fn try_from(n: &str) -> Result<Self, Self::Error> {
+        BigInt::from_string(n)
     }
 }
 

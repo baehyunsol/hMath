@@ -146,6 +146,7 @@ impl Ratio {
     }
 
     /// If this method and [this method] behave differently, that's an error.
+    ///
     /// [this method]: https://doc.rust-lang.org/stable/std/primitive.f64.html#method.round
     pub fn round(&self) -> Self {
         Ratio::from_bi(self.round_bi())

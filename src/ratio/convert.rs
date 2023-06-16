@@ -6,6 +6,8 @@ use crate::ubigint::convert::_to_scientific_notation;
 mod from;
 mod ieee754;
 
+pub use ieee754::{inspect_ieee754_f32, inspect_ieee754_f64};
+
 impl Ratio {
 
     pub fn from_denom_and_numer(denom: BigInt, numer: BigInt) -> Self {

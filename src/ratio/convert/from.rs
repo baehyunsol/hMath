@@ -1,10 +1,28 @@
 use crate::{Ratio, BigInt, UBigInt, ConversionError};
+use crate::{impl_from_for_ref, impl_tryfrom_for_ref};
 
-impl<T: Copy> From<&T> for Ratio where Ratio: From<T> {
-    fn from(n: &T) -> Self {
-        Ratio::from(*n)
-    }
+macro_rules! impl_from_ref_ratio {
+    ($t: ty) => (
+        impl_from_for_ref!(Ratio, $t);
+    );
+    ($t: ty, $($u: ty), +) => (
+        impl_from_ref_ratio!($t);
+        impl_from_ref_ratio!($($u),+);
+    )
 }
+
+macro_rules! impl_tryfrom_ref_ratio {
+    ($t: ty) => (
+        impl_tryfrom_for_ref!(Ratio, $t);
+    );
+    ($t: ty, $($u: ty), +) => (
+        impl_tryfrom_ref_ratio!($t);
+        impl_tryfrom_ref_ratio!($($u),+);
+    )
+}
+
+impl_from_ref_ratio!(bool, u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize);
+impl_tryfrom_ref_ratio!(f32, f64);
 
 impl From<bool> for Ratio {
     fn from(b: bool) -> Self {
@@ -16,29 +34,19 @@ impl From<bool> for Ratio {
     }
 }
 
-/// It returns 0 for NaN, Ratio(f32::MAX) for f32::Inf and Ratio(f32::MIN) for f32::NegInf.
-impl From<f32> for Ratio {
-    fn from(n: f32) -> Self {
-        match Ratio::from_ieee754_f32(n) {
-            Ok(n) => n,
-            Err(ConversionError::NotANumber) => Ratio::zero(),
-            Err(ConversionError::Infinity) => Ratio::from_ieee754_f32(f32::MAX).unwrap(),
-            Err(ConversionError::NegInfinity) => Ratio::from_ieee754_f32(f32::MIN).unwrap(),
-            _ => unreachable!()
-        }
+impl TryFrom<f32> for Ratio {
+    type Error = ConversionError;
+
+    fn try_from(n: f32) -> Result<Self, Self::Error> {
+        Ratio::from_ieee754_f32(n)
     }
 }
 
-/// It returns 0 for NaN, Ratio(f64::MAX) for f64::Inf and Ratio(f64::MIN) for f64::NegInf.
-impl From<f64> for Ratio {
-    fn from(n: f64) -> Self {
-        match Ratio::from_ieee754_f64(n) {
-            Ok(n) => n,
-            Err(ConversionError::NotANumber) => Ratio::zero(),
-            Err(ConversionError::Infinity) => Ratio::from_ieee754_f64(f64::MAX).unwrap(),
-            Err(ConversionError::NegInfinity) => Ratio::from_ieee754_f64(f64::MIN).unwrap(),
-            _ => unreachable!()
-        }
+impl TryFrom<f64> for Ratio {
+    type Error = ConversionError;
+
+    fn try_from(n: f64) -> Result<Self, Self::Error> {
+        Ratio::from_ieee754_f64(n)
     }
 }
 
@@ -114,17 +122,19 @@ impl From<usize> for Ratio {
     }
 }
 
-/// If it fails to parse the string, it returns 0.
-impl From<String> for Ratio {
-    fn from(n: String) -> Self {
-        Ratio::from_string(&n).unwrap_or(Ratio::zero())
+impl TryFrom<String> for Ratio {
+    type Error = ConversionError;
+
+    fn try_from(n: String) -> Result<Self, Self::Error> {
+        Ratio::from_string(&n)
     }
 }
 
-/// If it fails to parse the string, it returns 0.
-impl From<&str> for Ratio {
-    fn from(n: &str) -> Self {
-        Ratio::from_string(n).unwrap_or(Ratio::zero())
+impl TryFrom<&str> for Ratio {
+    type Error = ConversionError;
+
+    fn try_from(n: &str) -> Result<Self, Self::Error> {
+        Ratio::from_string(n)
     }
 }
 

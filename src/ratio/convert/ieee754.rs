@@ -7,7 +7,7 @@ impl Ratio {
     /// It returns an error if `n` is NaN or Inf.
     pub fn from_ieee754_f32(n: f32) -> Result<Self, ConversionError> {
 
-        match inspect_f32(n) {
+        match inspect_ieee754_f32(n) {
             Ok((neg, exp, frac)) => if exp == i32::MIN {
                 Ok(Ratio::zero())
             } else if exp >= 23 {
@@ -127,7 +127,7 @@ impl Ratio {
     /// It returns an error if `n` is NaN or Inf.
     pub fn from_ieee754_f64(n: f64) -> Result<Self, ConversionError> {
 
-        match inspect_f64(n) {
+        match inspect_ieee754_f64(n) {
             Ok((neg, exp, frac)) => if exp == i32::MIN {
                 Ok(Ratio::zero())
             } else if exp >= 52 {
@@ -244,9 +244,10 @@ impl Ratio {
 
 }
 
-// https://en.wikipedia.org/wiki/IEEE_754
-// it returns (false, i32::MIN, 0) when n is 0
-fn inspect_f32(n: f32) -> Result<(bool, i32, u32), ConversionError> {  // (neg, exp, frac)
+/// You may find this function useful when you're dealing with [ieee 754 numbers](https://en.wikipedia.org/wiki/IEEE_754).\
+/// This function returns `(neg, exp, frac)`, which means `n` is `(-1)^(neg) * 2^(exp) * (1 + frac/2^23)` whether it's denormalized or not.\
+/// It returns (false, i32::MIN, 0) when n is 0.
+pub fn inspect_ieee754_f32(n: f32) -> Result<(bool, i32, u32), ConversionError> {  // (neg, exp, frac)
     let n_u32 = {
         let np = &n as *const f32 as *const u32;
 
@@ -299,9 +300,10 @@ fn inspect_f32(n: f32) -> Result<(bool, i32, u32), ConversionError> {  // (neg, 
     Ok((neg, exp, frac))
 }
 
-// https://en.wikipedia.org/wiki/IEEE_754
-// it returns (false, i32::MIN, 0) when n is 0
-fn inspect_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> {  // (neg, exp, frac)
+/// You may find this function useful when you're dealing with [ieee 754 numbers](https://en.wikipedia.org/wiki/IEEE_754).\
+/// This function returns `(neg, exp, frac)`, which means `n` is `(-1)^(neg) * 2^(exp) * (1 + frac/2^52)` whether it's denormalized or not.\
+/// It returns (false, i32::MIN, 0) when n is 0.
+pub fn inspect_ieee754_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> {  // (neg, exp, frac)
     let n_u64 = {
         let np = &n as *const f64 as *const u64;
 
@@ -545,23 +547,23 @@ mod tests {
 
     #[test]
     fn ieee754_inspect_test() {
-        assert_eq!((false, 1, 0), inspect_f32(2.0).unwrap());
-        assert_eq!((true, 1, 0), inspect_f32(-2.0).unwrap());
-        assert_eq!((false, 0, (1 << 22)), inspect_f32(1.5).unwrap());
+        assert_eq!((false, 1, 0), inspect_ieee754_f32(2.0).unwrap());
+        assert_eq!((true, 1, 0), inspect_ieee754_f32(-2.0).unwrap());
+        assert_eq!((false, 0, (1 << 22)), inspect_ieee754_f32(1.5).unwrap());
 
         // (1 + 1 / 16 + 1 / 32) * 16
-        assert_eq!((false, 4, (1 << 19) + (1 << 18)), inspect_f32(17.5).unwrap());
+        assert_eq!((false, 4, (1 << 19) + (1 << 18)), inspect_ieee754_f32(17.5).unwrap());
 
         // (1 + 1 / 2 + 1 / 4 + 1 / 8 + 1 / 16 + 1 / 32 + 1 / 128) * 32
-        assert_eq!((false, 5, (1 << 51) + (1 << 50) + (1 << 49) + (1 << 48) + (1 << 47) + (1 << 45)), inspect_f64(63.25).unwrap());
+        assert_eq!((false, 5, (1 << 51) + (1 << 50) + (1 << 49) + (1 << 48) + (1 << 47) + (1 << 45)), inspect_ieee754_f64(63.25).unwrap());
 
         // (1 + 1 / 512) * 1
-        assert_eq!((false, 0, 1 << 43), inspect_f64(1.001953125).unwrap());
+        assert_eq!((false, 0, 1 << 43), inspect_ieee754_f64(1.001953125).unwrap());
 
-        assert_eq!((false, i32::MIN, 0), inspect_f32(0.0).unwrap());
-        assert_eq!((false, i32::MIN, 0), inspect_f32(-0.0).unwrap());
-        assert_eq!((false, i32::MIN, 0), inspect_f64(0.0).unwrap());
-        assert_eq!((false, i32::MIN, 0), inspect_f64(-0.0).unwrap());
+        assert_eq!((false, i32::MIN, 0), inspect_ieee754_f32(0.0).unwrap());
+        assert_eq!((false, i32::MIN, 0), inspect_ieee754_f32(-0.0).unwrap());
+        assert_eq!((false, i32::MIN, 0), inspect_ieee754_f64(0.0).unwrap());
+        assert_eq!((false, i32::MIN, 0), inspect_ieee754_f64(-0.0).unwrap());
     }
 
     // This test is not just for hmath::Ratio, but also for ieee754 implementation.
