@@ -2,6 +2,7 @@ use crate::{Ratio, BigInt, UBigInt};
 use crate::err::ConversionError;
 use crate::utils::gcd_i32;
 use crate::ubigint::convert::_to_scientific_notation;
+use std::str::FromStr;
 
 mod from;
 mod ieee754;
@@ -537,6 +538,15 @@ impl std::fmt::Display for Ratio {
 
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(fmt, "{}", self.to_string())
+    }
+
+}
+
+impl FromStr for Ratio {
+    type Err = ConversionError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        Ratio::from_string(s)
     }
 
 }

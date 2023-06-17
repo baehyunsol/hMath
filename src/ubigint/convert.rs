@@ -1,6 +1,7 @@
 use crate::UBigInt;
 use crate::err::ConversionError;
 use std::fmt;
+use std::str::FromStr;
 
 mod from;
 
@@ -348,6 +349,15 @@ impl fmt::LowerExp for UBigInt {
 
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}", self.to_scientific_notation(5))
+    }
+
+}
+
+impl FromStr for UBigInt {
+    type Err = ConversionError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        UBigInt::from_string(s)
     }
 
 }

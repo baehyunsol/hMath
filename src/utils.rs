@@ -70,30 +70,6 @@ pub fn are_close(a: &crate::Ratio, b: &crate::Ratio, thres: f64) -> bool {
     1.0 - thres <= diff && diff <= 1.0 + thres
 }
 
-#[macro_export]
-macro_rules! impl_from_for_ref {
-    ($name: ty, $t: ty) => (
-        impl From<&$t> for $name {
-            fn from(n: &$t) -> Self {
-                <$name>::from(*n)
-            }
-        }
-    )
-}
-
-#[macro_export]
-macro_rules! impl_tryfrom_for_ref {
-    ($name: ty, $t: ty) => (
-        impl TryFrom<&$t> for $name {
-            type Error = ConversionError;
-
-            fn try_from(n: &$t) -> Result<Self, ConversionError> {
-                <$name>::try_from(*n)
-            }
-        }
-    )
-}
-
 #[cfg(test)]
 mod tests {
     use super::gcd_i32;

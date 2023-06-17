@@ -5,6 +5,8 @@ mod ratio;
 mod ubigint;
 pub mod utils;
 
+mod impl_macros;
+
 pub use ubigint::{UBigInt, funcs::gcd_ubi};
 pub use bigint::{BigInt, funcs::gcd_bi};
 pub use ratio::{
