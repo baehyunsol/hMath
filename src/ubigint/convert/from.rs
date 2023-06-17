@@ -1,5 +1,5 @@
 use crate::{Ratio, BigInt, UBigInt, ConversionError};
-use crate::{impl_from_for_ref, impl_tryfrom_for_ref};
+use crate::{impl_from_for_ref, impl_tryfrom_for_ref, impl_trait_for_general};
 
 macro_rules! impl_from_ref_ubigint {
     ($t: ty) => (
@@ -39,7 +39,7 @@ impl TryFrom<f32> for UBigInt {
     type Error = ConversionError;
 
     fn try_from(n: f32) -> Result<Self, Self::Error> {
-        Ok(Ratio::try_from(n)?.truncate_bi().try_into()?)
+        Ratio::try_from(n)?.truncate_bi().try_into()
     }
 }
 
@@ -48,7 +48,7 @@ impl TryFrom<f64> for UBigInt {
     type Error = ConversionError;
 
     fn try_from(n: f64) -> Result<Self, Self::Error> {
-        Ok(Ratio::try_from(n)?.truncate_bi().try_into()?)
+        Ratio::try_from(n)?.truncate_bi().try_into()
     }
 }
 
@@ -100,35 +100,13 @@ impl TryFrom<isize> for UBigInt {
     }
 }
 
-impl From<u8> for UBigInt {
-    fn from(n: u8) -> Self {
-        UBigInt::from_u32(n as u32)
-    }
-}
+impl_trait_for_general!(From, u8, UBigInt, from_u32);
+impl_trait_for_general!(From, u16, UBigInt, from_u32);
+impl_trait_for_general!(From, u32, UBigInt, from_u32);
+impl_trait_for_general!(From, u64, UBigInt, from_u64);
+impl_trait_for_general!(From, u128, UBigInt, from_u128);
 
-impl From<u16> for UBigInt {
-    fn from(n: u16) -> Self {
-        UBigInt::from_u32(n as u32)
-    }
-}
-
-impl From<u32> for UBigInt {
-    fn from(n: u32) -> Self {
-        UBigInt::from_u32(n)
-    }
-}
-
-impl From<u64> for UBigInt {
-    fn from(n: u64) -> Self {
-        UBigInt::from_u64(n)
-    }
-}
-
-impl From<u128> for UBigInt {
-    fn from(n: u128) -> Self {
-        UBigInt::from_u128(n)
-    }
-}
+impl_trait_for_general!(TryFrom, &str, UBigInt, from_string);
 
 impl From<usize> for UBigInt {
     fn from(n: usize) -> Self {
@@ -141,14 +119,6 @@ impl TryFrom<String> for UBigInt {
 
     fn try_from(n: String) -> Result<Self, Self::Error> {
         UBigInt::from_string(&n)
-    }
-}
-
-impl TryFrom<&str> for UBigInt {
-    type Error = ConversionError;
-
-    fn try_from(n: &str) -> Result<Self, Self::Error> {
-        UBigInt::from_string(n)
     }
 }
 

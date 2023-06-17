@@ -1,5 +1,5 @@
 use crate::{Ratio, BigInt, UBigInt, ConversionError};
-use crate::{impl_from_for_ref, impl_tryfrom_for_ref};
+use crate::{impl_from_for_ref, impl_tryfrom_for_ref, impl_trait_for_general};
 
 macro_rules! impl_from_ref_bigint {
     ($t: ty) => (
@@ -52,56 +52,19 @@ impl TryFrom<f64> for BigInt {
     }
 }
 
-impl From<i8> for BigInt {
-    fn from(n: i8) -> Self {
-        BigInt::from_i32(n as i32)
-    }
-}
+impl_trait_for_general!(From, i8, BigInt, from_i32);
+impl_trait_for_general!(From, i16, BigInt, from_i32);
+impl_trait_for_general!(From, i32, BigInt, from_i32);
+impl_trait_for_general!(From, i64, BigInt, from_i64);
+impl_trait_for_general!(From, i128, BigInt, from_i128);
+impl_trait_for_general!(From, u8, BigInt, from_i32);
+impl_trait_for_general!(From, u16, BigInt, from_i32);
+impl_trait_for_general!(From, u32, BigInt, from_i64);
 
-impl From<i16> for BigInt {
-    fn from(n: i16) -> Self {
-        BigInt::from_i32(n as i32)
-    }
-}
-
-impl From<i32> for BigInt {
-    fn from(n: i32) -> Self {
-        BigInt::from_i32(n)
-    }
-}
-
-impl From<i64> for BigInt {
-    fn from(n: i64) -> Self {
-        BigInt::from_i64(n)
-    }
-}
-
-impl From<i128> for BigInt {
-    fn from(n: i128) -> Self {
-        BigInt::from_i128(n)
-    }
-}
+impl_trait_for_general!(TryFrom, &str, BigInt, from_string);
 
 impl From<isize> for BigInt {
     fn from(n: isize) -> Self {
-        BigInt::from_i64(n as i64)
-    }
-}
-
-impl From<u8> for BigInt {
-    fn from(n: u8) -> Self {
-        BigInt::from_i32(n as i32)
-    }
-}
-
-impl From<u16> for BigInt {
-    fn from(n: u16) -> Self {
-        BigInt::from_i32(n as i32)
-    }
-}
-
-impl From<u32> for BigInt {
-    fn from(n: u32) -> Self {
         BigInt::from_i64(n as i64)
     }
 }
@@ -129,14 +92,6 @@ impl TryFrom<String> for BigInt {
 
     fn try_from(n: String) -> Result<Self, Self::Error> {
         BigInt::from_string(&n)
-    }
-}
-
-impl TryFrom<&str> for BigInt {
-    type Error = ConversionError;
-
-    fn try_from(n: &str) -> Result<Self, Self::Error> {
-        BigInt::from_string(n)
     }
 }
 

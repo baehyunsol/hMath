@@ -6,6 +6,7 @@ use std::str::FromStr;
 
 mod from;
 mod ieee754;
+mod into;
 
 pub use ieee754::{inspect_ieee754_f32, inspect_ieee754_f64};
 

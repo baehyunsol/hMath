@@ -4,6 +4,7 @@ use std::fmt;
 use std::str::FromStr;
 
 mod from;
+mod into;
 
 impl BigInt {
 

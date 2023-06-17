@@ -204,8 +204,8 @@ mod tests {
 
         while curr < 8.0 {
             let rounded = curr.round();
-            let rounded_rat = Ratio::from(curr).round();
-            assert_eq!(<f64 as Into<Ratio>>::into(rounded), rounded_rat);
+            let rounded_rat = Ratio::try_from(curr).unwrap().round();
+            assert_eq!(<f64 as TryInto<Ratio>>::try_into(rounded).unwrap(), rounded_rat);
             curr += 0.125;
         }
 

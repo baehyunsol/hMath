@@ -23,85 +23,42 @@ macro_rules! impl_tryfrom_for_ref {
 }
 
 #[macro_export]
-macro_rules! impl_ops_for_refs {
-    (deref_rhs, $trait: ident, $rhs: ty, $lhs: ty, $trait_func: ident, $impl_func: ident) => (
-        impl $trait<$rhs> for $lhs {
-            type Output = Self;
-
-            fn $trait_func(self, other: $rhs) -> Self::Output {
-                self.$impl_func(other)
+macro_rules! impl_trait_for_general {
+    (From, $t: ty, $u: ty, $m2: ident) => (
+        impl From<$t> for $u {
+            fn from(n: $t) -> Self {
+                <$u>::$m2(n.into())
             }
-
-        }
-        impl $trait<&$rhs> for $lhs {
-            type Output = Self;
-
-            fn $trait_func(self, other: &$rhs) -> Self::Output {
-                self.$impl_func(*other)
-            }
-
-        }
-        impl $trait<$rhs> for &$lhs {
-            type Output = $lhs;
-
-            fn $trait_func(self, other: $rhs) -> Self::Output {
-                self.$impl_func(other)
-            }
-
-        }
-        impl $trait<&$rhs> for &$lhs {
-            type Output = $lhs;
-
-            fn $trait_func(self, other: &$rhs) -> Self::Output {
-                self.$impl_func(*other)
-            }
-
         }
     );
-    (ref_rhs, $trait: ident, $rhs: ty, $lhs: ty, $trait_func: ident, $impl_func: ident) => (
-        impl $trait<$rhs> for $lhs {
-            type Output = Self;
+    (TryFrom, $t: ty, $u: ty, $m2: ident) => (
+        impl TryFrom<$t> for $u {
+            type Error = ConversionError;
 
-            fn $trait_func(self, other: $rhs) -> Self::Output {
-                self.$impl_func(&other)
+            fn try_from(n: $t) -> Result<Self, Self::Error> {
+                <$u>::$m2(n.into())
             }
-
         }
-        impl $trait<&$rhs> for $lhs {
-            type Output = Self;
-
-            fn $trait_func(self, other: &$rhs) -> Self::Output {
-                self.$impl_func(other)
-            }
-
-        }
-        impl $trait<$rhs> for &$lhs {
-            type Output = $lhs;
-
-            fn $trait_func(self, other: $rhs) -> Self::Output {
-                self.$impl_func(&other)
-            }
-
-        }
-        impl $trait<&$rhs> for &$lhs {
-            type Output = $lhs;
-
-            fn $trait_func(self, other: &$rhs) -> Self::Output {
-                self.$impl_func(other)
-            }
-
-        }
-    )
+    );
 }
 
 #[macro_export]
-macro_rules! impl_ops_general {
-    ($trait: ident, $rhs: ty, $lhs: ty, $output: ty, $trait_func: ident, $impl_func: ident) => (
-        impl $trait<$rhs> for $lhs {
-            type Output = $output;
+macro_rules! impl_trivial_try_from {
+    ($t: ty, $u: ty, $m: ident) => (
+        impl TryFrom<$t> for $u {
+            type Error = ConversionError;
+        
+            fn try_from(n: $t) -> Result<Self, Self::Error> {
+                n.$m()
+            }
+        }
+    );
+    (Fallible, $t: ty, $u: ty, $m: ident) => (
+        impl TryFrom<$t> for $u {
+            type Error = ConversionError;
 
-            fn $trait_func(self, other: $rhs) -> Self::Output {
-                <$lhs as TryInto<$output>>::try_into(self).unwrap().$impl_func(&other.try_into().unwrap())
+            fn try_from(n: $t) -> Result<Self, Self::Error> {
+                Ok(n.$m()?.try_into()?)
             }
         }
     )

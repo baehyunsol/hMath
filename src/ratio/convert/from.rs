@@ -1,5 +1,5 @@
 use crate::{Ratio, BigInt, UBigInt, ConversionError};
-use crate::{impl_from_for_ref, impl_tryfrom_for_ref};
+use crate::{impl_from_for_ref, impl_tryfrom_for_ref, impl_trait_for_general};
 
 macro_rules! impl_from_ref_ratio {
     ($t: ty) => (
@@ -38,7 +38,7 @@ impl TryFrom<f32> for Ratio {
     type Error = ConversionError;
 
     fn try_from(n: f32) -> Result<Self, Self::Error> {
-        Ratio::from_ieee754_f32(n)
+        Ratio::from_ieee754_f32(n.into())
     }
 }
 
@@ -46,60 +46,25 @@ impl TryFrom<f64> for Ratio {
     type Error = ConversionError;
 
     fn try_from(n: f64) -> Result<Self, Self::Error> {
-        Ratio::from_ieee754_f64(n)
+        Ratio::from_ieee754_f64(n.into())
     }
 }
 
-impl From<i8> for Ratio {
-    fn from(n: i8) -> Self {
-        Ratio::from_i32(n as i32)
-    }
-}
+impl_trait_for_general!(From, i8, Ratio, from_i32);
+impl_trait_for_general!(From, i16, Ratio, from_i32);
+impl_trait_for_general!(From, i32, Ratio, from_i32);
+impl_trait_for_general!(From, i64, Ratio, from_i64);
+impl_trait_for_general!(From, i128, Ratio, from_i128);
+impl_trait_for_general!(From, u8, Ratio, from_i32);
+impl_trait_for_general!(From, u16, Ratio, from_i32);
+impl_trait_for_general!(From, u32, Ratio, from_i64);
+impl_trait_for_general!(From, BigInt, Ratio, from_bi);
+impl_trait_for_general!(From, UBigInt, Ratio, from_ubi);
 
-impl From<i16> for Ratio {
-    fn from(n: i16) -> Self {
-        Ratio::from_i32(n as i32)
-    }
-}
-
-impl From<i32> for Ratio {
-    fn from(n: i32) -> Self {
-        Ratio::from_i32(n)
-    }
-}
-
-impl From<i64> for Ratio {
-    fn from(n: i64) -> Self {
-        Ratio::from_i64(n)
-    }
-}
-
-impl From<i128> for Ratio {
-    fn from(n: i128) -> Self {
-        Ratio::from_i128(n)
-    }
-}
+impl_trait_for_general!(TryFrom, &str, Ratio, from_string);
 
 impl From<isize> for Ratio {
     fn from(n: isize) -> Self {
-        Ratio::from_i64(n as i64)
-    }
-}
-
-impl From<u8> for Ratio {
-    fn from(n: u8) -> Self {
-        Ratio::from_i32(n as i32)
-    }
-}
-
-impl From<u16> for Ratio {
-    fn from(n: u16) -> Self {
-        Ratio::from_i32(n as i32)
-    }
-}
-
-impl From<u32> for Ratio {
-    fn from(n: u32) -> Self {
         Ratio::from_i64(n as i64)
     }
 }
@@ -127,25 +92,5 @@ impl TryFrom<String> for Ratio {
 
     fn try_from(n: String) -> Result<Self, Self::Error> {
         Ratio::from_string(&n)
-    }
-}
-
-impl TryFrom<&str> for Ratio {
-    type Error = ConversionError;
-
-    fn try_from(n: &str) -> Result<Self, Self::Error> {
-        Ratio::from_string(n)
-    }
-}
-
-impl From<BigInt> for Ratio {
-    fn from(n: BigInt) -> Self {
-        Ratio::from_bi(n)
-    }
-}
-
-impl From<UBigInt> for Ratio {
-    fn from(n: UBigInt) -> Self {
-        Ratio::from_ubi(n)
     }
 }
