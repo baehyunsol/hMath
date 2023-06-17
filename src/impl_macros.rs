@@ -1,9 +1,9 @@
 #[macro_export]
 macro_rules! impl_from_for_ref {
-    ($name: ty, $t: ty) => (
-        impl From<&$t> for $name {
-            fn from(n: &$t) -> Self {
-                <$name>::from(*n)
+    ($t: ty, $u: ty) => (
+        impl From<&$u> for $t {
+            fn from(n: &$u) -> Self {
+                <$t>::from(*n)
             }
         }
     )
@@ -11,12 +11,12 @@ macro_rules! impl_from_for_ref {
 
 #[macro_export]
 macro_rules! impl_tryfrom_for_ref {
-    ($name: ty, $t: ty) => (
-        impl TryFrom<&$t> for $name {
+    ($t: ty, $u: ty) => (
+        impl TryFrom<&$u> for $t {
             type Error = ConversionError;
 
-            fn try_from(n: &$t) -> Result<Self, ConversionError> {
-                <$name>::try_from(*n)
+            fn try_from(n: &$u) -> Result<Self, ConversionError> {
+                <$t>::try_from(*n)
             }
         }
     )

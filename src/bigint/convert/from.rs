@@ -95,14 +95,14 @@ impl TryFrom<String> for BigInt {
     }
 }
 
-impl From<Ratio> for BigInt {
-    fn from(n: Ratio) -> Self {
+impl From<&Ratio> for BigInt {
+    fn from(n: &Ratio) -> Self {
         n.truncate_bi()
     }
 }
 
-impl From<UBigInt> for BigInt {
-    fn from(n: UBigInt) -> Self {
-        BigInt::from_ubi(n, false)
+impl From<&UBigInt> for BigInt {
+    fn from(n: &UBigInt) -> Self {
+        BigInt::from_ubi(n.clone(), false)
     }
 }

@@ -58,8 +58,6 @@ impl_trait_for_general!(From, i128, Ratio, from_i128);
 impl_trait_for_general!(From, u8, Ratio, from_i32);
 impl_trait_for_general!(From, u16, Ratio, from_i32);
 impl_trait_for_general!(From, u32, Ratio, from_i64);
-impl_trait_for_general!(From, BigInt, Ratio, from_bi);
-impl_trait_for_general!(From, UBigInt, Ratio, from_ubi);
 
 impl_trait_for_general!(TryFrom, &str, Ratio, from_string);
 
@@ -92,5 +90,17 @@ impl TryFrom<String> for Ratio {
 
     fn try_from(n: String) -> Result<Self, Self::Error> {
         Ratio::from_string(&n)
+    }
+}
+
+impl From<&UBigInt> for Ratio {
+    fn from(n: &UBigInt) -> Self {
+        Ratio::from_ubi(n.clone())
+    }
+}
+
+impl From<&BigInt> for Ratio {
+    fn from(n: &BigInt) -> Self {
+        Ratio::from_bi(n.clone())
     }
 }

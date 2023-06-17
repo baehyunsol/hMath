@@ -122,18 +122,18 @@ impl TryFrom<String> for UBigInt {
     }
 }
 
-impl TryFrom<Ratio> for UBigInt {
+impl TryFrom<&Ratio> for UBigInt {
     type Error = ConversionError;
 
-    fn try_from(n: Ratio) -> Result<Self, Self::Error> {
+    fn try_from(n: &Ratio) -> Result<Self, Self::Error> {
         n.truncate_bi().try_into()
     }
 }
 
-impl TryFrom<BigInt> for UBigInt {
+impl TryFrom<&BigInt> for UBigInt {
     type Error = ConversionError;
 
-    fn try_from(n: BigInt) -> Result<Self, Self::Error> {
+    fn try_from(n: &BigInt) -> Result<Self, Self::Error> {
         n.to_ubi()
     }
 }
