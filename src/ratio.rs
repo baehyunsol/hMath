@@ -28,12 +28,21 @@ impl Ratio {
         Ratio { denom: BigInt::from_raw(denom, denom_neg), numer: BigInt::from_raw(numer, numer_neg) }
     }
 
+    /// (denom, denom_neg, numer, numer_neg)
     pub fn into_raw(self) -> (Vec<u32>, bool, Vec<u32>, bool) {
         let (denom, numer) = (self.denom, self.numer);
         let (denom, denom_neg) = denom.into_raw();
         let (numer, numer_neg) = numer.into_raw();
 
         (denom, denom_neg, numer, numer_neg)
+    }
+
+    pub fn get_denom(&self) -> BigInt {
+        self.denom.clone()
+    }
+
+    pub fn get_numer(&self) -> BigInt {
+        self.numer.clone()
     }
 
     pub fn zero() -> Self {
