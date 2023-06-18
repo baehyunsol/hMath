@@ -44,7 +44,7 @@ impl_trivial_try_from!(&BigInt, i128, to_i128);
 
 impl_trivial_try_from!(Fallible, &BigInt, u8, to_i32);
 impl_trivial_try_from!(Fallible, &BigInt, u16, to_i32);
-impl_trivial_try_from!(Fallible, &BigInt, u32, to_i32);
+impl_trivial_try_from!(Fallible, &BigInt, u32, to_i64);
 impl_trivial_try_from!(Fallible, &BigInt, u64, to_i128);
 impl_trivial_try_from!(Fallible, &BigInt, usize, to_i128);
 
