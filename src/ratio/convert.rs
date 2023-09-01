@@ -27,6 +27,11 @@ impl Ratio {
             numer /= r;
         }
 
+        if denom < 0 {
+            denom *= -1;
+            numer *= -1;
+        }
+
         Ratio::from_denom_and_numer_raw(BigInt::from_i32(denom), BigInt::from_i32(numer))
     }
 

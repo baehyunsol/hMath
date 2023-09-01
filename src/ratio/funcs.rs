@@ -1,16 +1,38 @@
-use crate::{Ratio, BigInt};
+use crate::{Ratio, BigInt, gcd_bi};
 
+mod approx;
 mod exp;
 mod ln;
 mod pow;
 mod root;
 mod trigo;
 
+pub use approx::{cubic_2_points, quadratic_3_points};
 pub use exp::exp_iter;
 pub use ln::{ln_iter, log_iter};
 pub use pow::pow_iter;
 pub use root::{sqrt_iter, cbrt_iter};
 pub use trigo::{sin_iter, cos_iter, tan_iter};
+
+// 3 / 4, 7 / 5 -> 15 / 20, 28 / 20
+
+/// a = v1 / v3, b = v2 / v3 where the return value is `(v1, v2, v3)`
+#[must_use = "method returns a new number and does not mutate the original value"]
+pub fn common_denom(a: &Ratio, b: &Ratio) -> (BigInt, BigInt, BigInt) {
+    // v1 = a.numer * b.denom / gcd(a.denom, b.denom)
+    // v2 = b.numer * a.denom / gcd(a.denom, b.denom)
+    // v3 = a.denom * b.denom / gcd(a.denom, b.denom)
+
+    let gcd = gcd_bi(&a.denom, &b.denom);
+    let a_den_gcd = a.denom.div_bi(&gcd);
+    let b_den_gcd = b.denom.div_bi(&gcd);
+
+    (
+        a.numer.mul_bi(&b_den_gcd),
+        b.numer.mul_bi(&a_den_gcd),
+        a.denom.mul_bi(&b_den_gcd),
+    )
+}
 
 impl Ratio {
 
@@ -196,7 +218,7 @@ impl Ratio {
 
 #[cfg(test)]
 mod tests {
-    use crate::Ratio;
+    use crate::{Ratio, common_denom};
 
     #[test]
     fn round_test() {
@@ -237,6 +259,33 @@ mod tests {
             let _ = Ratio::from_string(trun).unwrap().frac();
         }
 
+    }
+
+    #[test]
+    fn common_denom_test() {
+
+        for denom1 in 1..11 {
+            for denom1 in [denom1, -denom1] {
+                for numer1 in -10..11 {
+                    for denom2 in 1..11 {
+                        for denom2 in [denom2, -denom2] {
+                            for numer2 in -10..11 {
+                                let n1 = Ratio::from_denom_and_numer_i32(denom1, numer1);
+                                let n2 = Ratio::from_denom_and_numer_i32(denom2, numer2);
+
+                                let (numer_res1, numer_res2, denom_res) = common_denom(&n1, &n2);
+
+                                let n1_res = Ratio::from_denom_and_numer(denom_res.clone(), numer_res1);
+                                let n2_res = Ratio::from_denom_and_numer(denom_res, numer_res2);
+
+                                assert_eq!(n1, n1_res);
+                                assert_eq!(n2, n2_res);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 }

@@ -11,9 +11,11 @@ pub use ubigint::{UBigInt, funcs::gcd_ubi};
 pub use bigint::{BigInt, funcs::gcd_bi};
 pub use ratio::{
     Ratio,
+    funcs::cubic_2_points, funcs::quadratic_3_points,
     funcs::exp_iter, funcs::ln_iter, funcs::pow_iter, funcs::log_iter,
     funcs::sqrt_iter, funcs::cbrt_iter,
     funcs::sin_iter, funcs::cos_iter, funcs::tan_iter,
+    funcs::common_denom,
     e::e_iter, ln2::ln2_iter, pi::pi_iter,
     inspect_ieee754_f32, inspect_ieee754_f64
 };
