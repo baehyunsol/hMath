@@ -1,20 +1,16 @@
 use crate::{Ratio, BigInt, gcd_bi};
 
-mod approx;
 mod exp;
 mod ln;
 mod pow;
 mod root;
 mod trigo;
 
-pub use approx::{cubic_2_points, quadratic_3_points};
 pub use exp::exp_iter;
 pub use ln::{ln_iter, log_iter};
 pub use pow::pow_iter;
 pub use root::{sqrt_iter, cbrt_iter};
 pub use trigo::{sin_iter, cos_iter, tan_iter};
-
-// 3 / 4, 7 / 5 -> 15 / 20, 28 / 20
 
 /// a = v1 / v3, b = v2 / v3 where the return value is `(v1, v2, v3)`
 #[must_use = "method returns a new number and does not mutate the original value"]

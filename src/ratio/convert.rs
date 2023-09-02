@@ -237,7 +237,11 @@ impl Ratio {
 
     /// Ratio { 4, 7 } -> "4/7".
     pub fn to_ratio_string(&self) -> String {
-        format!("{}/{}", self.numer.to_string_dec(), self.denom.to_string_dec())
+        if self.denom.is_one() {
+            self.numer.to_string_dec()
+        } else {
+            format!("{}/{}", self.numer.to_string_dec(), self.denom.to_string_dec())
+        }
     }
 
     /// Ratio { 4, 7 } -> "1.75".
