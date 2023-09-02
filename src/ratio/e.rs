@@ -37,6 +37,11 @@ mod tests {
             e_iter(7).to_approx_string(29),
             "2.718281828459045235360287471"
         );
+
+        assert_eq!(
+            std::f64::consts::E,
+            e_iter(3).to_ieee754_f64().unwrap(),
+        );
     }
 
 }

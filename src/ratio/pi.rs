@@ -307,6 +307,11 @@ mod tests {
             pi_iter(5).to_approx_string(19),
             "3.14159265358979323"
         );
+
+        assert_eq!(
+            std::f64::consts::PI,
+            pi_iter(5).to_ieee754_f64().unwrap(),
+        );
     }
 
 }

@@ -85,10 +85,24 @@ mod tests {
         assert_eq!("1", ln_iter(&Ratio::from_string("2.718281828459045").unwrap(), 6).to_approx_string(8));
         assert_eq!("0.6931471", ln_iter(&Ratio::from_string("2").unwrap(), 6).to_approx_string(9));
         assert_eq!("-1.386294", ln_iter(&Ratio::from_string("0.25").unwrap(), 6).to_approx_string(9));
+
+        assert_eq!(
+            std::f64::consts::LN_10,
+            ln_iter(&10.into(), 11).to_ieee754_f64().unwrap(),
+        );
     }
 
     #[test]
     fn log_test() {
+        assert_eq!(
+            std::f64::consts::LOG2_10,
+            log_iter(&2.into(), &10.into(), 12).to_ieee754_f64().unwrap(),
+        );
+        assert_eq!(
+            std::f64::consts::LOG10_2,
+            log_iter(&10.into(), &2.into(), 11).to_ieee754_f64().unwrap(),
+        );
+
         let nums = vec![
             0.5f64, 1.6, 3.2,
             2.0, 1624.5, 4.9,

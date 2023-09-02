@@ -253,6 +253,11 @@ mod tests {
             ln2_iter(6).to_approx_string(17),
             "0.693147180559945"
         );
+
+        assert_eq!(
+            std::f64::consts::LN_2,
+            ln2_iter(6).to_ieee754_f64().unwrap(),
+        );
     }
 
 }

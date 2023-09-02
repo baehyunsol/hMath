@@ -121,6 +121,7 @@ impl Matrix {
 
 #[cfg(test)]
 mod tests {
+    #[cfg(feature = "rand")]
     use crate::{Matrix, MatrixError};
 
     #[cfg(feature = "rand")]

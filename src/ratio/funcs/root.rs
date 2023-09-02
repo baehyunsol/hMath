@@ -86,4 +86,11 @@ mod tests {
 
     }
 
+    #[test]
+    fn sqrt2_test() {
+        assert_eq!(
+            std::f64::consts::SQRT_2,
+            sqrt_iter(&2.into(), 3).to_ieee754_f64().unwrap(),
+        );
+    }
 }

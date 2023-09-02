@@ -25,6 +25,7 @@ pub fn cubic_2_points(a: &Ratio, b: &Ratio, v1: &Ratio, v2: &Ratio, v3: &Ratio, 
     let aa = a.mul_rat(a);
     let bb = b.mul_rat(b);
 
+    // TODO: what if it's not invertible?
     let mat2 = Matrix::from_vec(vec![
         vec![aa.mul_rat(a), aa.clone(), a.clone(), Ratio::one()],
         vec![bb.mul_rat(b), bb.clone(), b.clone(), Ratio::one()],
@@ -61,6 +62,7 @@ pub fn quadratic_3_points(a: &Ratio, b: &Ratio, c: &Ratio, v1: &Ratio, v2: &Rati
         vec![v3.clone()],
     ]).unwrap();
 
+    // TODO: what if it's not invertible?
     let mat2 = Matrix::from_vec(vec![
         vec![a.mul_rat(a), a.clone(), Ratio::one()],
         vec![b.mul_rat(b), b.clone(), Ratio::one()],
