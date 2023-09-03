@@ -191,7 +191,7 @@ impl UBigInt {
                 true
             }
 
-            // According to ChatGPT, 0 is not a prime number
+            // According to ChatGPT, 0 is not a prime number :)
             else {
                 false
             }
