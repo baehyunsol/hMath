@@ -38,6 +38,10 @@ impl Polynomial {
         Polynomial { coeffs: coeffs.into_iter().map(|n| n.into()).collect() }
     }
 
+    pub fn to_vec(&self) -> &Vec<Ratio> {
+        &self.coeffs
+    }
+
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn add(&self, other: &Polynomial) -> Self {
         todo!()
@@ -89,11 +93,41 @@ impl Polynomial {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn differentiate(&self) -> Self {
-        todo!()
+        let mut result = Vec::with_capacity(self.coeffs.len());
+
+        for (ind, value) in self.coeffs.iter().rev().enumerate() {
+            result.push(value.mul_i32(ind as i32));
+        }
+
+        result.reverse();
+        result.pop().unwrap();
+
+        if result.is_empty() {
+            result.push(Ratio::zero());
+        }
+
+        let result = Polynomial::from_vec(result);
+
+        #[cfg(test)] {
+            let mut p = self.clone();
+            p.differentiate_mut();
+
+            assert_eq!(result, p);
+        }
+
+        result
     }
 
     pub fn differentiate_mut(&mut self) {
-        todo!()
+        for (ind, value) in self.coeffs.iter_mut().rev().enumerate() {
+            value.mul_i32_mut(ind as i32);
+        }
+
+        self.coeffs.pop().unwrap();
+
+        if self.coeffs.is_empty() {
+            self.coeffs.push(Ratio::zero());
+        }
     }
 
     /// f(x)
@@ -109,30 +143,100 @@ impl Polynomial {
     }
 
     pub fn to_string(&self) -> String {
-        let result = self.coeffs.iter().rev().enumerate().rev().map(
-            |(i, n)| if n.is_zero() {
-                String::new()
-            } else if i < 2 {
-                if i == 0 {
-                    n.to_ratio_string()
-                } else if n.is_one() {
-                    String::from("x")
-                } else {
-                    format!("{} * x", n.to_ratio_string())
-                }
-            } else {
-                if n.is_one() {
-                    format!("x^{i}")
-                } else {
-                    format!("{} * x^{i}", n.to_ratio_string())
-                }
+        let mut result = Vec::with_capacity(self.coeffs.len());
+
+        for (ind, value) in self.coeffs.iter().rev().enumerate().rev() {
+            if value.is_zero() {
+                continue;
             }
-        ).filter(|s| !s.is_empty()).collect::<Vec<String>>().join(" + ");
+
+            let abs_val = value.abs();
+
+            if !result.is_empty() {
+                if value.is_neg() {
+                    result.push(" - ".to_string());
+                } else {
+                    result.push(" + ".to_string());
+                }
+            } else if value.is_neg() {
+                result.push("-".to_string());
+            }
+
+            if !abs_val.is_one() {
+                result.push(abs_val.to_ratio_string());
+
+                if ind > 0 {
+                    result.push(" * ".to_string());
+                }
+            } else if ind == 0 {
+                result.push(abs_val.to_ratio_string());
+            }
+
+            if ind != 0 {
+                result.push("x".to_string());
+            }
+
+            if ind > 1 {
+                result.push(format!("^{ind}"));
+            }
+        }
 
         if result.is_empty() {
-            String::from("0")
-        } else {
-            result
+            result.push("0".to_string());
         }
+
+        result.concat()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{Polynomial, Ratio};
+
+    #[test]
+    fn diff_test() {
+        // 3x^3 + 4x^2 + 5x + 6
+        let p1 = Polynomial::from_vec_generic(vec![3, 4, 5, 6]);
+
+        // 9x^2 + 8x + 5
+        let p2 = Polynomial::from_vec_generic(vec![9, 8, 5]);
+
+        // 18x + 8
+        let p3 = Polynomial::from_vec_generic(vec![18, 8]);
+
+        // 18
+        let p4 = Polynomial::from_vec_generic(vec![18]);
+
+        // 0
+        let p5 = Polynomial::from_vec_generic(vec![0]);
+
+        assert_eq!(p1.differentiate(), p2);
+        assert_eq!(p2.differentiate(), p3);
+        assert_eq!(p3.differentiate(), p4);
+        assert_eq!(p4.differentiate(), p5);
+        assert_eq!(p5.differentiate(), p5);
+    }
+
+    #[test]
+    fn to_string_test() {
+
+        let v = vec![3.5, 4.25, 5.0, 6.5, 0.0, 1.0, 2.0, -3.0, -4.0];
+        let v = v.into_iter().map(|n| Ratio::from_ieee754_f32(n).unwrap()).collect();
+    
+        assert_eq!("7/2 * x^8 + 17/4 * x^7 + 5 * x^6 + 13/2 * x^5 + x^3 + 2 * x^2 - 3 * x - 4", Polynomial::from_vec(v).to_string());
+        assert_eq!("0", Polynomial::from_vec_generic(vec![0]).to_string());
+        assert_eq!("1", Polynomial::from_vec_generic(vec![1]).to_string());
+        assert_eq!("-1", Polynomial::from_vec_generic(vec![-1]).to_string());
+        assert_eq!("0", Polynomial::from_vec_generic(vec![0; 3]).to_string());
+        assert_eq!("x^2 + x + 1", Polynomial::from_vec_generic(vec![1; 3]).to_string());
+        assert_eq!("-x^2 - x - 1", Polynomial::from_vec_generic(vec![-1; 3]).to_string());
+        assert_eq!("x^3 + x", Polynomial::from_vec_generic(vec![1, 0, 1, 0]).to_string());
+        assert_eq!("x^2 + 1", Polynomial::from_vec_generic(vec![0, 1, 0, 1]).to_string());
+        assert_eq!("x^3 + x", Polynomial::from_vec_generic(vec![0, 1, 0, 1, 0]).to_string());
+        assert_eq!("x^4 + x^2 + 1", Polynomial::from_vec_generic(vec![1, 0, 1, 0, 1]).to_string());
+        assert_eq!("-x^3 - x", Polynomial::from_vec_generic(vec![-1, 0, -1, 0]).to_string());
+        assert_eq!("-x^2 - 1", Polynomial::from_vec_generic(vec![0, -1, 0, -1]).to_string());
+        assert_eq!("-x^3 - x", Polynomial::from_vec_generic(vec![0, -1, 0, -1, 0]).to_string());
+        assert_eq!("-x^4 - x^2 - 1", Polynomial::from_vec_generic(vec![-1, 0, -1, 0, -1]).to_string());
     }
 }

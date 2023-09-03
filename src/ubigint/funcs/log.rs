@@ -55,6 +55,14 @@ mod tests {
         assert_eq!(UBigInt::zero().log2(), UBigInt::zero());
         assert_eq!(UBigInt::zero().log2_accurate(), UBigInt::zero());
 
+        assert_eq!(
+            std::f32::consts::LOG2_10,  // f64 wouldn't work
+            Ratio::from_denom_and_numer(
+                UBigInt::from_u64(1 << 32).into(),
+                UBigInt::from_u32(10).log2_accurate().into(),
+            ).to_ieee754_f32().unwrap(),
+        );
+
         let mut n = UBigInt::from_u32(2);
         let mut i = 1;
 
