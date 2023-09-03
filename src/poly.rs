@@ -42,6 +42,16 @@ impl Polynomial {
         &self.coeffs
     }
 
+    /// It panics if a coefficient cannot be converted to an f32. (Eg. not in range)
+    pub fn to_vec_f32(&self) -> Vec<f32> {
+        self.coeffs.iter().map(|n| n.to_ieee754_f32().unwrap()).collect()
+    }
+
+    /// It panics if a coefficient cannot be converted to an f64. (Eg. not in range)
+    pub fn to_vec_f64(&self) -> Vec<f64> {
+        self.coeffs.iter().map(|n| n.to_ieee754_f64().unwrap()).collect()
+    }
+
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn add(&self, other: &Polynomial) -> Self {
         todo!()
@@ -95,11 +105,10 @@ impl Polynomial {
     pub fn differentiate(&self) -> Self {
         let mut result = Vec::with_capacity(self.coeffs.len());
 
-        for (ind, value) in self.coeffs.iter().rev().enumerate() {
+        for (ind, value) in self.coeffs.iter().rev().enumerate().rev() {
             result.push(value.mul_i32(ind as i32));
         }
 
-        result.reverse();
         result.pop().unwrap();
 
         if result.is_empty() {
@@ -140,6 +149,19 @@ impl Polynomial {
         }
 
         result
+    }
+
+    /// It returns `x - (f(x)/f'(x))`. If you pre-calculated `f'`, pass it to `prime`. Set `prime` to `None` otherwise.
+    pub fn newton_method(&self, x: &Ratio, prime: &Option<Polynomial>) -> Ratio {
+        let fpx = match prime {
+            Some(p) => p.calc(x),
+            None => {
+                let fp = self.differentiate();
+                fp.calc(x)
+            }
+        };
+
+        x.sub_rat(&self.calc(x).div_rat(&fpx))
     }
 
     pub fn to_string(&self) -> String {
@@ -194,6 +216,19 @@ mod tests {
     use crate::{Polynomial, Ratio};
 
     #[test]
+    fn newtons_method() {
+        let f = Polynomial::from_vec_generic(vec![1, 0, -10]);
+        let fp = Some(f.differentiate());
+        let mut n = Ratio::from_i32(3);
+
+        for _ in 0..6 {
+            n = f.newton_method(&n, &fp);
+        }
+
+        assert_eq!("3.162277660168379331998893544432", n.to_approx_string(32));
+    }
+
+    #[test]
     fn diff_test() {
         // 3x^3 + 4x^2 + 5x + 6
         let p1 = Polynomial::from_vec_generic(vec![3, 4, 5, 6]);
@@ -219,7 +254,6 @@ mod tests {
 
     #[test]
     fn to_string_test() {
-
         let v = vec![3.5, 4.25, 5.0, 6.5, 0.0, 1.0, 2.0, -3.0, -4.0];
         let v = v.into_iter().map(|n| Ratio::from_ieee754_f32(n).unwrap()).collect();
     
