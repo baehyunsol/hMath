@@ -5,6 +5,7 @@ pub use err::MatrixError;
 mod det;
 mod err;
 mod inv;
+mod utils;
 
 /// It's very naively implemented, thus very slow.
 #[derive(Clone, Debug, PartialEq)]

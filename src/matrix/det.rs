@@ -77,7 +77,13 @@ impl Matrix {
                 }
             }
         } else {
-            todo!()
+            let mut result = Ratio::zero();
+
+            for j in 0..self.cols {
+                result.add_rat_mut(&self.get(0, j).mul_rat(&self.cofactor(0, j)));
+            }
+
+            Ok(result)
         }
     }
 

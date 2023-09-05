@@ -37,7 +37,7 @@ impl Matrix {
                 self.adjugate_4_by_4()
             }
         } else {
-            todo!()
+            Matrix::generate(self.cols, self.rows, |i, j| self.cofactor(j, i))
         }
     }
 
@@ -128,7 +128,7 @@ mod tests {
     #[test]
     fn inv_fuzz_test() {
         for _ in 0..256 {
-            for size in 2..5 {
+            for size in 2..6 {
                 let mat = Matrix::generate(
                     size, size, |_, _| {
                         (rand::random::<u32>() % 4).into()

@@ -33,7 +33,7 @@ impl Ratio {
     }
 
     /// If you don't know what `ieee754` is, you're okay to use this function.
-    /// This function does not return `f32::NAN` or `f32::INFINITY`, but it returns `ConversionError::NotInRange` instead.
+    /// This function does not return `f32::NAN` or `f32::INFINITY` for overflows, but it returns `ConversionError::NotInRange` instead.
     /// For underflow numbers like `1-e20000`, it returns 0.
     pub fn to_ieee754_f32(&self) -> Result<f32, ConversionError> {
 
@@ -94,7 +94,7 @@ impl Ratio {
                 exp = -127;
             }
 
-            // it has choose the closest value
+            // it has to choose the closest value
             if frac % 32 > 15 {
                 frac /= 32;
                 frac += 1;
@@ -153,7 +153,7 @@ impl Ratio {
     }
 
     /// If you don't know what `ieee754` is, you're okay to use this function.
-    /// This function does not return `f64::NAN` or `f64::INFINITY`, but it returns `ConversionError::NotInRange` instead.
+    /// This function does not return `f64::NAN` or `f64::INFINITY` for overflows, but it returns `ConversionError::NotInRange` instead.
     /// For underflow numbers like `1-e20000`, it returns 0.
     pub fn to_ieee754_f64(&self) -> Result<f64, ConversionError> {
 
@@ -214,7 +214,7 @@ impl Ratio {
                 exp = -1023;
             }
 
-            // it has choose the closest value
+            // it has to choose the closest value
             if frac % 32 > 15 {
                 frac /= 32;
                 frac += 1;
@@ -245,7 +245,7 @@ impl Ratio {
 }
 
 /// You may find this function useful when you're dealing with [ieee 754 numbers](https://en.wikipedia.org/wiki/IEEE_754).\
-/// This function returns `(neg, exp, frac)`, which means `n` is `(-1)^(neg) * 2^(exp) * (1 + frac/2^23)` whether it's denormalized or not.\
+/// This function returns `(neg, exp, frac)`, which means `n` is `(-1)^(neg) * 2^(exp) * (1 + frac/2^23)` regardless of denormalization.\
 /// It returns (false, i32::MIN, 0) when n is 0.
 pub fn inspect_ieee754_f32(n: f32) -> Result<(bool, i32, u32), ConversionError> {  // (neg, exp, frac)
     let n_u32 = {
@@ -301,7 +301,7 @@ pub fn inspect_ieee754_f32(n: f32) -> Result<(bool, i32, u32), ConversionError> 
 }
 
 /// You may find this function useful when you're dealing with [ieee 754 numbers](https://en.wikipedia.org/wiki/IEEE_754).\
-/// This function returns `(neg, exp, frac)`, which means `n` is `(-1)^(neg) * 2^(exp) * (1 + frac/2^52)` whether it's denormalized or not.\
+/// This function returns `(neg, exp, frac)`, which means `n` is `(-1)^(neg) * 2^(exp) * (1 + frac/2^52)` regardless of denormalization.\
 /// It returns (false, i32::MIN, 0) when n is 0.
 pub fn inspect_ieee754_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> {  // (neg, exp, frac)
     let n_u64 = {
@@ -567,7 +567,7 @@ mod tests {
     }
 
     // This test is not just for hmath::Ratio, but also for ieee754 implementation.
-    // A failed assertion is either due to (1) a bug in hmath or (2) my wrong assumption on iee754 implementation.
+    // A failed assertion is either due to (1) a bug in hmath or (2) my wrong assumption on ieee754 implementation.
     #[test]
     fn ieee754_general_test() {
         if !RUN_ALL_TESTS { return; }

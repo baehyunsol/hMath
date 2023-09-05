@@ -1,4 +1,65 @@
-use crate::{Polynomial, Matrix, Ratio};
+use crate::{Polynomial, Matrix, MatrixError, Ratio};
+
+/// `p`: `Vec<(x, y)>` where `f(x) = y`
+pub fn from_points(p: Vec<(Ratio, Ratio)>) -> Result<Polynomial, MatrixError> {
+    let mut mat1 = Matrix::zeros(p.len(), p.len());
+    let mut mat2 = Matrix::zeros(1, p.len());
+
+    for i in 0..p.len() {
+        let mut curr = Ratio::one();
+
+        for j in 1..(p.len() + 1) {
+            *mat1.get_mut(i, p.len() - j) = curr.clone();
+            curr.mul_rat_mut(&p[i].0);
+        }
+
+        *mat2.get_mut(i, 0) = p[i].1.clone();
+    }
+
+    let mat1_inv = match mat1.inverse() {
+        Ok(m) => m,
+        Err(e) => {
+            return Err(MatrixError::ZeroDeterminant);
+        }
+    };
+
+    let result = mat1_inv.mul(&mat2).unwrap();
+
+    let result = Polynomial::from_vec((0..p.len()).map(|i| result.get(i, 0).clone()).collect());
+
+    #[cfg(test)] {
+        if p.len() == 2 {
+            let p = linear_2_points(
+                &p[0].0,
+                &p[1].0,
+                &p[0].1,
+                &p[1].1,
+            );
+
+            assert_eq!(result, p);
+        } else if p.len() == 3 {
+            let p = quadratic_3_points(
+                &p[0].0,
+                &p[1].0,
+                &p[2].0,
+                &p[0].1,
+                &p[1].1,
+                &p[2].1,
+            );
+
+            assert_eq!(result, p);
+        }
+    }
+
+    Ok(result)
+}
+
+/// `p`: `Vec<(x, y)>` where `f(x) = y`
+pub fn from_points_generic<T: Into<Ratio>>(points: Vec<(T, T)>) -> Result<Polynomial, MatrixError> {
+    from_points(
+        points.into_iter().map(|(x, y)| (x.into(), y.into())).collect()
+    )
+}
 
 /// f(a) = v1, f(b) = v2, f'(a) = v3, f'(b) = v4\
 /// It ignores `v2` and `v4` if `a == b`.
@@ -14,7 +75,7 @@ pub fn cubic_2_points(a: &Ratio, b: &Ratio, v1: &Ratio, v2: &Ratio, v3: &Ratio, 
     // |3aa  2a   1    0|   |r3|     |v3|
     // |3bb  2b   1    0|   |r4|     |v4|
 
-    // [v1 v2 v3 v4] * Inv([[aaa aa a 1] [bbb bb b 1] [3aa 2a 1 0] [3bb 2b 1 0]]) = [r1 r2 r3 r4]
+    // Inv([[aaa aa a 1] [bbb bb b 1] [3aa 2a 1 0] [3bb 2b 1 0]]) * [v1 v2 v3 v4] = [r1 r2 r3 r4]
 
     let mat1 = Matrix::from_vec(vec![
         vec![v1.clone()],
@@ -65,7 +126,7 @@ pub fn quadratic_3_points(a: &Ratio, b: &Ratio, c: &Ratio, v1: &Ratio, v2: &Rati
     // |bb b 1|   |r2|     |v2|
     // |cc c 1|   |r3|     |v3|
 
-    // [v1 v2 v3] * Inv([[aa a 1] [bb b 1] [cc c 1]]) = [r1 r2 r3]
+    // Inv([[aa a 1] [bb b 1] [cc c 1]]) * [v1 v2 v3] = [r1 r2 r3]
 
     let mat1 = Matrix::from_vec(vec![
         vec![v1.clone()],
@@ -113,7 +174,7 @@ pub fn linear_2_points(a: &Ratio, b: &Ratio, v1: &Ratio, v2: &Ratio) -> Polynomi
 
 #[cfg(test)]
 mod tests {
-    use crate::{cubic_2_points, quadratic_3_points, linear_2_points, Ratio};
+    use crate::{from_points_generic, cubic_2_points, quadratic_3_points, linear_2_points, Ratio};
 
     #[test]
     fn sqrt_10_test() {
@@ -145,5 +206,33 @@ mod tests {
         assert_eq!("3.162277", sqrt_approx1.calc(&1000.into()).div_i32(10).to_approx_string(8));
         assert_eq!("3.1622", sqrt_approx2.calc(&1000.into()).div_i32(10).to_approx_string(6));
         assert_eq!("3.16227", sqrt_approx3.calc(&100000.into()).div_i32(100).to_approx_string(7));
+    }
+
+    #[test]
+    fn sqrt_10_test2() {
+        let points = vec![
+            (841, 29),
+            (1156, 34),
+            (900, 30),
+            (1089, 33),
+            (961, 31),
+            (1024, 32),
+        ];
+
+        let mut buffer = vec![];
+        let mut sqrt_funcs = vec![];
+
+        for point in points.into_iter() {
+            buffer.push(point);
+
+            sqrt_funcs.push(from_points_generic(buffer.clone()).unwrap());
+        }
+
+        assert!(sqrt_funcs[0].calc(&1000.into()).div_i32(10).to_approx_string(11).starts_with("2.9"));
+        assert!(sqrt_funcs[1].calc(&1000.into()).div_i32(10).to_approx_string(11).starts_with("3.1"));
+        assert!(sqrt_funcs[2].calc(&1000.into()).div_i32(10).to_approx_string(11).starts_with("3.162"));
+        assert!(sqrt_funcs[3].calc(&1000.into()).div_i32(10).to_approx_string(11).starts_with("3.162"));
+        assert!(sqrt_funcs[4].calc(&1000.into()).div_i32(10).to_approx_string(11).starts_with("3.16227"));
+        assert!(sqrt_funcs[5].calc(&1000.into()).div_i32(10).to_approx_string(11).starts_with("3.1622776"));
     }
 }

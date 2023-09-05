@@ -1,8 +1,8 @@
 use crate::Ratio;
 
-pub mod from_points;
+mod from_points;
 
-pub use from_points::{cubic_2_points, quadratic_3_points, linear_2_points};
+pub use from_points::{from_points, from_points_generic, cubic_2_points, quadratic_3_points, linear_2_points};
 
 /// [3, 4, 5] -> 3x^2 + 4x + 5
 #[derive(Clone, Debug, PartialEq)]

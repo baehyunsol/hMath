@@ -23,6 +23,7 @@ pub use ratio::{
 pub use matrix::{Matrix, MatrixError};
 pub use poly::{
     Polynomial,
+    from_points, from_points_generic,
     cubic_2_points, quadratic_3_points, linear_2_points,
 };
 pub use consts::{pi_const, e_const, ln2_const};
