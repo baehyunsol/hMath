@@ -164,7 +164,15 @@ impl Polynomial {
         x.sub_rat(&self.calc(x).div_rat(&fpx))
     }
 
-    pub fn to_string(&self) -> String {
+    pub fn to_approx_string(&self, max_len: usize) -> String {
+        self.to_string(Some(max_len))
+    }
+
+    pub fn to_ratio_string(&self) -> String {
+        self.to_string(None)
+    }
+
+    fn to_string(&self, approx: Option<usize>) -> String {
         let mut result = Vec::with_capacity(self.coeffs.len());
 
         for (ind, value) in self.coeffs.iter().rev().enumerate().rev() {
@@ -185,13 +193,21 @@ impl Polynomial {
             }
 
             if !abs_val.is_one() {
-                result.push(abs_val.to_ratio_string());
+                if let Some(n) = approx {
+                    result.push(abs_val.to_approx_string(n));
+                } else {
+                    result.push(abs_val.to_ratio_string());
+                }
 
                 if ind > 0 {
                     result.push(" * ".to_string());
                 }
             } else if ind == 0 {
-                result.push(abs_val.to_ratio_string());
+                if let Some(n) = approx {
+                    result.push(abs_val.to_approx_string(n));
+                } else {
+                    result.push(abs_val.to_ratio_string());
+                }
             }
 
             if ind != 0 {
@@ -257,20 +273,20 @@ mod tests {
         let v = vec![3.5, 4.25, 5.0, 6.5, 0.0, 1.0, 2.0, -3.0, -4.0];
         let v = v.into_iter().map(|n| Ratio::from_ieee754_f32(n).unwrap()).collect();
     
-        assert_eq!("7/2 * x^8 + 17/4 * x^7 + 5 * x^6 + 13/2 * x^5 + x^3 + 2 * x^2 - 3 * x - 4", Polynomial::from_vec(v).to_string());
-        assert_eq!("0", Polynomial::from_vec_generic(vec![0]).to_string());
-        assert_eq!("1", Polynomial::from_vec_generic(vec![1]).to_string());
-        assert_eq!("-1", Polynomial::from_vec_generic(vec![-1]).to_string());
-        assert_eq!("0", Polynomial::from_vec_generic(vec![0; 3]).to_string());
-        assert_eq!("x^2 + x + 1", Polynomial::from_vec_generic(vec![1; 3]).to_string());
-        assert_eq!("-x^2 - x - 1", Polynomial::from_vec_generic(vec![-1; 3]).to_string());
-        assert_eq!("x^3 + x", Polynomial::from_vec_generic(vec![1, 0, 1, 0]).to_string());
-        assert_eq!("x^2 + 1", Polynomial::from_vec_generic(vec![0, 1, 0, 1]).to_string());
-        assert_eq!("x^3 + x", Polynomial::from_vec_generic(vec![0, 1, 0, 1, 0]).to_string());
-        assert_eq!("x^4 + x^2 + 1", Polynomial::from_vec_generic(vec![1, 0, 1, 0, 1]).to_string());
-        assert_eq!("-x^3 - x", Polynomial::from_vec_generic(vec![-1, 0, -1, 0]).to_string());
-        assert_eq!("-x^2 - 1", Polynomial::from_vec_generic(vec![0, -1, 0, -1]).to_string());
-        assert_eq!("-x^3 - x", Polynomial::from_vec_generic(vec![0, -1, 0, -1, 0]).to_string());
-        assert_eq!("-x^4 - x^2 - 1", Polynomial::from_vec_generic(vec![-1, 0, -1, 0, -1]).to_string());
+        assert_eq!("7/2 * x^8 + 17/4 * x^7 + 5 * x^6 + 13/2 * x^5 + x^3 + 2 * x^2 - 3 * x - 4", Polynomial::from_vec(v).to_ratio_string());
+        assert_eq!("0", Polynomial::from_vec_generic(vec![0]).to_ratio_string());
+        assert_eq!("1", Polynomial::from_vec_generic(vec![1]).to_ratio_string());
+        assert_eq!("-1", Polynomial::from_vec_generic(vec![-1]).to_ratio_string());
+        assert_eq!("0", Polynomial::from_vec_generic(vec![0; 3]).to_ratio_string());
+        assert_eq!("x^2 + x + 1", Polynomial::from_vec_generic(vec![1; 3]).to_ratio_string());
+        assert_eq!("-x^2 - x - 1", Polynomial::from_vec_generic(vec![-1; 3]).to_ratio_string());
+        assert_eq!("x^3 + x", Polynomial::from_vec_generic(vec![1, 0, 1, 0]).to_ratio_string());
+        assert_eq!("x^2 + 1", Polynomial::from_vec_generic(vec![0, 1, 0, 1]).to_ratio_string());
+        assert_eq!("x^3 + x", Polynomial::from_vec_generic(vec![0, 1, 0, 1, 0]).to_ratio_string());
+        assert_eq!("x^4 + x^2 + 1", Polynomial::from_vec_generic(vec![1, 0, 1, 0, 1]).to_ratio_string());
+        assert_eq!("-x^3 - x", Polynomial::from_vec_generic(vec![-1, 0, -1, 0]).to_ratio_string());
+        assert_eq!("-x^2 - 1", Polynomial::from_vec_generic(vec![0, -1, 0, -1]).to_ratio_string());
+        assert_eq!("-x^3 - x", Polynomial::from_vec_generic(vec![0, -1, 0, -1, 0]).to_ratio_string());
+        assert_eq!("-x^4 - x^2 - 1", Polynomial::from_vec_generic(vec![-1, 0, -1, 0, -1]).to_ratio_string());
     }
 }
