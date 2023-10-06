@@ -1,11 +1,13 @@
 use crate::{Ratio, BigInt, gcd_bi};
 
+mod atrigo;
 mod exp;
 mod ln;
 mod pow;
 mod root;
 mod trigo;
 
+pub use atrigo::{asin_iter, acos_iter, atan_iter};
 pub use exp::exp_iter;
 pub use ln::{ln_iter, log_iter};
 pub use pow::pow_iter;

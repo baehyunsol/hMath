@@ -70,6 +70,10 @@ fn sin_iter_worker(x: &Ratio, iter: usize) -> Ratio {
         numer.mul_rat_mut(&x_sq);
     }
 
+    result.sub_rat_mut(
+        &numer.div_bi(&denom)
+    );
+
     result
 }
 
@@ -140,6 +144,10 @@ fn cos_iter_worker(x: &Ratio, iter: usize) -> Ratio {
         numer.mul_rat_mut(&x_sq);
     }
 
+    result.sub_rat_mut(
+        &numer.div_bi(&denom)
+    );
+
     result
 }
 
@@ -156,7 +164,10 @@ mod tests {
 
     #[test]
     fn sin_test() {
+        assert!(sin_iter(&"314.159265358979323846264338".parse::<Ratio>().unwrap(), 11).lt_rat(&"1e-21".parse::<Ratio>().unwrap()));
+
         if !RUN_ALL_TESTS { return; }
+
         let iter = 9;
         let samples = vec![
             // (a, b, c) -> sin(a * pi / b) = c
@@ -180,7 +191,7 @@ mod tests {
         ];
         let pi = pi_iter(iter);
         let cos_coeff = Ratio::from_denom_and_numer_i32(-2, 1);
-        let accuracy = 3e-6;
+        let accuracy = 3e-7;
 
         for (numer, denom, value) in samples.into_iter() {
             let sin_val = sin_iter(&Ratio::from_denom_and_numer_i32(denom, numer).mul_rat(&pi), iter);

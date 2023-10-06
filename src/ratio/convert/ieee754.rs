@@ -410,12 +410,13 @@ mod tests {
             assert_eq!(Ratio::from_ieee754_f64(nf64).unwrap(), rat);
         }
 
-
         // numbers that single precision IEEE754 cannot represent perfectly
         let samples2 = vec![
             "3.1", "3.14", "3.141", "3.1415", "3.14159",
             "2.7", "2.71", "2.718", "2.7182", "2.71828",
             "4e-40", "4e-320", "4e-310", "4e-300",
+            "0.00123", "0.00123e4", "0.00123e-4",
+            "1.00123", "1.00123e4", "1.00123e-4",
             "1307674368000"
         ];
 
