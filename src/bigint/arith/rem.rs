@@ -50,7 +50,6 @@ impl BigInt {
 
         BigInt::from_ubi(new_val, is_neg)
     }
-
 }
 
 #[cfg(test)]
@@ -59,11 +58,8 @@ mod tests {
 
     #[test]
     fn sign_test() {
-
         for x in -7..8 {
-
             for y in -7..8 {
-
                 if y == 0 {
                     continue;
                 }
@@ -83,9 +79,6 @@ mod tests {
                 assert_eq!(res1, x1);
                 assert_eq!(res2, x2);
             }
-
         }
-
     }
-
 }

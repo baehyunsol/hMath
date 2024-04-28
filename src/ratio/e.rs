@@ -23,19 +23,19 @@ mod tests {
     fn e_test() {
         assert_eq!(
             e_iter(1).to_approx_string(21),
-            "2.7182818284590452353"
+            "2.7182818284590452353",
         );
         assert_eq!(
             e_iter(3).to_approx_string(24),
-            "2.7182818284590452353602"
+            "2.7182818284590452353602",
         );
         assert_eq!(
             e_iter(5).to_approx_string(27),
-            "2.7182818284590452353602874"
+            "2.7182818284590452353602874",
         );
         assert_eq!(
             e_iter(7).to_approx_string(29),
-            "2.718281828459045235360287471"
+            "2.718281828459045235360287471",
         );
 
         assert_eq!(
@@ -43,5 +43,4 @@ mod tests {
             e_iter(3).to_ieee754_f64().unwrap(),
         );
     }
-
 }

@@ -82,23 +82,18 @@ impl Ratio {
     pub fn comp_i32(&self, other: i32) -> Ordering {
         self.numer.comp_bi(&self.denom.mul_i32(other))
     }
-
 }
 
 impl PartialOrd for Ratio {
-
     fn partial_cmp(&self, other: &Ratio) -> Option<Ordering> {
         Some(self.comp_rat(other))
     }
-
 }
 
 impl Ord for Ratio {
-
     fn cmp(&self, other: &Ratio) -> Ordering {
         self.comp_rat(other)
     }
-
 }
 
 #[cfg(test)]
@@ -108,23 +103,15 @@ mod tests {
 
     #[test]
     fn rat_comp_test() {
-
         for d1 in 1..6 {
-
             for d2 in 1..6 {
-
                 for n1 in -7..7 {
-
                     for n2 in -7..7 {
                         comp_test_worker(d1, d2, n1, n2);
                     }
-
                 }
-
             }
-
         }
-
     }
 
     fn comp_test_worker(d1: i32, d2: i32, n1: i32, n2: i32) {
@@ -169,5 +156,4 @@ mod tests {
 
         assert!(a.lt_one() && a.lt_i32(1) || a.gt_one() && a.gt_i32(1) || a.eq_i32(1));
     }
-
 }

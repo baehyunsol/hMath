@@ -235,23 +235,23 @@ mod tests {
     fn ln2_test() {
         assert_eq!(
             ln2_iter(2).to_approx_string(9),
-            "0.6931471"
+            "0.6931471",
         );
         assert_eq!(
             ln2_iter(3).to_approx_string(12),
-            "0.6931471805"
+            "0.6931471805",
         );
         assert_eq!(
             ln2_iter(4).to_approx_string(14),
-            "0.693147180559"
+            "0.693147180559",
         );
         assert_eq!(
             ln2_iter(5).to_approx_string(16),
-            "0.69314718055994"
+            "0.69314718055994",
         );
         assert_eq!(
             ln2_iter(6).to_approx_string(17),
-            "0.693147180559945"
+            "0.693147180559945",
         );
 
         assert_eq!(
@@ -259,5 +259,4 @@ mod tests {
             ln2_iter(6).to_ieee754_f64().unwrap(),
         );
     }
-
 }

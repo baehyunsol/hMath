@@ -36,7 +36,6 @@ pub fn cbrt_iter(x: &Ratio, iter: usize) -> Ratio {
             approx.numer.shift_right_mut(len_post - len_pre - 4);
             approx.fit();
         }
-
     }
 
     approx
@@ -59,7 +58,7 @@ mod tests {
             0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
             16, 25, 27, 28, 29, 30, 1000, 2000, 3000,
             4000, 5000, 6000, 0x1000, 0x2000, 0x3000,
-            0x3001, 0x3002, 0x123456789
+            0x3001, 0x3002, 0x123456789,
         ];
         let iter = 4;
         let accuracy = 0.005;
@@ -81,9 +80,7 @@ mod tests {
             if !are_close(&cbrt1, &cbrt2, accuracy) {
                 panic!("{cbrt1}, {cbrt2}, {number}");
             }
-
         }
-
     }
 
     #[test]

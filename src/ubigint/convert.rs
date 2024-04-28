@@ -14,7 +14,6 @@ impl UBigInt {
     }
 
     pub fn to_u32(&self) -> Result<u32, ConversionError> {
-
         if self.len() > 1 {
             Err(ConversionError::NotInRange { permitted: "0~4.29e9".to_string(), error: self.to_scientific_notation(5) })
         }
@@ -22,12 +21,10 @@ impl UBigInt {
         else {
             Ok(self.0[0])
         }
-
     }
 
     #[inline]
     pub fn from_u64(n: u64) -> Self {
-
         if n >= (1 << 32) {
             UBigInt::from_raw(vec![(n % (1 << 32)) as u32, (n >> 32) as u32])
         }
@@ -35,11 +32,9 @@ impl UBigInt {
         else {
             UBigInt::from_raw(vec![n as u32])
         }
-
     }
 
     pub fn to_u64(&self) -> Result<u64, ConversionError> {
-
         if self.len() > 2 {
             Err(ConversionError::NotInRange { permitted: "0~1.84e19".to_string(), error: self.to_scientific_notation(5) })
         }
@@ -51,11 +46,9 @@ impl UBigInt {
         else {
             Ok(self.0[0] as u64)
         }
-
     }
 
     pub fn from_u128(n: u128) -> Self {
-
         if n < 1 << 32 {
             UBigInt::from_raw(vec![n as u32])
         }
@@ -71,19 +64,16 @@ impl UBigInt {
         else {
             UBigInt::from_raw(vec![(n % (1 << 32)) as u32, ((n >> 32) % (1 << 32)) as u32, ((n >> 64) % (1 << 32)) as u32, (n >> 96) as u32])
         }
-
     }
 
     pub fn to_u128(&self) -> Result<u128, ConversionError> {
-
         match self.len() {
             1 => Ok(self.0[0] as u128),
             2 => Ok(self.0[0] as u128 + ((self.0[1] as u128) << 32)),
             3 => Ok(self.0[0] as u128 + ((self.0[1] as u128) << 32) + ((self.0[2] as u128) << 64)),
             4 => Ok(self.0[0] as u128 + ((self.0[1] as u128) << 32) + ((self.0[2] as u128) << 64) + ((self.0[3] as u128) << 96)),
-            _ => Err(ConversionError::NotInRange { permitted: "0~3.4e38".to_string(), error: self.to_scientific_notation(5) })
+            _ => Err(ConversionError::NotInRange { permitted: "0~3.4e38".to_string(), error: self.to_scientific_notation(5) }),
         }
-
     }
 
     /// `('0' '_'*) | ([1-9] ([0-9] | '_')*)`\
@@ -98,7 +88,6 @@ impl UBigInt {
         let mut base = 10;
 
         for c in s.chars() {
-
             if c == '_' && curr_state != StringToNumFSM::Init {
                 continue;
             }
@@ -119,10 +108,8 @@ impl UBigInt {
                     else {
                         return Err(ConversionError::InvalidChar(c));
                     }
-
                 }
                 StringToNumFSM::InitialZero => {
-
                     if c.to_ascii_lowercase() == 'x' {
                         curr_state = StringToNumFSM::InitNum;
                         base = 16;
@@ -141,24 +128,20 @@ impl UBigInt {
                     else {
                         return Err(ConversionError::InvalidChar(c));
                     }
-
                 }
                 StringToNumFSM::InitNum => {
-
                     match c.to_digit(16) {
                         Some(n) if n < base => {
                             curr_state = StringToNumFSM::ReadNum;
                             int_buffer = n;
                             int_buffer_coeff = base;
-                        }
+                        },
                         _ => {
                             return Err(ConversionError::InvalidChar(c));
-                        }
+                        },
                     }
-
                 }
                 StringToNumFSM::ReadNum => {
-
                     match c.to_digit(16) {
                         Some(n) if n < base => {
                             int_buffer *= base;
@@ -172,33 +155,28 @@ impl UBigInt {
                                 int_buffer = 0;
                                 int_buffer_coeff = 1;
                             }
-
-                        }
+                        },
                         _ => {
                             return Err(ConversionError::InvalidChar(c));
-                        }
+                        },
                     }
-
                 }
             }
-
         }
 
         match curr_state {
             StringToNumFSM::InitialZero => Ok(UBigInt::zero()),
             StringToNumFSM::ReadNum => {
-
                 if int_buffer_coeff > 1 {
                     ubi_buffer.mul_u32_mut(int_buffer_coeff);
                     ubi_buffer.add_u32_mut(int_buffer);
                 }
 
                 Ok(ubi_buffer)
-            }
+            },
             StringToNumFSM::Init => Err(ConversionError::NoData),  // empty string
             StringToNumFSM::InitNum => Err(ConversionError::NoData),  // no number
         }
-
     }
 
     /// `9.8e5`
@@ -214,7 +192,6 @@ impl UBigInt {
                 n.div_ubi_mut(&big_number);
                 exp += 64;
             }
-
         }
 
         while n.len() > 2 {
@@ -303,7 +280,6 @@ impl UBigInt {
 
         buffer.concat()
     }
-
 }
 
 #[derive(PartialEq)]
@@ -315,43 +291,33 @@ enum StringToNumFSM {
 }
 
 impl fmt::Display for UBigInt {
-
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}", self.to_string_dec())
     }
-
 }
 
 impl fmt::LowerHex for UBigInt {
-
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}", self.to_string_hex(fmt.alternate()))
     }
-
 }
 
 impl fmt::Octal for UBigInt {
-
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}", self.to_string_oct(fmt.alternate()))
     }
-
 }
 
 impl fmt::Binary for UBigInt {
-
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}", self.to_string_bin(fmt.alternate()))
     }
-
 }
 
 impl fmt::LowerExp for UBigInt {
-
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         write!(fmt, "{}", self.to_scientific_notation(5))
     }
-
 }
 
 impl FromStr for UBigInt {
@@ -360,7 +326,6 @@ impl FromStr for UBigInt {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         UBigInt::from_string(s)
     }
-
 }
 
 pub fn _to_scientific_notation(mut n: u64, digits_max_len: usize) -> (String, usize) {
@@ -402,6 +367,7 @@ mod tests {
     #[test]
     fn integer_conversion_test() {
         if !RUN_ALL_TESTS { return; }
+
         let mut n: u128 = 0;
 
         for _ in 0..31 {
@@ -440,7 +406,6 @@ mod tests {
             n *= 2;
             n += 1;
         }
-
     }
 
     #[test]
@@ -451,20 +416,19 @@ mod tests {
             "1e0", "1e1", "0e0",
             "2e1", "2e0", "3.14e2",
             "3.14e6", "3.1415e200",
-            "2.7182e20000", "3e3"
+            "2.7182e20000", "3e3",
         ];
 
         for sample in samples.iter() {
             let n = Ratio::from_string(sample).unwrap().truncate_bi().to_ubi().unwrap();
             assert_eq!(sample.to_string(), n.to_scientific_notation(5));
         }
-
     }
 
     #[test]
     fn string_conversion_test() {
-
         if !RUN_ALL_TESTS { return; }
+
         assert_eq!(UBigInt::from_raw(vec![0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1]), UBigInt::from_string("2135987035920910082395021706169552114602704522356652769947041607822219725780658996767035796488192").unwrap());
 
         let samples = vec![
@@ -562,7 +526,7 @@ mod tests {
         let invalid_samples = vec![
             "00", "_0", "-0", "_1",
             "00x123", "0x", "", "0c1",
-            "0b123"
+            "0b123",
         ];
 
         for (string, number) in samples.into_iter() {
@@ -588,6 +552,5 @@ mod tests {
         for sample in invalid_samples.into_iter() {
             assert!(UBigInt::from_string(sample).is_err());
         }
-
     }
 }

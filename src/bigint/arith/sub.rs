@@ -34,7 +34,6 @@ impl BigInt {
     }
 
     pub fn sub_bi_mut(&mut self, other: &BigInt) {
-
         if self.is_neg() != other.is_neg() {
             self.val.add_ubi_mut(&other.val);
         }
@@ -83,7 +82,6 @@ impl BigInt {
     }
 
     pub fn sub_i32_mut(&mut self, other: i32) {
-
         if self.is_neg() != (other < 0) {
             self.val.add_u32_mut(other.abs() as u32);
         }
@@ -106,7 +104,6 @@ impl BigInt {
 
         #[cfg(test)] assert!(self.is_valid());
     }
-
 }
 
 #[cfg(test)]
@@ -115,9 +112,7 @@ mod tests {
 
     #[test]
     fn sign_test() {
-
         for x in -7..8 {
-
             for y in -7..8 {
                 let mut x1 = BigInt::from_i32(x);
                 let y1 = BigInt::from_i32(y);
@@ -134,9 +129,6 @@ mod tests {
                 assert_eq!(res1, x1);
                 assert_eq!(res2, x2);
             }
-
         }
-
     }
-
 }

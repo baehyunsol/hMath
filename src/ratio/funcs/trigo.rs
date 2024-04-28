@@ -33,16 +33,19 @@ pub fn sin_iter(x: &Ratio, iter: usize) -> Ratio {
 
     if pi_div.mul_i32(4).lt_one() {
         let mut result = sin_iter_worker(&pi_div.mul_rat(&pi), iter);
+
         if negate { result.neg_mut(); }
+
         result
     }
 
     else {
         let mut result = cos_iter_worker(&Ratio::from_denom_and_numer_i32(2, 1).sub_rat(&pi_div).mul_rat(&pi), iter);
+
         if negate { result.neg_mut(); }
+
         result
     }
-
 }
 
 // x - x^3/3! + x^5/5! - x^7/7! + ...
@@ -108,13 +111,17 @@ pub fn cos_iter(x: &Ratio, iter: usize) -> Ratio {
 
     if pi_div.mul_i32(4).lt_one() {
         let mut result = cos_iter_worker(&pi_div.mul_rat(&pi), iter);
+
         if negate { result.neg_mut(); }
+
         result
     }
 
     else {
         let mut result = sin_iter_worker(&Ratio::from_denom_and_numer_i32(2, 1).sub_rat(&pi_div).mul_rat(&pi), iter);
+
         if negate { result.neg_mut(); }
+
         result
     }
 }
@@ -211,7 +218,5 @@ mod tests {
             assert!(are_close(&cos_val2, &value, accuracy));
             assert!(are_close(&cos_val3, &value, accuracy));
         }
-
     }
-
 }

@@ -8,12 +8,10 @@ pub fn v64_to_v32(mut v64: Vec<u64>) -> Vec<u32> {
     #[cfg(test)] assert!(v64.len() > 0);
 
     for i in 0..(v64.len() - 1) {
-
         if v64[i] >= (1 << 32) {
             v64[i + 1] += v64[i] >> 32;
             v64[i] %= 1 << 32;
         }
-
     }
 
     let v64_len = v64.len() - 1;
@@ -29,11 +27,9 @@ pub fn v64_to_v32(mut v64: Vec<u64>) -> Vec<u32> {
 }
 
 pub fn remove_suffix_0(vec: &mut Vec<u32>) {
-
     while vec.len() > 1 && vec[vec.len() - 1] == 0 {
         vec.pop().unwrap();
     }
-
 }
 
 pub fn gcd_i32(mut a: i32, mut b: i32) -> i32 {
@@ -51,11 +47,10 @@ pub fn gcd_i32(mut a: i32, mut b: i32) -> i32 {
 
 #[cfg(test)]
 pub fn are_close(a: &crate::Ratio, b: &crate::Ratio, thres: f64) -> bool {
-
     if b.is_zero() {
         let thres_to_rat = match crate::Ratio::from_ieee754_f64(thres) {
             Ok(n) => n,
-            _ => { return false; }
+            _ => { return false; },
         };
         return a.abs().leq_rat(&thres_to_rat);
     }
@@ -64,7 +59,7 @@ pub fn are_close(a: &crate::Ratio, b: &crate::Ratio, thres: f64) -> bool {
         Ok(n) => n,
         _ => {
             return false;
-        }
+        },
     };
 
     1.0 - thres <= diff && diff <= 1.0 + thres
@@ -82,7 +77,7 @@ mod tests {
             (0, 8, 8),
             (1728, 93, 3),
             (1048576, 84, 4),
-            (3003, 343, 7)
+            (3003, 343, 7),
         ];
 
         for (a, b, c) in samples.into_iter() {
@@ -91,7 +86,5 @@ mod tests {
             assert_eq!(gcd_i32(a, -b), c);
             assert_eq!(gcd_i32(-a, -b), c);
         }
-
     }
-
 }

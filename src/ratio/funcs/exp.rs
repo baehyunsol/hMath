@@ -49,5 +49,4 @@ mod tests {
         assert_eq!("20.08553", exp_iter(&Ratio::from_i32(3), 15).to_approx_string(8));
         assert_eq!("10", exp_iter(&ln2_iter(8).mul_i32(70777).div_i32(21306), 8).to_approx_string(10));
     }
-
 }

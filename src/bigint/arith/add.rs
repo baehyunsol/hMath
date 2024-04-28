@@ -4,7 +4,6 @@ impl BigInt {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn add_bi(&self, other: &BigInt) -> Self {
-
         if self.is_neg() == other.is_neg() {
             BigInt::from_ubi(self.val.add_ubi(&other.val), self.is_neg())
         }
@@ -32,11 +31,9 @@ impl BigInt {
 
             result
         }
-
     }
 
     pub fn add_bi_mut(&mut self, other: &BigInt) {
-
         if self.is_neg() == other.is_neg() {
             self.val.add_ubi_mut(&other.val);
         }
@@ -54,12 +51,10 @@ impl BigInt {
 
             #[cfg(test)] assert!(self.is_valid());
         }
-
     }
 
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn add_i32(&self, other: i32) -> Self {
-
         if self.is_neg() == (other < 0) {
             BigInt::from_ubi(self.val.add_u32(other.abs() as u32), self.is_neg())
         }
@@ -80,11 +75,9 @@ impl BigInt {
 
             result
         }
-
     }
 
     pub fn add_i32_mut(&mut self, other: i32) {
-
         if self.is_neg() == (other < 0) {
             self.val.add_u32_mut(other.abs() as u32);
         }
@@ -102,9 +95,7 @@ impl BigInt {
             self._is_neg = (self_less ^ self.is_neg()) & !is_diff_zero;
             #[cfg(test)] assert!(self.is_valid());
         }
-
     }
-
 }
 
 #[cfg(test)]
@@ -113,9 +104,7 @@ mod tests {
 
     #[test]
     fn sign_test() {
-
         for x in -7..8 {
-
             for y in -7..8 {
                 let mut x1 = BigInt::from_i32(x);
                 let y1 = BigInt::from_i32(y);
@@ -132,9 +121,6 @@ mod tests {
                 assert_eq!(res1, x1);
                 assert_eq!(res2, x2);
             }
-
         }
-
     }
-
 }

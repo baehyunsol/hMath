@@ -6,7 +6,7 @@ impl Ratio {
     pub fn sub_rat(&self, other: &Ratio) -> Self {
         let result = Ratio::from_denom_and_numer(
             self.denom.mul_bi(&other.denom),
-            self.numer.mul_bi(&other.denom).sub_bi(&other.numer.mul_bi(&self.denom))
+            self.numer.mul_bi(&other.denom).sub_bi(&other.numer.mul_bi(&self.denom)),
         );
 
         #[cfg(test)] assert!(result.is_valid());
@@ -27,7 +27,7 @@ impl Ratio {
         // Safety: `self.denom` and `self.numer` are already coprime.
         let result = Ratio::from_denom_and_numer_raw(
             self.denom.clone(),
-            self.numer.sub_bi(&self.denom.mul_bi(other))
+            self.numer.sub_bi(&self.denom.mul_bi(other)),
         );
 
         #[cfg(test)] assert!(result.is_valid());
@@ -46,7 +46,7 @@ impl Ratio {
         // Safety: `self.denom` and `self.numer` are already coprime.
         let result = Ratio::from_denom_and_numer_raw(
             self.denom.clone(),
-            self.numer.sub_bi(&self.denom.mul_i32(other))
+            self.numer.sub_bi(&self.denom.mul_i32(other)),
         );
 
         #[cfg(test)] assert!(result.is_valid());
@@ -58,5 +58,4 @@ impl Ratio {
         self.numer.sub_bi_mut(&self.denom.mul_i32(other));
         #[cfg(test)] assert!(self.is_valid());
     }
-
 }

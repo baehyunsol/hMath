@@ -35,7 +35,6 @@ impl UBigInt {
         result += (self_clone.len() as u64 - 1) * 32 + log2_u32(self_clone.0[self_clone.len() - 1]) as u64;
         UBigInt::from_u64(result)
     }
-
 }
 
 /// truncate(log2(n))
@@ -82,14 +81,14 @@ mod tests {
                 denom.clone(),
                 BigInt::from_i32(3).log2_accurate()
             ).to_approx_string(10),
-            "1.5849625"
+            "1.5849625",
         );
         assert_eq!(
             Ratio::from_denom_and_numer(
                 denom.clone(),
                 BigInt::from_i32(9900).log2_accurate()
             ).to_approx_string(6),
-            "13.273"
+            "13.273",
         );
     }
 }

@@ -6,9 +6,7 @@ impl UBigInt {
     /// 0^0 is 1
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn pow_u32(&self, mut exp: u32) -> Self {
-
         if exp < 3 {
-
             if exp == 0 {
                 return UBigInt::one();
             }
@@ -20,7 +18,6 @@ impl UBigInt {
             else {
                 return self.mul_ubi(self);
             }
-
         }
 
         let mut powers = Vec::with_capacity(log2_u32(exp) as usize);
@@ -64,11 +61,10 @@ impl UBigInt {
         UBigInt::from_raw(
             vec![
                 vec![0; (exp / 32) as usize],
-                vec![1 << (exp % 32)]
+                vec![1 << (exp % 32)],
             ].concat()
         )
     }
-
 }
 
 #[cfg(test)]
@@ -78,7 +74,6 @@ mod tests {
 
     #[test]
     fn pow_test2() {
-
         if !RUN_ALL_TESTS {
             return;
         }
@@ -89,7 +84,6 @@ mod tests {
             assert_eq!(a, UBigInt::from_u32(i).pow_u32(5).pow_u32(245));
             assert_eq!(a, UBigInt::from_u32(i).pow_u32(245).pow_u32(5));
         }
-
     }
 
     #[test]
@@ -102,7 +96,5 @@ mod tests {
             assert_eq!(p.log2().to_u32().unwrap(), i);
             assert_eq!(UBigInt::from_u32(2).pow_u32(i), p);
         }
-
     }
-
 }

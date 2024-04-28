@@ -2,7 +2,6 @@ use crate::{Ratio, BigInt, ln2_iter};
 
 /// It returns `ln(x)`. It gets more accurate as `iter` gets bigger. It panics when `x` is less than 0.
 pub fn ln_iter(x: &Ratio, iter: usize) -> Ratio {
-
     if x.is_neg() {
         panic!("logarithm of a negative number is undefined");
     }
@@ -20,7 +19,6 @@ pub fn ln_iter(x: &Ratio, iter: usize) -> Ratio {
 
     // x /= 2^log2_approx
     if log2_approx > 0 {
-
         while log2_approx_counter > 0 && x_iter.numer.rem_pow2(2).is_zero() {
             log2_approx_counter -= 1;
             x_iter.numer.div_i32_mut(2);
@@ -37,7 +35,6 @@ pub fn ln_iter(x: &Ratio, iter: usize) -> Ratio {
 
     // x *= 2^log2_approx.abs()
     else {
-
         while log2_approx_counter > 0 && x_iter.denom.rem_pow2(2).is_zero() {
             log2_approx_counter -= 1;
             x_iter.denom.div_i32_mut(2);
@@ -106,12 +103,11 @@ mod tests {
         let nums = vec![
             0.5f64, 1.6, 3.2,
             2.0, 1624.5, 4.9,
-            1.01, 9932.0, 0.1
+            1.01, 9932.0, 0.1,
         ];
         let accr = 3e-8;
 
         for i in 0..nums.len() {
-
             for j in 0..nums.len() {
                 let a = nums[i];
                 let b = nums[j];
@@ -121,10 +117,10 @@ mod tests {
                 let ans_f64_rat = Ratio::from_ieee754_f64(ans_f64).unwrap();
                 let ans_rat_1 = Ratio::from_denom_and_numer(
                     BigInt::from_raw(vec![0, 1], false),
-                    b_rat.numer.log2_accurate().sub_bi(&b_rat.denom.log2_accurate())
+                    b_rat.numer.log2_accurate().sub_bi(&b_rat.denom.log2_accurate()),
                 ).div_rat(&Ratio::from_denom_and_numer(
                     BigInt::from_raw(vec![0, 1], false),
-                    a_rat.numer.log2_accurate().sub_bi(&a_rat.denom.log2_accurate())
+                    a_rat.numer.log2_accurate().sub_bi(&a_rat.denom.log2_accurate()),
                 ));
                 let ans_rat_2 = log_iter(
                     &a_rat, &b_rat, 14
@@ -134,9 +130,6 @@ mod tests {
                 assert!(are_close(&ans_f64_rat, &ans_rat_2, accr));
                 assert!(are_close(&ans_rat_1, &ans_rat_2, accr));
             }
-
         }
-
     }
-
 }

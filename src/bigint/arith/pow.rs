@@ -18,5 +18,4 @@ impl BigInt {
     pub fn pow2(exp: u32) -> Self {
         BigInt::from_ubi(UBigInt::pow2(exp), false)
     }
-
 }

@@ -1,5 +1,10 @@
-use crate::{BigInt, UBigInt, Ratio, ConversionError};
-use crate::impl_trivial_try_from;
+use crate::{
+    BigInt,
+    ConversionError,
+    Ratio,
+    UBigInt,
+    impl_trivial_try_from,
+};
 
 macro_rules! impl_ref_for_ratios {
     ($t: ty) => (

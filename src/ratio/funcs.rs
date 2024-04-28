@@ -60,7 +60,7 @@ impl Ratio {
         // Safety: `self.denom` and `self.numer` is already coprime
         let mut result = Ratio::from_denom_and_numer_raw(
             self.numer.clone(),
-            self.denom.clone()
+            self.denom.clone(),
         );
 
         if result.denom.is_zero() {
@@ -146,9 +146,7 @@ impl Ratio {
 
     /// It returns the largest integer less than or equal to `self`.
     pub fn floor_bi(&self) -> BigInt {
-
         if self.is_neg() {
-
             if self.is_integer() {
                 self.numer.clone()
             }
@@ -156,13 +154,11 @@ impl Ratio {
             else {
                 self.truncate_bi().sub_i32(1)
             }
-
         }
 
         else {
             self.truncate_bi()
         }
-
     }
 
     /// If this method and [this method] behave differently, that's an error.
@@ -188,9 +184,8 @@ impl Ratio {
                 trun.sub_i32(1)
             } else {
                 trun.add_i32(1)
-            }
+            },
         }
-
     }
 
     /// It returns a number between 0 and 1 (both exclusive).
@@ -200,7 +195,7 @@ impl Ratio {
             vec![0, 0, 0, 0, 1],
             false,
             (0..4).map(|_| rand::random::<u32>().max(1)).collect(),
-            false
+            false,
         );
         result.fit();
 
@@ -228,7 +223,6 @@ mod tests {
             assert_eq!(<f64 as TryInto<Ratio>>::try_into(rounded).unwrap(), rounded_rat);
             curr += 0.125;
         }
-
     }
 
     #[test]
@@ -245,23 +239,21 @@ mod tests {
         for (before, trun, floor) in samples.into_iter() {
             assert_eq!(
                 Ratio::from_string(before).unwrap().truncate(),
-                Ratio::from_string(trun).unwrap()
+                Ratio::from_string(trun).unwrap(),
             );
             assert_eq!(
                 Ratio::from_string(before).unwrap().floor(),
-                Ratio::from_string(floor).unwrap()
+                Ratio::from_string(floor).unwrap(),
             );
 
             // test code is inside the `.frac()` method
             let _ = Ratio::from_string(before).unwrap().frac();
             let _ = Ratio::from_string(trun).unwrap().frac();
         }
-
     }
 
     #[test]
     fn common_denom_test() {
-
         for denom1 in 1..11 {
             for denom1 in [denom1, -denom1] {
                 for numer1 in -10..11 {
@@ -285,5 +277,4 @@ mod tests {
             }
         }
     }
-
 }

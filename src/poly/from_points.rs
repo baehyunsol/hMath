@@ -1,4 +1,9 @@
-use crate::{Polynomial, Matrix, MatrixError, Ratio};
+use crate::{
+    Matrix,
+    MatrixError,
+    Polynomial,
+    Ratio,
+};
 
 /// `p`: `Vec<(x, y)>` where `f(x) = y`
 pub fn from_points(p: Vec<(Ratio, Ratio)>) -> Result<Polynomial, MatrixError> {
@@ -18,9 +23,9 @@ pub fn from_points(p: Vec<(Ratio, Ratio)>) -> Result<Polynomial, MatrixError> {
 
     let mat1_inv = match mat1.inverse() {
         Ok(m) => m,
-        Err(e) => {
+        Err(_) => {
             return Err(MatrixError::ZeroDeterminant);
-        }
+        },
     };
 
     let result = mat1_inv.mul(&mat2).unwrap();
@@ -98,7 +103,7 @@ pub fn cubic_2_points(a: &Ratio, b: &Ratio, v1: &Ratio, v2: &Ratio, v3: &Ratio, 
             // v3 (x - a) + v1
             return Polynomial::from_vec(vec![
                 v3.clone(),
-                v1.sub_rat(&a.mul_rat(v3))
+                v1.sub_rat(&a.mul_rat(v3)),
             ]);
         },
         _ => unreachable!(),  // I can't think of this case

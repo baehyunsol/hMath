@@ -289,23 +289,23 @@ mod tests {
     fn pi_test() {
         assert_eq!(
             pi_iter(1).to_approx_string(8),
-            "3.141592"
+            "3.141592",
         );
         assert_eq!(
             pi_iter(2).to_approx_string(11),
-            "3.141592653"
+            "3.141592653",
         );
         assert_eq!(
             pi_iter(3).to_approx_string(13),
-            "3.14159265358"
+            "3.14159265358",
         );
         assert_eq!(
             pi_iter(4).to_approx_string(16),
-            "3.14159265358979"
+            "3.14159265358979",
         );
         assert_eq!(
             pi_iter(5).to_approx_string(19),
-            "3.14159265358979323"
+            "3.14159265358979323",
         );
 
         assert_eq!(
@@ -313,5 +313,4 @@ mod tests {
             pi_iter(5).to_ieee754_f64().unwrap(),
         );
     }
-
 }

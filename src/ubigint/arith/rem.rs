@@ -76,14 +76,11 @@ impl UBigInt {
 
         result
     }
-
 }
 
 #[cfg(test)]
 fn is_pow2(mut n: u32) -> bool {
-
     while n > 4 {
-
         if n % 2 == 1 {
             return false;
         }

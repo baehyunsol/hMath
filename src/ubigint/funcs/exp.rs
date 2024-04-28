@@ -33,7 +33,6 @@ impl UBigInt {
                 f2 = mid;
                 frac *= 2;
             }
-
         }
 
         f1.add_ubi_mut(&f2.sub_ubi(&f1).mul_u32(frac as u32).div_u32(1 << 23));
@@ -48,9 +47,7 @@ impl UBigInt {
         else {
             result
         }
-
     }
-
 }
 
 #[cfg(test)]
@@ -59,7 +56,6 @@ mod tests {
 
     #[test]
     fn exp2_test() {
-
         for n in [0, 1, 2, 3, 4, 5, 17, 1728, 196, 159, 160, 161, 162, 9982, 230716] {
             assert_eq!(UBigInt::from_u32(2).pow_u32(n), UBigInt::exp2(n as u64));
         }
@@ -70,7 +66,6 @@ mod tests {
 
         assert_eq!(UBigInt::one(), UBigInt::exp2_accurate(&UBigInt::zero()));
     }
-
 }
 
 const EXP_TABLE: [u64; 513] = [

@@ -8,7 +8,6 @@ mod rem;
 mod sub;
 
 impl std::iter::Sum for UBigInt {
-
     fn sum<I: Iterator<Item = UBigInt>>(mut iter: I) -> Self {
         let mut result = UBigInt::zero();
 
@@ -18,11 +17,9 @@ impl std::iter::Sum for UBigInt {
 
         result
     }
-
 }
 
 impl std::iter::Product for UBigInt {
-
     fn product<I: Iterator<Item = UBigInt>>(mut iter: I) -> Self {
         let mut result = UBigInt::one();
 
@@ -32,7 +29,6 @@ impl std::iter::Product for UBigInt {
 
         result
     }
-
 }
 
 #[cfg(test)]
@@ -46,5 +42,4 @@ mod tests {
         //assert_eq!(v1.iter().sum::<UBigInt>(), UBigInt::from_u32(210));
         assert_eq!(v1.into_iter().sum::<UBigInt>(), UBigInt::from_u32(210));
     }
-
 }

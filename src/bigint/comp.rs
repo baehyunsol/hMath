@@ -5,13 +5,11 @@ impl BigInt {
 
     /// self < other
     pub fn lt_bi(&self, other: &BigInt) -> bool {
-
         if self.is_neg() != other.is_neg() {
             self.is_neg()
         }
 
         else {
-
             match self.val.comp_ubi(&other.val) {
                 Ordering::Equal => false,
 
@@ -25,22 +23,18 @@ impl BigInt {
                 Ordering::Greater if self.is_neg() => true,
 
                 // 4 > 3
-                Ordering::Greater => false
+                Ordering::Greater => false,
             }
-
         }
-
     }
 
     /// self > other
     pub fn gt_bi(&self, other: &BigInt) -> bool {
-
         if self.is_neg() != other.is_neg() {
             other.is_neg()
         }
 
         else {
-
             match self.val.comp_ubi(&other.val) {
                 Ordering::Equal => false,
 
@@ -54,10 +48,9 @@ impl BigInt {
                 Ordering::Greater if self.is_neg() => false,
 
                 // 4 > 3
-                Ordering::Greater => true
+                Ordering::Greater => true,
             }
         }
-
     }
 
     /// Though `PartialEq` is implemented for `BigInt`, this method exists.
@@ -81,9 +74,7 @@ impl BigInt {
     }
 
     pub fn comp_bi(&self, other: &BigInt) -> Ordering {
-
         if self.is_neg() != other.is_neg() {
-
             if self.is_neg() {
                 Ordering::Less
             }
@@ -91,11 +82,9 @@ impl BigInt {
             else {
                 Ordering::Greater
             }
-
         }
 
         else {
-
             match self.val.comp_ubi(&other.val) {
                 Ordering::Equal => Ordering::Equal,
                 Ordering::Less if self.is_neg() => Ordering::Greater,
@@ -103,20 +92,16 @@ impl BigInt {
                 Ordering::Greater if self.is_neg() => Ordering::Less,
                 Ordering::Greater => Ordering::Greater,
             }
-
         }
-
     }
 
     /// self < other
     pub fn lt_i32(&self, other: i32) -> bool {
-
         if self.is_neg() != (other < 0) {
             self.is_neg()
         }
 
         else {
-
             match self.val.comp_u32(other.abs() as u32) {
                 Ordering::Equal => false,
 
@@ -130,22 +115,18 @@ impl BigInt {
                 Ordering::Greater if self.is_neg() => true,
 
                 // 4 > 3
-                Ordering::Greater => false
+                Ordering::Greater => false,
             }
-
         }
-
     }
 
     /// self > other
     pub fn gt_i32(&self, other: i32) -> bool {
-
         if self.is_neg() != (other < 0) {
             other < 0
         }
 
         else {
-
             match self.val.comp_u32(other.abs() as u32) {
                 Ordering::Equal => false,
 
@@ -159,15 +140,12 @@ impl BigInt {
                 Ordering::Greater if self.is_neg() => false,
 
                 // 4 > 3
-                Ordering::Greater => true
+                Ordering::Greater => true,
             }
-
         }
-
     }
 
     pub fn eq_i32(&self, other: i32) -> bool {
-
         if self.is_neg() != (other < 0) {
             false
         }
@@ -175,7 +153,6 @@ impl BigInt {
         else {
             self.val.to_u32().unwrap() == other.abs() as u32
         }
-
     }
 
     pub fn neq_i32(&self, other: i32) -> bool {
@@ -193,9 +170,7 @@ impl BigInt {
     }
 
     pub fn comp_i32(&self, other: i32) -> Ordering {
-
         if self.is_neg() != (other < 0) {
-
             if self.is_neg() {
                 Ordering::Less
             }
@@ -203,11 +178,9 @@ impl BigInt {
             else {
                 Ordering::Greater
             }
-
         }
 
         else {
-
             match self.val.comp_u32(other.abs() as u32) {
                 Ordering::Equal => Ordering::Equal,
                 Ordering::Less if self.is_neg() => Ordering::Greater,
@@ -215,27 +188,20 @@ impl BigInt {
                 Ordering::Greater if self.is_neg() => Ordering::Less,
                 Ordering::Greater => Ordering::Greater,
             }
-
         }
-
     }
-
 }
 
 impl PartialOrd for BigInt {
-
     fn partial_cmp(&self, other: &BigInt) -> Option<Ordering> {
         Some(self.comp_bi(other))
     }
-
 }
 
 impl Ord for BigInt {
-
     fn cmp(&self, other: &BigInt) -> Ordering {
         self.comp_bi(other)
     }
-
 }
 
 #[cfg(test)]
@@ -244,7 +210,6 @@ mod tests {
     use std::cmp::Ordering;
 
     fn bi_comp(bi1: &BigInt, bi2: &BigInt) {
-
         match bi1.comp_bi(bi2) {
             Ordering::Equal => {
                 assert!(!bi1.lt_bi(bi2));
@@ -253,7 +218,7 @@ mod tests {
                 assert!(bi1.leq_bi(bi2));
                 assert!(bi1.geq_bi(bi2));
                 assert!(!bi1.neq_bi(bi2));
-            }
+            },
             Ordering::Less => {
                 assert!(bi1.lt_bi(bi2));
                 assert!(!bi1.gt_bi(bi2));
@@ -261,7 +226,7 @@ mod tests {
                 assert!(bi1.leq_bi(bi2));
                 assert!(!bi1.geq_bi(bi2));
                 assert!(bi1.neq_bi(bi2));
-            }
+            },
             Ordering::Greater => {
                 assert!(!bi1.lt_bi(bi2));
                 assert!(bi1.gt_bi(bi2));
@@ -269,13 +234,11 @@ mod tests {
                 assert!(!bi1.leq_bi(bi2));
                 assert!(bi1.geq_bi(bi2));
                 assert!(bi1.neq_bi(bi2));
-            }
+            },
         }
-
     }
 
     fn bi_i32_comp(bi: &BigInt, n: i32) {
-
         match bi.comp_i32(n) {
             Ordering::Equal => {
                 assert!(!bi.lt_i32(n));
@@ -284,7 +247,7 @@ mod tests {
                 assert!(bi.leq_i32(n));
                 assert!(bi.geq_i32(n));
                 assert!(!bi.neq_i32(n));
-            }
+            },
             Ordering::Less => {
                 assert!(bi.lt_i32(n));
                 assert!(!bi.gt_i32(n));
@@ -292,7 +255,7 @@ mod tests {
                 assert!(bi.leq_i32(n));
                 assert!(!bi.geq_i32(n));
                 assert!(bi.neq_i32(n));
-            }
+            },
             Ordering::Greater => {
                 assert!(!bi.lt_i32(n));
                 assert!(bi.gt_i32(n));
@@ -300,16 +263,13 @@ mod tests {
                 assert!(!bi.leq_i32(n));
                 assert!(bi.geq_i32(n));
                 assert!(bi.neq_i32(n));
-            }
+            },
         }
-
     }
 
     #[test]
     fn bi_comp_test() {
-
         for x in -7..8 {
-
             for y in -7..8 {
                 let bix = BigInt::from_i32(x);
                 let biy = BigInt::from_i32(y);
@@ -317,9 +277,6 @@ mod tests {
                 bi_comp(&bix, &biy);
                 bi_i32_comp(&bix, y);
             }
-
         }
-
     }
-
 }

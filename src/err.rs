@@ -21,13 +21,11 @@ pub enum ConversionError {
     /// For example, if you try to convert a `BigInt` into a `u32`, it's first converted to `i64`, then to `u32`.
     /// If the latter one fails, Rust emits `std::num::TryFromIntError`, which hmath cannot understand.
     /// In this case hmath will throw this error.
-    TryFromIntError
+    TryFromIntError,
 }
 
 impl From<TryFromIntError> for ConversionError {
-
     fn from(_: TryFromIntError) -> Self {
         ConversionError::TryFromIntError
     }
-
 }

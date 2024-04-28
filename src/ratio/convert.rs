@@ -11,7 +11,6 @@ mod into;
 pub use ieee754::{inspect_ieee754_f32, inspect_ieee754_f64};
 
 impl Ratio {
-
     pub fn from_denom_and_numer(denom: BigInt, numer: BigInt) -> Self {
         let mut result = Ratio::from_denom_and_numer_raw(denom, numer);
         result.fit();
@@ -74,7 +73,6 @@ impl Ratio {
     }
 
     pub fn from_string(s: &str) -> Result<Self, ConversionError> {
-
         if s.len() == 0 {
             return Err(ConversionError::NoData);
         }
@@ -82,7 +80,6 @@ impl Ratio {
         let dot_index = s.find('.');
 
         let e_index = if let Some(c) = get_non_decimal_char(s) {
-
             if c.to_ascii_lowercase() != 'x' {
                 s.find(|c: char| c.to_ascii_lowercase() == 'e')
             }
@@ -90,7 +87,6 @@ impl Ratio {
             else {
                 None
             }
-
         } else {
             s.find(|c: char| c.to_ascii_lowercase() == 'e')
         };
@@ -103,11 +99,9 @@ impl Ratio {
         }
 
         if let Some(c) = get_non_decimal_char(s) {
-
             if c.to_ascii_lowercase() != 'e' {
                 return Err(ConversionError::InvalidChar(c));
             }
-
         }
 
         let is_neg = s.starts_with('-');
@@ -124,9 +118,8 @@ impl Ratio {
 
             match BigInt::from_string(integer_string) {
                 Ok(n) => n,
-                Err(e) => { return Err(e); }
+                Err(e) => { return Err(e); },
             }
-
         };
         let mut fractional_part = match dot_index {
             None => Ratio::zero(),
@@ -148,19 +141,17 @@ impl Ratio {
                 let mut numer = BigInt::zero();
 
                 for c in fraction_string.chars() {
-
                     match c {
                         '_' => { continue; }
                         x if x.is_digit(10) => {
                             denom.mul_i32_mut(10);
                             numer.mul_i32_mut(10);
                             numer.add_i32_mut(x.to_digit(10).unwrap() as i32);
-                        }
+                        },
                         _ => {
                             return Err(ConversionError::InvalidChar(c));
-                        }
+                        },
                     }
-
                 }
 
                 Ratio::from_denom_and_numer(denom, numer)
@@ -171,19 +162,18 @@ impl Ratio {
             Some(i) => {
                 let exp_string = match s.get((i + 1)..) {
                     Some(i) => i,
-                    _ => { return Err(ConversionError::UnexpectedEnd); }
+                    _ => { return Err(ConversionError::UnexpectedEnd); },
                 };
 
                 match BigInt::from_string(&exp_string) {
                     Err(e) => {
                         return Err(e);
-                    }
+                    },
                     Ok(n) => match n.to_i32() {
                         Ok(n) => n,
                         Err(e) => { return Err(e); }
-                    }
+                    },
                 }
-
             }
         };
 
@@ -200,7 +190,6 @@ impl Ratio {
             let mut exponential_part_bi = BigInt::from_i32(10).pow_u32(exponential_part.abs() as u32);
 
             if exponential_part > 0 {
-
                 while result.denom.rem_pow2(2).is_zero() && exponential_part_bi.rem_pow2(2).is_zero() {
                     result.denom.div_i32_mut(2);
                     exponential_part_bi.div_i32_mut(2);
@@ -215,7 +204,6 @@ impl Ratio {
             }
 
             else if exponential_part < 0 {
-
                 while result.numer.rem_pow2(2).is_zero() && exponential_part_bi.rem_pow2(2).is_zero() {
                     result.numer.div_i32_mut(2);
                     exponential_part_bi.div_i32_mut(2);
@@ -353,7 +341,6 @@ impl Ratio {
                 if digits.ends_with('.') {
                     digits = digits.get(0..(digits.len() - 1)).unwrap().to_string();
                 }
-
             }
 
             format!("{sign_part}{digits}{exp}")
@@ -443,7 +430,6 @@ impl Ratio {
             } else {
                 format!("{sign_part}{int_part}")
             }
-
         };
 
         #[cfg(test)] assert!(result.len() <= max_len);
@@ -457,7 +443,7 @@ impl Ratio {
         let mut self_clone = if len_min > 4 {
             Ratio::from_denom_and_numer(
                 self.denom.shift_right(len_min - 4),
-                self.numer.shift_right(len_min - 4)
+                self.numer.shift_right(len_min - 4),
             )
         }
 
@@ -485,7 +471,7 @@ impl Ratio {
         format!(
             "{}{digits}e{}",
             if self.is_neg() { "-" } else { "" },
-            exp + new_exp as i64
+            exp + new_exp as i64,
         )
     }
 
@@ -493,21 +479,17 @@ impl Ratio {
     pub fn to_string(&self) -> String {
         self.to_approx_string(12)
     }
-
 }
 
 // it returns the first non-decimal character, if exists
 // it assumes that `s` is a valid numeric literal
 fn get_non_decimal_char(s: &str) -> Option<char> {
-
     for c in s.chars() {
-
         match c.to_ascii_lowercase() {
-            '-' | '0' | '.' => { continue; }
-            x if x.is_digit(10) => { return None; }
-            _ => { return Some(c); }
+            '-' | '0' | '.' => { continue; },
+            x if x.is_digit(10) => { return None; },
+            _ => { return Some(c); },
         }
-
     }
 
     None
@@ -538,18 +520,15 @@ fn exp10(n: &Ratio) -> i64 {
             big = mid;
             big_exp = mid_exp;
         }
-
     }
 
     small.to_i64().unwrap()
 }
 
 impl std::fmt::Display for Ratio {
-
     fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(fmt, "{}", self.to_string())
     }
-
 }
 
 impl FromStr for Ratio {
@@ -558,7 +537,6 @@ impl FromStr for Ratio {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ratio::from_string(s)
     }
-
 }
 
 #[cfg(test)]
@@ -569,57 +547,57 @@ mod tests {
     fn string_test() {
         assert_eq!(
             Ratio::from_string("3.141592e720").unwrap().to_approx_string(12),
-            "3.141592e720"
+            "3.141592e720",
         );
         assert_eq!(
             Ratio::from_string("-3.141592e720").unwrap().to_approx_string(16),
-            "-3.141592e720"
+            "-3.141592e720",
         );
         assert_eq!(
             Ratio::from_string("3.141592e720").unwrap().to_approx_string(9),
-            "3.141e720"
+            "3.141e720",
         );
         assert_eq!(
             Ratio::from_string("-3.141592e720").unwrap().to_approx_string(10),
-            "-3.141e720"
+            "-3.141e720",
         );
         assert_eq!(
             Ratio::from_string("3.141592e720").unwrap().to_approx_string(6),
-            "3.1e720"
+            "3.1e720",
         );
         assert_eq!(
             Ratio::from_string("-3.141592e720").unwrap().to_approx_string(6),
-            "-3e720"
+            "-3e720",
         );
         assert_eq!(
             Ratio::from_string("3e20").unwrap().to_approx_string(0),
-            "3e20"
+            "3e20",
         );
         assert_eq!(
             Ratio::from_string("-3e20").unwrap().to_approx_string(0),
-            "-3e20"
+            "-3e20",
         );
         assert_eq!(
             // not 16 * 10^5
             Ratio::from_string("0x16e5").unwrap(),
-            Ratio::from_bi(BigInt::from_i32(0x16e5))
+            Ratio::from_bi(BigInt::from_i32(0x16e5)),
         );
         assert_eq!(
             // not -16 * 10^5
             Ratio::from_string("-0x16e5").unwrap(),
-            Ratio::from_bi(BigInt::from_i32(-0x16e5))
+            Ratio::from_bi(BigInt::from_i32(-0x16e5)),
         );
         assert_eq!(
             Ratio::from_string("16e5").unwrap(),
-            Ratio::from_bi(BigInt::from_i32(1600000))
+            Ratio::from_bi(BigInt::from_i32(1600000)),
         );
         assert_eq!(
             Ratio::from_string("1600e-1").unwrap(),
-            Ratio::from_bi(BigInt::from_i32(160))
+            Ratio::from_bi(BigInt::from_i32(160)),
         );
         assert_eq!(
             Ratio::from_string("3.012").unwrap(),
-            Ratio::from_denom_and_numer_i32(1000, 3012)
+            Ratio::from_denom_and_numer_i32(1000, 3012),
         );
         assert!(Ratio::from_string("0x123.4").is_err());
         assert!(Ratio::from_string("0x123.4e4").is_err());
@@ -643,7 +621,7 @@ mod tests {
             "1.23e-120",
             "1.2345e-9",
             "3e-1200",
-            "3.141e7"
+            "3.141e7",
         ];
 
         for sample in samples.into_iter() {
@@ -679,7 +657,5 @@ mod tests {
             assert_eq!(ans, s.to_scientific_notation(6));
             assert_eq!(ans2, s2.to_scientific_notation(6));
         }
-
     }
-
 }

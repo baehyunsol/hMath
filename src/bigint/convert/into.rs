@@ -1,5 +1,10 @@
-use crate::{BigInt, Ratio, UBigInt, ConversionError};
-use crate::impl_trivial_try_from;
+use crate::{
+    BigInt,
+    ConversionError,
+    Ratio,
+    UBigInt,
+    impl_trivial_try_from,
+};
 
 macro_rules! impl_ref_for_bigints {
     (From, $t: ty) => (
@@ -61,7 +66,6 @@ impl TryFrom<&BigInt> for u128 {
     type Error = ConversionError;
 
     fn try_from(n: &BigInt) -> Result<Self, Self::Error> {
-
         if n.is_neg() {
             Err(ConversionError::NotInRange { permitted: "0~3.4e38".to_string(), error: format!("{n}") })
         }
@@ -69,7 +73,6 @@ impl TryFrom<&BigInt> for u128 {
         else {
             (&n.val).try_into()
         }
-
     }
 }
 

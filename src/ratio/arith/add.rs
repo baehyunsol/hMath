@@ -6,7 +6,7 @@ impl Ratio {
     pub fn add_rat(&self, other: &Ratio) -> Self {
         let result = Ratio::from_denom_and_numer(
             self.denom.mul_bi(&other.denom),
-            self.denom.mul_bi(&other.numer).add_bi(&other.denom.mul_bi(&self.numer))
+            self.denom.mul_bi(&other.numer).add_bi(&other.denom.mul_bi(&self.numer)),
         );
 
         #[cfg(test)] assert!(result.is_valid());
@@ -27,7 +27,7 @@ impl Ratio {
         // Safety: `self.denom` and `self.numer` are already coprime.
         let result = Ratio::from_denom_and_numer_raw(
             self.denom.clone(),
-            self.numer.add_bi(&self.denom.mul_bi(other))
+            self.numer.add_bi(&self.denom.mul_bi(other)),
         );
 
         #[cfg(test)] assert!(result.is_valid());
@@ -46,7 +46,7 @@ impl Ratio {
         // Safety: `self.denom` and `self.numer` are already coprime.
         let result = Ratio::from_denom_and_numer_raw(
             self.denom.clone(),
-            self.numer.add_bi(&self.denom.mul_i32(other))
+            self.numer.add_bi(&self.denom.mul_i32(other)),
         );
 
         #[cfg(test)] assert!(result.is_valid());
@@ -58,5 +58,4 @@ impl Ratio {
         self.numer.add_bi_mut(&self.denom.mul_i32(other));
         #[cfg(test)] assert!(self.is_valid());
     }
-
 }

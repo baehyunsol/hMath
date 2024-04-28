@@ -16,7 +16,7 @@ pub use convert::{inspect_ieee754_f32, inspect_ieee754_f64};
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Ratio {
     denom: BigInt,
-    numer: BigInt
+    numer: BigInt,
 }
 
 impl Ratio {
@@ -48,14 +48,14 @@ impl Ratio {
     pub fn zero() -> Self {
         Ratio {
             denom: BigInt::one(),
-            numer: BigInt::zero()
+            numer: BigInt::zero(),
         }
     }
 
     pub fn one() -> Self {
         Ratio {
             denom: BigInt::one(),
-            numer: BigInt::one()
+            numer: BigInt::one(),
         }
     }
 
@@ -82,7 +82,6 @@ impl Ratio {
 
     // TODO: better name
     fn fit(&mut self) {
-
         if self.denom.is_neg() {
             self.denom.neg_mut();
             self.numer.neg_mut();
@@ -104,7 +103,6 @@ impl Ratio {
     /// If it successfully shrinks, it returns `Ok(n)` where `n` is how much numbers it removed.
     /// Sometimes, the shrinked result doesn't satisfy the limit. It returns `Err(n)` in those cases where `n` is how much numbers it removed.
     pub fn shrink(&mut self, limit: usize) -> Result<usize, usize> {
-
         if limit < 3 {
             return Err(0);
         }
@@ -145,7 +143,6 @@ impl Ratio {
             else {
                 Ok(shrink - 1)
             }
-
         }
 
         else if self.denom.len() + 4 < self.numer.len() {
@@ -160,15 +157,12 @@ impl Ratio {
             else {
                 Ok(shrink - 1)
             }
-
         }
 
         else {
             Err(0)
         }
-
     }
-
 }
 
 impl Default for Ratio {

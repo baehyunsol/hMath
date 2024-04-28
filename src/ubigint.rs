@@ -38,7 +38,6 @@ impl UBigInt {
 
     #[cfg(test)]
     pub fn is_valid(&self) -> bool {
-
         if self.len() == 0 {
             println!("length 0 ubigint");
             return false;
@@ -62,7 +61,6 @@ impl UBigInt {
     pub fn into_raw(self) -> Vec<u32> {
         self.0
     }
-
 }
 
 impl Default for UBigInt {

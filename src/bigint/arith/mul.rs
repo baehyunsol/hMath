@@ -56,9 +56,7 @@ mod tests {
 
     #[test]
     fn sign_test() {
-
         for x in -7..8 {
-
             for y in -7..8 {
                 let mut x1 = BigInt::from_i32(x);
                 let y1 = BigInt::from_i32(y);
@@ -75,9 +73,6 @@ mod tests {
                 assert_eq!(res1, x1);
                 assert_eq!(res2, x2);
             }
-
         }
-
     }
-
 }

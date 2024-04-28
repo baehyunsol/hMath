@@ -5,7 +5,6 @@ impl UBigInt {
 
     /// self < other
     pub fn lt_ubi(&self, other: &UBigInt) -> bool {
-
         if self.len() > other.len() {
             false
         }
@@ -18,7 +17,6 @@ impl UBigInt {
             let self_len = self.len();
 
             for i in 1..(self_len + 1) {
-
                 if self.0[self_len - i] < other.0[self_len - i] {
                     return true;
                 }
@@ -26,17 +24,14 @@ impl UBigInt {
                 else if self.0[self_len - i] > other.0[self_len - i] {
                     return false;
                 }
-
             }
 
             false  // equal
         }
-
     }
 
     /// self > other
     pub fn gt_ubi(&self, other: &UBigInt) -> bool {
-
         if self.len() > other.len() {
             true
         }
@@ -49,7 +44,6 @@ impl UBigInt {
             let self_len = self.len();
 
             for i in 1..(self_len + 1) {
-
                 if self.0[self_len - i] < other.0[self_len - i] {
                     return false;
                 }
@@ -57,12 +51,10 @@ impl UBigInt {
                 else if self.0[self_len - i] > other.0[self_len - i] {
                     return true;
                 }
-
             }
 
             false  // equal
         }
-
     }
 
     /// Though `PartialEq` is implemented for `UBigInt`, this method exists.
@@ -86,7 +78,6 @@ impl UBigInt {
     }
 
     pub fn comp_ubi(&self, other: &UBigInt) -> Ordering {
-
         if self.len() > other.len() {
             Ordering::Greater
         }
@@ -107,17 +98,14 @@ impl UBigInt {
                 else if self.0[self_len - i] < other.0[self_len - i] {
                     return Ordering::Less;
                 }
-
             }
 
             Ordering::Equal
         }
-
     }
 
     /// self < other
     pub fn lt_u32(&self, other: u32) -> bool {
-
         if self.len() > 1 {
             false
         }
@@ -125,12 +113,10 @@ impl UBigInt {
         else {
             self.0[0] < other
         }
-
     }
 
     /// self > other
     pub fn gt_u32(&self, other: u32) -> bool {
-
         if self.len() > 1 {
             true
         }
@@ -138,11 +124,9 @@ impl UBigInt {
         else {
             self.0[0] > other
         }
-
     }
 
     pub fn eq_u32(&self, other: u32) -> bool {
-
         if self.len() > 1 {
             false
         }
@@ -150,7 +134,6 @@ impl UBigInt {
         else {
             self.0[0] == other
         }
-
     }
 
     pub fn neq_u32(&self, other: u32) -> bool {
@@ -168,7 +151,6 @@ impl UBigInt {
     }
 
     pub fn comp_u32(&self, other: u32) -> Ordering {
-
         if self.len() > 1 {
             Ordering::Greater
         }
@@ -176,24 +158,19 @@ impl UBigInt {
         else {
             self.0[0].cmp(&other)
         }
-
     }
 }
 
 impl PartialOrd for UBigInt {
-
     fn partial_cmp(&self, other: &UBigInt) -> Option<Ordering> {
         Some(self.comp_ubi(other))
     }
-
 }
 
 impl Ord for UBigInt {
-
     fn cmp(&self, other: &UBigInt) -> Ordering {
         self.comp_ubi(other)
     }
-
 }
 
 #[cfg(test)]
@@ -224,9 +201,7 @@ mod tests {
         ];
 
         for i in 0..numbers.len() {
-
             for j in (i + 1)..numbers.len() {
-
                 match numbers[i].comp_ubi(&numbers[j]) {
                     Ordering::Greater => {
                         assert!(numbers[i].gt_ubi(&numbers[j]));
@@ -236,7 +211,6 @@ mod tests {
                         if let Ok(n) = numbers[j].to_u32() {
                             assert!(numbers[i].gt_u32(n));
                         }
-
                     },
                     Ordering::Equal => panic!("No same numbers"),
                     Ordering::Less => {
@@ -247,14 +221,9 @@ mod tests {
                         if let Ok(n) = numbers[i].to_u32() {
                             assert!(numbers[j].gt_u32(n));
                         }
-
                     },
                 }
-
             }
-
         }
-
     }
-
 }

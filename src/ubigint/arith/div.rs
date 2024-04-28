@@ -6,7 +6,6 @@ impl UBigInt {
     // TODO: the code is too messy
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn div_ubi(&self, other: &UBigInt) -> Self {
-
         if self.len() < other.len() {
             UBigInt::zero()
         }
@@ -83,13 +82,9 @@ impl UBigInt {
                         else {
                             approx4.sub_u32(1)
                         }
-
                     }
-
                 }
-
             }
-
         }
 
         else {
@@ -108,7 +103,6 @@ impl UBigInt {
             }
 
             else {
-
                 if other.gt_ubi(self) {
                     UBigInt::zero()
                 }
@@ -116,11 +110,8 @@ impl UBigInt {
                 else {
                     UBigInt::one()
                 }
-
             }
-
         }
-
     }
 
     pub fn div_ubi_mut(&mut self, other: &UBigInt) {
@@ -158,7 +149,6 @@ impl UBigInt {
 
         #[cfg(test)] assert!(self.is_valid());
     }
-
 }
 
 fn div_approx(divend: Vec<u32>, divisor: u64) -> UBigInt {
@@ -198,44 +188,40 @@ mod tests {
         if !RUN_ALL_TESTS { return; }
         assert_eq!(
             UBigInt::from_string("1_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000").unwrap().div_ubi(&UBigInt::from_string("1_0000_0000_0000_0000_0000_0000").unwrap()),
-            UBigInt::from_string("1_0000_0000_0000_0000_0000_0000_0000_0000_0000").unwrap()
+            UBigInt::from_string("1_0000_0000_0000_0000_0000_0000_0000_0000_0000").unwrap(),
         );
         assert_eq!(
             UBigInt::from_string("1000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000_0000").unwrap().div_ubi(&UBigInt::from_string("316227766016837933199889").unwrap()),
-            UBigInt::from_string("316227766016837933199889").unwrap()
+            UBigInt::from_string("316227766016837933199889").unwrap(),
         );
         assert_eq!(
             UBigInt::from_u32(8).pow_u32(888).div_ubi(&UBigInt::from_u32(8).pow_u32(886)),
-            UBigInt::from_u32(64)
+            UBigInt::from_u32(64),
         );
         assert_eq!(
             UBigInt::from_u32(7).pow_u32(777).div_ubi(&UBigInt::from_u32(7).pow_u32(775)),
-            UBigInt::from_u32(49)
+            UBigInt::from_u32(49),
         );
         assert_eq!(
             UBigInt::from_u32(6).pow_u32(666).div_ubi(&UBigInt::from_u32(6).pow_u32(664)),
-            UBigInt::from_u32(36)
+            UBigInt::from_u32(36),
         );
         assert_eq!(
             UBigInt::from_raw(vec![1, 2, 3, 4, 5, 5, 5]).div_ubi(&UBigInt::from_raw(vec![1, 1, 1, 1, 5, 5, 5])),
-            UBigInt::one()
+            UBigInt::one(),
         );
         assert_eq!(
             UBigInt::from_raw(vec![u32::MAX; 18]).div_ubi(&UBigInt::from_raw(vec![u32::MAX; 8])),
-            UBigInt::from_string("2135987035920910082395021706169552114602704522356652769947041607822219725780658996767035796488192").unwrap()
+            UBigInt::from_string("2135987035920910082395021706169552114602704522356652769947041607822219725780658996767035796488192").unwrap(),
         );
 
         for a in 6..12 {
-
             for b in (a + 1)..18 {
                 assert_eq!(
                     UBigInt::from_u32(17).pow_u32(b * 300).div_ubi(&UBigInt::from_u32(17).pow_u32(a * 300)),
-                    UBigInt::from_u32(17).pow_u32((b - a) * 300)
+                    UBigInt::from_u32(17).pow_u32((b - a) * 300),
                 );
             }
-
         }
-
     }
-
 }

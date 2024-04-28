@@ -22,9 +22,7 @@ impl UBigInt {
         }
 
         for i in 0..other.len() {
-
             if carry {
-
                 if other.0[i] != u32::MAX && self.0[i] >= other.0[i] + 1 {
                     self.0[i] = self.0[i].checked_sub(other.0[i] + 1).expect("UBigInt::sub_ubi panics when `other` > `self`");
                     carry = false;
@@ -33,11 +31,9 @@ impl UBigInt {
                 else {
                     self.0[i] = u32::MAX - (other.0[i].checked_sub(self.0[i]).expect("UBigInt::sub_ubi panics when `other` > `self`"));
                 }
-
             }
 
             else {
-
                 if self.0[i] >= other.0[i] {
                     self.0[i] = self.0[i].checked_sub(other.0[i]).expect("UBigInt::sub_ubi panics when `other` > `self`");
                 }
@@ -46,19 +42,15 @@ impl UBigInt {
                     self.0[i] = u32::MAX - (other.0[i].checked_sub(self.0[i]).expect("UBigInt::sub_ubi panics when `other` > `self`")) + 1;
                     carry = true;
                 }
-
             }
-
         }
 
         if carry {
-
             if self.len() <= other.len() {
                 panic!("UBigInt::sub_ubi panics when `other` > `self`");
             }
 
             for i in other.len()..self.len() {
-
                 if self.0[i] > 0 {
                     self.0[i] -= 1;
                     break;
@@ -67,9 +59,7 @@ impl UBigInt {
                 else {
                     self.0[i] = u32::MAX;
                 }
-
             }
-
         }
 
         remove_suffix_0(&mut self.0);
@@ -93,7 +83,6 @@ impl UBigInt {
 
     /// it panics when `other` > `self`
     pub fn sub_u32_mut(&mut self, other: u32) {
-
         if self.0[0] >= other {
             self.0[0] -= other;
         }
@@ -106,7 +95,6 @@ impl UBigInt {
                 i += 1;
             }
 
-
             self.0[i] -= 1;
             self.0[0] = u32::MAX - other + self.0[0] + 1;
 
@@ -117,11 +105,9 @@ impl UBigInt {
         else {
             panic!("attempt to subtract with overflow");
         }
-
     }
 
     pub fn abs_diff_ubi(&self, other: &UBigInt) -> Self {
-
         if self.geq_ubi(other) {
             self.sub_ubi(other)
         }
@@ -129,11 +115,9 @@ impl UBigInt {
         else {
             other.sub_ubi(self)
         }
-
     }
 
     pub fn abs_diff_u32(&self, other: u32) -> Self {
-
         if self.geq_u32(other) {
             self.sub_u32(other)
         }
@@ -141,9 +125,7 @@ impl UBigInt {
         else {
             UBigInt::from_u32(other - self.to_u32().unwrap())
         }
-
     }
-
 }
 
 #[cfg(test)]
@@ -154,7 +136,7 @@ mod tests {
     fn sub_carry_test() {
         assert_eq!(
             UBigInt::from_raw(vec![0, 0, 0, 1]).sub_ubi(&UBigInt::from_u32(1)),
-            UBigInt::from_raw(vec![u32::MAX, u32::MAX, u32::MAX])
+            UBigInt::from_raw(vec![u32::MAX, u32::MAX, u32::MAX]),
         );
 
         let mut pow2 = UBigInt::from_u32(256);
@@ -169,7 +151,6 @@ mod tests {
             pow2.add_u32_mut(1);
             assert_eq!(pow2, UBigInt::from_u32(256).pow_u32(i + 1));
         }
-
     }
 
     #[test]
@@ -179,7 +160,7 @@ mod tests {
         #[cfg(feature = "rand")]
         let (x, y) = (
                 UBigInt::random(rand::random::<usize>() % 6 + 1),
-                UBigInt::random(rand::random::<usize>() % 6 + 1)
+                UBigInt::random(rand::random::<usize>() % 6 + 1),
         );
 
         #[cfg(not(feature = "rand"))]
@@ -188,15 +169,13 @@ mod tests {
         match x.comp_ubi(&y) {
             std::cmp::Ordering::Greater => {
                 let _ = y.sub_ubi(&x);  // should panic
-            }
+            },
             std::cmp::Ordering::Less => {
                 let _ = x.sub_ubi(&y);  // should panic
-            }
+            },
             _ => {
                 panic!();
-            }
+            },
         }
-
     }
-
 }

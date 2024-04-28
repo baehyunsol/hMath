@@ -6,7 +6,6 @@ impl Ratio {
     /// Though the ieee 754 standard distinguishes negative 0 and positive 0, it doesn't distinguish between them.
     /// It returns an error if `n` is NaN or Inf.
     pub fn from_ieee754_f32(n: f32) -> Result<Self, ConversionError> {
-
         match inspect_ieee754_f32(n) {
             Ok((neg, exp, frac)) => if exp == i32::MIN {
                 Ok(Ratio::zero())
@@ -27,16 +26,14 @@ impl Ratio {
 
                 Ok(Ratio::from_denom_and_numer(denom, numer))
             },
-            Err(e) => Err(e)
+            Err(e) => Err(e),
         }
-
     }
 
     /// If you don't know what `ieee754` is, you're okay to use this function.
     /// This function does not return `f32::NAN` or `f32::INFINITY` for overflows, but it returns `ConversionError::NotInRange` instead.
     /// For underflow numbers like `1-e20000`, it returns 0.
     pub fn to_ieee754_f32(&self) -> Result<f32, ConversionError> {
-
         if self.is_zero() {
             return Ok(0.0)
         }
@@ -107,7 +104,6 @@ impl Ratio {
             if frac == 0 {
                 return Ok(0.0);
             }
-
         }
 
         exp += 127;
@@ -126,7 +122,6 @@ impl Ratio {
     /// Though the ieee 754 standard distinguishes negative 0 and positive 0, it doesn't distinguish between them.
     /// It returns an error if `n` is NaN or Inf.
     pub fn from_ieee754_f64(n: f64) -> Result<Self, ConversionError> {
-
         match inspect_ieee754_f64(n) {
             Ok((neg, exp, frac)) => if exp == i32::MIN {
                 Ok(Ratio::zero())
@@ -147,16 +142,14 @@ impl Ratio {
 
                 Ok(Ratio::from_denom_and_numer(denom, numer))
             },
-            Err(e) => Err(e)
+            Err(e) => Err(e),
         }
-
     }
 
     /// If you don't know what `ieee754` is, you're okay to use this function.
     /// This function does not return `f64::NAN` or `f64::INFINITY` for overflows, but it returns `ConversionError::NotInRange` instead.
     /// For underflow numbers like `1-e20000`, it returns 0.
     pub fn to_ieee754_f64(&self) -> Result<f64, ConversionError> {
-
         if self.is_zero() {
             return Ok(0.0)
         }
@@ -227,7 +220,6 @@ impl Ratio {
             if frac == 0 {
                 return Ok(0.0);
             }
-
         }
 
         exp += 1023;
@@ -241,7 +233,6 @@ impl Ratio {
 
         unsafe { Ok(*rp) }
     }
-
 }
 
 /// You may find this function useful when you're dealing with [ieee 754 numbers](https://en.wikipedia.org/wiki/IEEE_754).\
@@ -277,9 +268,7 @@ pub fn inspect_ieee754_f32(n: f32) -> Result<(bool, i32, u32), ConversionError> 
     }
 
     else if exp == 128 {
-
         if frac == 0 {
-
             if neg {
                 return Err(ConversionError::NegInfinity);
             }
@@ -287,13 +276,11 @@ pub fn inspect_ieee754_f32(n: f32) -> Result<(bool, i32, u32), ConversionError> 
             else {
                 return Err(ConversionError::Infinity);
             }
-
         }
 
         else {
             return Err(ConversionError::NotANumber);
         }
-
     }
 
     // if neg { -1 } else { 1 } * 2^exp * (1 + frac / 2^23)
@@ -333,9 +320,7 @@ pub fn inspect_ieee754_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> 
     }
 
     else if exp == 1024 {
-
         if frac == 0 {
-
             if neg {
                 return Err(ConversionError::NegInfinity);
             }
@@ -343,13 +328,11 @@ pub fn inspect_ieee754_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> 
             else {
                 return Err(ConversionError::Infinity);
             }
-
         }
 
         else {
             return Err(ConversionError::NotANumber);
         }
-
     }
 
     // if neg { -1 } else { 1 } * 2^exp * (1 + frac / 2^52)
@@ -367,7 +350,6 @@ mod tests {
 
     #[test]
     fn ieee754_test() {
-
         if !RUN_ALL_TESTS { return; }
 
         let samples = vec![

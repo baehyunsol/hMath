@@ -1,4 +1,8 @@
-use crate::{BigInt, gcd_ubi, UBigInt};
+use crate::{
+    BigInt,
+    UBigInt,
+    gcd_ubi,
+};
 
 impl BigInt {
 
@@ -115,7 +119,6 @@ impl BigInt {
     /// If `scale` is 0, it returns 0.
     #[cfg(feature = "rand")]
     pub fn random(scale: usize) -> Self {
-
         if scale == 0 {
             BigInt::zero()
         }
@@ -123,9 +126,7 @@ impl BigInt {
         else {
             BigInt::from_ubi(UBigInt::random(scale), rand::random::<bool>())
         }
-
     }
-
 }
 
 pub fn gcd_bi(a: &BigInt, b: &BigInt) -> BigInt {

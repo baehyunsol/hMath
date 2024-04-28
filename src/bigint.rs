@@ -9,7 +9,7 @@ pub mod funcs;
 #[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct BigInt {
     val: UBigInt,
-    _is_neg: bool
+    _is_neg: bool,
 }
 
 impl BigInt {
@@ -60,7 +60,6 @@ impl BigInt {
     pub fn is_valid(&self) -> bool {
         self.val.is_valid() && (!self.val.is_zero() || !self.is_neg())
     }
-
 }
 
 impl Default for BigInt {

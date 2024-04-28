@@ -10,7 +10,6 @@ impl UBigInt {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn sqrt(&self) -> Self {
-
         if self.len() < 3 {
             return UBigInt::from_u64(sqrt_u64(self.to_u64().unwrap()));
         }
@@ -46,7 +45,6 @@ impl UBigInt {
             if div.len() < 2 {
                 break;
             }
-
         }
 
         // Safety: div.len() < 2;
@@ -57,7 +55,6 @@ impl UBigInt {
         }
 
         loop {
-
             while result.mul_ubi(&result).lt_ubi(self) {
                 result.add_u32_mut(div);
             }
@@ -78,13 +75,10 @@ impl UBigInt {
             if div == 0 {
                 return result;
             }
-
         }
-
     }
 
     pub fn factorial(n: u32) -> UBigInt {
-
         if n < 21 {
             let mut result: u64 = 1;
 
@@ -106,7 +100,6 @@ impl UBigInt {
                     result.mul_u32_mut(int_buffer);
                     int_buffer = 1;
                 }
-
             }
 
             if int_buffer > 1 {
@@ -124,7 +117,7 @@ impl UBigInt {
                 684006397, 4097118094, 3861115933,
                 3624737256, 703871983, 1875727135,
                 2498653150, 380736459, 2256750694,
-                3845178240, 3753984225, 4581
+                3845178240, 3753984225, 4581,
             ]);  // factorial(128)
             let mut buffer = UBigInt::one();
 
@@ -135,21 +128,18 @@ impl UBigInt {
                     result.mul_ubi_mut(&buffer);
                     buffer = UBigInt::one();
                 }
-
             }
 
             result.mul_ubi_mut(&buffer);
             result
         }
-
     }
 
     pub fn fibonacci(n: u32) -> UBigInt {
-
         if n < 14 {
             UBigInt::from_u32([
                 0, 1, 1, 2, 3, 5, 8, 13,
-                21, 34, 55, 89, 144, 233
+                21, 34, 55, 89, 144, 233,
             ][n as usize])
         }
 
@@ -180,13 +170,10 @@ impl UBigInt {
 
             result
         }
-
     }
 
     pub fn is_prime(&self) -> bool {
-
         if self.0[0] % 2 == 0 {
-
             if self.0[0] == 2 && self.0.len() == 1 {
                 true
             }
@@ -195,7 +182,6 @@ impl UBigInt {
             else {
                 false
             }
-
         }
 
         else if self.is_one() {
@@ -213,7 +199,6 @@ impl UBigInt {
                     let self_ = self.to_u64().unwrap();
 
                     while div < n {
-
                         if self_ % div as u64 == 0 {
                             return false;
                         }
@@ -222,9 +207,8 @@ impl UBigInt {
                     }
 
                     true
-                }
+                },
                 _ => {
-
                     for _ in 0..(u32::MAX / 2 - 1) {
 
                         if self.rem_u32(div).is_zero() {
@@ -241,7 +225,6 @@ impl UBigInt {
 
                     // TODO: this loop is not tested
                     while div.mul_ubi(&div).leq_ubi(self) {
-
                         if self.rem_ubi(&div).is_zero() {
                             return false;
                         }
@@ -250,12 +233,9 @@ impl UBigInt {
                     }
 
                     true
-                }
-
+                },
             }
-
         }
-
     }
 
     pub fn prime_factorial(&self) -> Vec<Self> {
@@ -270,7 +250,6 @@ impl UBigInt {
         let mut div = 3;
 
         while self_clone.geq_ubi(&UBigInt::from_u64(div as u64 * div as u64)) {
-
             while self_clone.rem_u32(div).is_zero() {
                 self_clone.div_u32_mut(div);
                 result.push(UBigInt::from_u32(div));
@@ -283,7 +262,6 @@ impl UBigInt {
 
         // TODO: this loop is not tested
         while self_clone.geq_ubi(&div.mul_ubi(&div)) {
-
             while self_clone.rem_ubi(&div).is_zero() {
                 self_clone.div_ubi_mut(&div);
                 result.push(div.clone());
@@ -303,7 +281,6 @@ impl UBigInt {
     /// If `scale` is 0, it returns 0.
     #[cfg(feature = "rand")]
     pub fn random(scale: usize) -> Self {
-
         if scale == 0 {
             UBigInt::zero()
         }
@@ -313,12 +290,10 @@ impl UBigInt {
                 (0..scale).map(|_| rand::random::<u32>().max(1)).collect()
             )
         }
-
     }
 }
 
 fn sqrt_u64(n: u64) -> u64 {
-
     if n == 0 { return 0; }
 
     let l2 = n.ilog2();
@@ -369,11 +344,9 @@ fn sqrt_u64(n: u64) -> u64 {
         if div == 0 {
             div = 2;
         }
-
     }
 
     loop {
-
         while result * result < n {
             result += div;
         }
@@ -393,12 +366,10 @@ fn sqrt_u64(n: u64) -> u64 {
 
             return result;
         }
-
     }
 }
 
 pub fn gcd_ubi(a: &UBigInt, b: &UBigInt) -> UBigInt {
-
     if a.is_zero() {
         return b.clone();
     }
@@ -425,18 +396,19 @@ mod tests {
     #[test]
     fn factorial_test() {
         if !RUN_ALL_TESTS { return; }
+
         let mut acc = UBigInt::one();
 
         for n in 2..256 {
             acc.mul_u32_mut(n);
             assert_eq!(UBigInt::factorial(n), acc);
         }
-
     }
 
     #[test]
     fn fibonacci_test() {
         if !RUN_ALL_TESTS { return; }
+
         let mut fibos = vec![
             UBigInt::zero(), UBigInt::one(), UBigInt::one()
         ];
@@ -450,12 +422,10 @@ mod tests {
         for i in 0..256 {
             assert_eq!(fibos[i], UBigInt::fibonacci(i as u32));
         }
-
     }
 
     #[test]
     fn sqrt_test() {
-
         assert_eq!(sqrt_u64(10), 3);
         assert_eq!(sqrt_u64(100), 10);
         assert_eq!(sqrt_u64(1000), 31);
@@ -475,7 +445,7 @@ mod tests {
             "0", "1", "2", "3",
             "20", "300", "4000",
             "50000", "600000",
-            "123456789"
+            "123456789",
         ] {
             let n = UBigInt::from_string(n).unwrap();
             let nn = n.mul_ubi(&n);
@@ -573,13 +543,12 @@ mod tests {
             2, 3, 5, 7, 11, 13, 17, 19,
             23, 29, 31, 37, 41, 43, 47,
             53, 59, 61, 67, 71, 73, 79,
-            83, 89, 97, 101, 103, 107, 109
+            83, 89, 97, 101, 103, 107, 109,
         ];
 
         for pn in pns.into_iter() {
             assert!(UBigInt::from_u32(pn).is_prime());
         }
-
     }
 
     fn prime_factorial_test_unit(number: &UBigInt) {
@@ -592,7 +561,6 @@ mod tests {
             if !pf.is_prime() && !(pf.is_one() && number.is_one()) {
                 panic!("{pf}, {number}, {result:?}");
             }
-
         }
 
         assert_eq!(&answer, number);
@@ -600,6 +568,5 @@ mod tests {
         if ((result.len() == 1) != number.is_prime()) && !number.is_one() {
             panic!("{number:?}, {result:?}");
         }
-
     }
 }

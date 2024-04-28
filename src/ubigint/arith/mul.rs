@@ -39,7 +39,6 @@ impl UBigInt {
             let result = z2.shift_left(2 * m).add_ubi(&z1.shift_left(m)).add_ubi(&z0);
 
             #[cfg(test)] unsafe {
-
                 if KARATSUBA_TEST {
                     KARATSUBA_ENABLE = false;
                     let result2 = self.mul_ubi(&other);
@@ -47,7 +46,6 @@ impl UBigInt {
 
                     assert_eq!(result, result2);
                 }
-
             }
 
             return result;
@@ -56,13 +54,11 @@ impl UBigInt {
         let mut result = vec![0; self.len() + other.len()];
 
         for i in 0..self.len() {
-
             for j in 0..other.len() {
                 let curr = self.0[i] as u64 * other.0[j] as u64;
                 result[i + j] += curr % (1 << 32);
                 result[i + j + 1] += curr >> 32;
             }
-
         }
 
         let mut result = v64_to_v32(result);
@@ -98,25 +94,23 @@ impl UBigInt {
         let mut carry = 0;
 
         for i in 0..self.len() {
-
             match self.0[i].checked_mul(other) {
                 Some(n) => match n.checked_add(carry as u32) {
                     Some(n) => {
                         self.0[i] = n;
                         carry = 0;
-                    }
+                    },
                     _ => {
                         self.0[i] = ((n as u64 + carry) % (1 << 32)) as u32;
                         carry = (n as u64 + carry) >> 32;
-                    }
-                }
+                    },
+                },
                 _ => {
                     let curr = self.0[i] as u64 * other as u64 + carry;
                     carry = curr >> 32;
                     self.0[i] = (curr % (1 << 32)) as u32;
-                }
+                },
             }
-
         }
 
         if carry > 0 {
@@ -160,10 +154,8 @@ mod tests {
         for i in 16..64 {
             assert_eq!(
                 three.mul_pow2(i * 8),
-                three.mul_ubi(&two.pow_u32(i * 8))
+                three.mul_ubi(&two.pow_u32(i * 8)),
             );
         }
-
     }
-
 }

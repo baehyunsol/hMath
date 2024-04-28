@@ -63,5 +63,4 @@ impl Ratio {
 
         #[cfg(test)] assert!(self.is_valid());
     }
-
 }

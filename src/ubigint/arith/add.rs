@@ -10,19 +10,15 @@ impl UBigInt {
         ).collect();
 
         if self.len() > other.len() {
-
             for i in other.len()..self.len() {
                 result.push(self.0[i] as u64);
             }
-
         }
 
         else {
-
             for i in self.len()..other.len() {
                 result.push(other.0[i] as u64);
             }
-
         }
 
         let result = UBigInt::from_raw(v64_to_v32(result));
@@ -41,61 +37,51 @@ impl UBigInt {
         let mut carry = false;
 
         for i in 0..self.len().min(other.len()) {
-
             match self.0[i].checked_add(other.0[i]) {
                 Some(n) => if carry {
                     match n.checked_add(1) {
                         Some(n) => {
                             self.0[i] = n;
                             carry = false;
-                        }
+                        },
                         _ => {
                             self.0[i] = ((self.0[i] as u64 + other.0[i] as u64 + 1) % (1 << 32)) as u32;
-                        }
+                        },
                     }
                 } else {
                     self.0[i] = n;
-                }
+                },
                 _ => if carry {
                     self.0[i] = ((self.0[i] as u64 + other.0[i] as u64 + 1) % (1 << 32)) as u32;
                 } else {
                     self.0[i] = ((self.0[i] as u64 + other.0[i] as u64) % (1 << 32)) as u32;
                     carry = true;
-                }
+                },
             }
-
         }
 
         if other.len() > self.len() {
-
             for i in self.len()..other.len() {
-
                 if carry {
-
                     match other.0[i].checked_add(1) {
                         Some(n) => {
                             self.0.push(n);
                             carry = false;
-                        }
+                        },
                         _ => {
                             self.0.push(0);
-                        }
+                        },
                     }
-
                 }
 
                 else {
                     self.0.push(other.0[i]);
                 }
-
             }
-
         }
 
         else if self.len() > other.len() && carry {
-
             for i in other.len()..self.len() {
-
                 if self.0[i] == u32::MAX {
                     self.0[i] = 0;
                 }
@@ -105,15 +91,12 @@ impl UBigInt {
                     carry = false;
                     break;
                 }
-
             }
-
         }
 
         if carry {
             self.0.push(1);
         }
-
     }
 
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -134,19 +117,16 @@ impl UBigInt {
     }
 
     pub fn add_u32_mut(&mut self, other: u32) {
-
         match self.0[0].checked_add(other) {
             Some(n) => {
                 self.0[0] = n;
-            }
+            },
             None => {
                 let mut self_data = v32_to_v64(&self.0);
                 self_data[0] += other as u64;
 
                 self.0 = v64_to_v32(self_data);
-            }
+            },
         }
-
     }
-
 }
