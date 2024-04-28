@@ -158,7 +158,7 @@ impl Polynomial {
             None => {
                 let fp = self.differentiate();
                 fp.calc(x)
-            }
+            },
         };
 
         x.sub(&self.calc(x).div(&fpx))

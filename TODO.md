@@ -13,6 +13,7 @@ traits
 - `eq/gt/lt/ne/ge/le`, `_/i32/one/zero`
 - `pow`, `_/i32`
 - `is_integer`, `round/floor/ceil`
+- `zero/one`
 
 you can then impl `Matrix<ThisTrait>` and `Polynomial<ThisTrait>`.
 

@@ -341,7 +341,6 @@ pub fn inspect_ieee754_f64(n: f64) -> Result<(bool, i32, u64), ConversionError> 
 
 #[cfg(test)]
 mod tests {
-    use crate::Ratio;
     use crate::consts::RUN_ALL_TESTS;
     use super::*;
 

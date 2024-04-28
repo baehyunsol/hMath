@@ -40,6 +40,11 @@ impl F192 {
         e.add(&d.log2_iter(16))
     }
 
+    #[must_use = "method returns a new number and does not mutate the original value"]
+    pub fn ln(&self) -> Self {
+        self.log2().mul(&F192::LN_2)
+    }
+
     // it returns log2(self)
     // it's guaranteed that 2^127 <= self < 2^128
     fn log2_iter(&self, iter: usize) -> Self {
@@ -95,21 +100,31 @@ const LOG_TABLE: [u32; 65] = [
 ];
 
 #[cfg(test)]
-#[test]
-fn log2_test() {
+mod tests {
+    use crate::F192;
+    use crate::fp192::testbench::assert_f64_close;
 
-    // some of below have very small differences when compared exactly
-    assert_eq!(F192::LN_3.div(&F192::LN_2).to_string(), F192::from(3).log2().to_string());
-    assert_eq!(F192::LN_10.div(&F192::LN_2).to_string(), F192::from(10).log2().to_string());
-    assert_eq!(F192::LN_2.to_string(), F192::from(1).div(&F192::E.log2()).to_string());
+    #[test]
+    fn log2_test() {
+        // some of below have very small differences when compared exactly
+        assert_eq!(F192::LN_3.div(&F192::LN_2).to_string(), F192::from(3).log2().to_string());
+        assert_eq!(F192::LN_10.div(&F192::LN_2).to_string(), F192::from(10).log2().to_string());
+        assert_eq!(F192::LN_2.to_string(), F192::from(1).div(&F192::E.log2()).to_string());
 
-    for i in 10..240 {
-        let i = i * 7;
-        let a = F192::from(i).fast_log2();
-        let b = F192::from(i).log2().shl(24).try_into().unwrap();
+        for i in 10..240 {
+            let i = i * 7;
+            let a = F192::from(i).fast_log2();
+            let b = F192::from(i).log2().shl(24).try_into().unwrap();
+    
+            assert!(
+                a.abs_diff(b) < 686
+            );
+        }
+    }
 
-        assert!(
-            a.abs_diff(b) < 686
-        );
+    #[test]
+    fn ln_test() {
+        assert_f64_close(F192::LN_2, F192::from(2).ln());
+        assert_f64_close(F192::LN_3, F192::from(3).ln());
     }
 }

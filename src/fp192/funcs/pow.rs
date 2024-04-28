@@ -59,6 +59,12 @@ impl F192 {
         }
     }
 
+    /// self^x
+    #[must_use = "method returns a new number and does not mutate the original value"]
+    pub fn pow(&self, x: &F192) -> Self {
+        x.mul(&self.log2()).pow2()
+    }
+
     // inverse of `fast_log2`
     pub(crate) fn fast_pow2(n: i64) -> Self {
         let mut e = n >> 24;
@@ -271,5 +277,21 @@ mod tests {
             F192::try_from(63.5).unwrap().pow2(),
             F192::try_from(13043817825332782212.0f64).unwrap(),
         );
+    }
+
+    #[test]
+    fn pow_test() {
+        for x in 1..8 {
+            let x_f = F192::from(x);
+
+            for y in 1..8 {
+                let y_f = F192::from(y);
+
+                assert_f64_close(
+                    x_f.powi(y),
+                    x_f.pow(&y_f),
+                );
+            }
+        }
     }
 }

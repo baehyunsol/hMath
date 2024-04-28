@@ -134,7 +134,7 @@ impl Default for F192 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use super::testbench::{assert_f64_close, assert_very_close};
+    use super::testbench::assert_very_close;
     use crate::Ratio;
 
     #[test]

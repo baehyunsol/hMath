@@ -2,6 +2,7 @@ use crate::Ratio;
 
 mod arith;
 mod convert;
+mod funcs;
 
 pub struct Complex {
     real_: Ratio,

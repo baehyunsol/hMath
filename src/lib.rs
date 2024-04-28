@@ -19,6 +19,7 @@ pub use ratio::{
     funcs::exp_iter, funcs::ln_iter, funcs::pow_iter, funcs::log_iter,
     funcs::sqrt_iter, funcs::cbrt_iter,
     funcs::sin_iter, funcs::cos_iter, funcs::tan_iter,
+    funcs::sinh_iter, funcs::cosh_iter, funcs::tanh_iter,
     funcs::common_denom,
     e::e_iter, ln2::ln2_iter, pi::pi_iter,
     inspect_ieee754_f32, inspect_ieee754_f64

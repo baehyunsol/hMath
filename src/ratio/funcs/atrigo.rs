@@ -87,7 +87,6 @@ pub fn atan_iter(x: &Ratio, iter: usize) -> Ratio {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Ratio;
     use crate::{sin_iter, cos_iter, tan_iter};
 
     #[test]
