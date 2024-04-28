@@ -54,3 +54,22 @@ impl From<Ratio> for BigInt {
         n.truncate_bi()
     }
 }
+
+impl<D, N> From<&Ratio> for (D, N) where BigInt: Into<D> + Into<N> {
+    /// It destructures its denom and numer to types that can be constructed from `BigInt`.
+    /// It's a bit expensive because it clones the numbers.
+    fn from(n: &Ratio) -> (D, N) {
+        let denom = n.get_denom();
+        let numer = n.get_numer();
+
+        (denom.into(), numer.into())
+    }
+}
+
+impl<D, N> From<Ratio> for (D, N) where BigInt: Into<D> + Into<N> {
+    /// It destructures its denom and numer to types that can be constructed from `BigInt`.
+    /// It's a bit expensive because it clones the numbers.
+    fn from(n: Ratio) -> (D, N) {
+        (&n).into()
+    }
+}

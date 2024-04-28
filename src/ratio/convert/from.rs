@@ -111,3 +111,18 @@ impl From<&BigInt> for Ratio {
         Ratio::from_bi(n.clone())
     }
 }
+
+impl<D, N> TryFrom<(D, N)> for Ratio
+    where BigInt: TryFrom<D> + TryFrom<N>, ConversionError: From<<BigInt as TryFrom<D>>::Error> + From<<BigInt as TryFrom<N>>::Error> {
+    type Error = ConversionError;
+
+    /// convert `(denom, numer)` to a `Ratio`.
+    fn try_from(denom_and_numer: (D, N)) -> Result<Self, Self::Error> {
+        let (denom, numer) = denom_and_numer;
+
+        Ok(Ratio::from_denom_and_numer(
+            BigInt::try_from(denom)?,
+            BigInt::try_from(numer)?,
+        ))
+    }
+}
