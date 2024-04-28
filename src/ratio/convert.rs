@@ -18,6 +18,7 @@ impl Ratio {
         result
     }
 
+    /// optimized version of `Ratio::From<(D, N)>` and `Ratio::from_denom_and_numer`
     pub fn from_denom_and_numer_i32(mut denom: i32, mut numer: i32) -> Self {
         let r = gcd_i32(denom, numer);
 

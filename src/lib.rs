@@ -1,4 +1,5 @@
 mod bigint;
+mod complex;
 mod consts;
 mod err;
 mod fp192;
@@ -29,5 +30,6 @@ pub use poly::{
     from_points, from_points_generic,
     cubic_2_points, quadratic_3_points, linear_2_points,
 };
+pub use complex::Complex;
 pub use consts::{pi_const, e_const, ln2_const};
 pub use err::ConversionError;
