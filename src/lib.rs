@@ -1,6 +1,7 @@
 mod bigint;
 mod consts;
 mod err;
+mod fp192;
 mod matrix;
 mod poly;
 mod ratio;
@@ -21,6 +22,7 @@ pub use ratio::{
     e::e_iter, ln2::ln2_iter, pi::pi_iter,
     inspect_ieee754_f32, inspect_ieee754_f64
 };
+pub use fp192::F192;
 pub use matrix::{Matrix, MatrixError};
 pub use poly::{
     Polynomial,
