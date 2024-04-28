@@ -4,7 +4,7 @@ use crate::utils::{v32_to_v64, v64_to_v32};
 impl UBigInt {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
-    pub fn add_ubi(&self, other: &UBigInt) -> Self {
+    pub fn add(&self, other: &UBigInt) -> Self {
         let mut result: Vec<u64> = (0..self.len().min(other.len())).map(
             |i| self.0[i] as u64 + other.0[i] as u64
         ).collect();
@@ -25,7 +25,7 @@ impl UBigInt {
 
         #[cfg(test)] {
             let mut t = self.clone();
-            t.add_ubi_mut(other);
+            t.add_mut(other);
             assert_eq!(t, result);
             assert!(result.is_valid());
         }
@@ -33,7 +33,7 @@ impl UBigInt {
         result
     }
 
-    pub fn add_ubi_mut(&mut self, other: &UBigInt) {
+    pub fn add_mut(&mut self, other: &UBigInt) {
         let mut carry = false;
 
         for i in 0..self.len().min(other.len()) {
@@ -106,8 +106,8 @@ impl UBigInt {
 
         #[cfg(test)] {
             let mut s2 = self.clone();
-            s2.add_ubi_mut(&UBigInt::from_u32(other));
-            let t = self.add_ubi(&UBigInt::from_u32(other));
+            s2.add_mut(&UBigInt::from_u32(other));
+            let t = self.add(&UBigInt::from_u32(other));
             assert_eq!(t, result);
             assert_eq!(t, s2);
             assert!(result.is_valid());

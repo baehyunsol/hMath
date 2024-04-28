@@ -159,7 +159,7 @@ mod tests {
             F192::SQRT_10,
         );
 
-        let one_over_sqrt_2 = Ratio::one().div_rat(&sqrt_iter(&2.into(), 17));
+        let one_over_sqrt_2 = Ratio::one().div(&sqrt_iter(&2.into(), 17));
         let one_over_sqrt_2: F192 = one_over_sqrt_2.into();
         assert_eq!(one_over_sqrt_2, F192::ONE_OVER_SQRT_2);
 

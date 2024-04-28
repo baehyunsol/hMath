@@ -10,7 +10,7 @@ pub fn ln2_iter(k: usize) -> Ratio {
     for i in 0..k {
         let (denom, numer) = LN2_TABLE[i];
         let curr = Ratio::from_denom_and_numer_raw(BigInt::from_i64(denom), BigInt::from_i64(numer));
-        result.add_rat_mut(&curr.div_bi(&coeff));
+        result.add_mut(&curr.div_bi(&coeff));
         coeff.mul_i32_mut(64);
     }
 

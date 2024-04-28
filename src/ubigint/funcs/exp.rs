@@ -12,7 +12,7 @@ impl UBigInt {
         let trunc = n.shift_right(1);
 
         // 0 ~ 2^32-1
-        let mut frac = n.sub_ubi(&trunc.shift_left(1)).to_u64().unwrap() as usize;
+        let mut frac = n.sub(&trunc.shift_left(1)).to_u64().unwrap() as usize;
 
         // It uses linear approximation
         // f1 + (f2 - f1) * (frac % 2^23) / (2^23)
@@ -21,7 +21,7 @@ impl UBigInt {
         frac %= 1 << 23;
 
         for _ in 0..5 {
-            let mid = f1.mul_ubi(&f2).sqrt();
+            let mid = f1.mul(&f2).sqrt();
 
             if frac > (1 << 22) {
                 f1 = mid;
@@ -35,9 +35,9 @@ impl UBigInt {
             }
         }
 
-        f1.add_ubi_mut(&f2.sub_ubi(&f1).mul_u32(frac as u32).div_u32(1 << 23));
+        f1.add_mut(&f2.sub(&f1).mul_u32(frac as u32).div_u32(1 << 23));
 
-        let result_pow_30 = UBigInt::exp2(trunc.to_u64().unwrap()).mul_ubi(&f1).shift_right(1);
+        let result_pow_30 = UBigInt::exp2(trunc.to_u64().unwrap()).mul(&f1).shift_right(1);
         let result = result_pow_30.div_u32(1 << 30);
 
         if result_pow_30.rem_pow2(1 << 30).0[0] > (1 << 29) {

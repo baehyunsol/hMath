@@ -45,7 +45,7 @@ impl Ratio {
 
         if neg { self_clone.neg_mut(); }
 
-        let approx_log2 = self.numer.log2().sub_bi(&self.denom.log2());
+        let approx_log2 = self.numer.log2().sub(&self.denom.log2());
 
         if approx_log2.gt_i32(128) {
             return Err(ConversionError::NotInRange { permitted: "1.18e-38~3.4e38".to_string(), error: self.to_scientific_notation(5) });
@@ -76,7 +76,7 @@ impl Ratio {
         let (mut frac, frac_rem) = self_clone.sub_i32(1).mul_i32(1 << 23).truncate_and_frac();
 
         // IEEE754 chooses the closest approximation
-        if frac_rem.gt_rat(&Ratio::from_denom_and_numer_i32(2, 1)) {
+        if frac_rem.gt(&Ratio::from_denom_and_numer_i32(2, 1)) {
             frac.add_i32_mut(1);
         }
 
@@ -161,7 +161,7 @@ impl Ratio {
 
         if neg { self_clone.neg_mut(); }
 
-        let approx_log2 = self.numer.log2().sub_bi(&self.denom.log2());
+        let approx_log2 = self.numer.log2().sub(&self.denom.log2());
 
         if approx_log2.gt_i32(1024) {
             return Err(ConversionError::NotInRange { permitted: "2.23e-308~1.8e308".to_string(), error: self.to_scientific_notation(5) });
@@ -192,7 +192,7 @@ impl Ratio {
         let (mut frac, frac_rem) = self_clone.sub_i32(1).mul_bi(&BigInt::from_i64(1 << 52)).truncate_and_frac();
 
         // IEEE754 chooses the closest approximation
-        if frac_rem.gt_rat(&Ratio::from_denom_and_numer_i32(2, 1)) {
+        if frac_rem.gt(&Ratio::from_denom_and_numer_i32(2, 1)) {
             frac.add_i32_mut(1);
         }
 
@@ -371,7 +371,7 @@ mod tests {
 
         let samples: Vec<String> = vec![
             samples.iter().map(|s| format!("-{s}")).collect::<Vec<String>>(),
-            samples.iter().map(|s| s.to_string()).collect()
+            samples.iter().map(|s| s.to_string()).collect(),
         ].concat();
 
         for n in samples.into_iter() {
@@ -399,7 +399,7 @@ mod tests {
             "4e-40", "4e-320", "4e-310", "4e-300",
             "0.00123", "0.00123e4", "0.00123e-4",
             "1.00123", "1.00123e4", "1.00123e-4",
-            "1307674368000"
+            "1307674368000",
         ];
 
         for n in samples2.into_iter() {
@@ -464,7 +464,6 @@ mod tests {
     fn ieee754_fuzzing() {
 
         #[cfg(feature = "rand")] {
-
             let iter_count = if RUN_ALL_TESTS {
                 480
             } else {
@@ -521,11 +520,8 @@ mod tests {
                     let n64_ = unsafe { *(&nf64_ as *const f64 as *const u64) };
                     assert_eq!(n64, n64_);
                 }
-
             }
-
         }
-
     }
 
     #[test]
@@ -558,7 +554,7 @@ mod tests {
             0, 1, 2, 3i32,
             4, 8, 16, 32, 64, 128,
             9, 27, 81, 243, 729,
-            230716, 220331
+            230716, 220331,
         ];
         let mut some_floats = vec![
             0.0, 1.0, 2.0, 3.0f32,
@@ -567,7 +563,7 @@ mod tests {
             3.1415, 3.1622, 2.7181,
             0.0078125, 0.0001234,
             1414252536365959.0,
-            1234567890.1
+            1234567890.1,
         ];
         some_ints = append_negs(some_ints);
         some_floats = append_negs(some_floats);
@@ -593,7 +589,6 @@ mod tests {
         let mut pow2f = 1.0f32;
 
         for _ in 0..24 {
-
             for fl in some_floats.clone().into_iter() {
                 let a = Ratio::from_ieee754_f32(fl).unwrap().mul_i32(pow2);
                 let b = Ratio::from_ieee754_f64(fl as f64).unwrap().mul_i32(pow2);
@@ -646,7 +641,6 @@ mod tests {
             assert_eq!(Ratio::from_ieee754_f32(a * n as f32).unwrap(), Ratio::one());
             assert_eq!(Ratio::from_ieee754_f64(b * n as f64).unwrap(), Ratio::one());
         }
-
     }
 
     use std::ops::Neg;
@@ -654,8 +648,7 @@ mod tests {
     fn append_negs<T: Neg + Clone>(v: Vec<T>) -> Vec<T> where Vec<T>: FromIterator<<T as Neg>::Output> {
         vec![
             v.clone(),
-            v.into_iter().map(|n| -n).collect()
+            v.into_iter().map(|n| -n).collect(),
         ].concat()
     }
-
 }

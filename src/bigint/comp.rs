@@ -4,13 +4,13 @@ use std::cmp::Ordering;
 impl BigInt {
 
     /// self < other
-    pub fn lt_bi(&self, other: &BigInt) -> bool {
+    pub fn lt(&self, other: &BigInt) -> bool {
         if self.is_neg() != other.is_neg() {
             self.is_neg()
         }
 
         else {
-            match self.val.comp_ubi(&other.val) {
+            match self.val.comp(&other.val) {
                 Ordering::Equal => false,
 
                 // -3 > -4
@@ -29,13 +29,13 @@ impl BigInt {
     }
 
     /// self > other
-    pub fn gt_bi(&self, other: &BigInt) -> bool {
+    pub fn gt(&self, other: &BigInt) -> bool {
         if self.is_neg() != other.is_neg() {
             other.is_neg()
         }
 
         else {
-            match self.val.comp_ubi(&other.val) {
+            match self.val.comp(&other.val) {
                 Ordering::Equal => false,
 
                 // -3 > -4
@@ -55,25 +55,25 @@ impl BigInt {
 
     /// Though `PartialEq` is implemented for `BigInt`, this method exists.
     /// That's for consistency.
-    pub fn eq_bi(&self, other: &BigInt) -> bool {
+    pub fn eq(&self, other: &BigInt) -> bool {
         self == other
     }
 
-    pub fn neq_bi(&self, other: &BigInt) -> bool {
+    pub fn neq(&self, other: &BigInt) -> bool {
         self != other
     }
 
     /// self <= other
-    pub fn leq_bi(&self, other: &BigInt) -> bool {
-        !self.gt_bi(other)
+    pub fn leq(&self, other: &BigInt) -> bool {
+        !self.gt(other)
     }
 
     /// self >= other
-    pub fn geq_bi(&self, other: &BigInt) -> bool {
-        !self.lt_bi(other)
+    pub fn geq(&self, other: &BigInt) -> bool {
+        !self.lt(other)
     }
 
-    pub fn comp_bi(&self, other: &BigInt) -> Ordering {
+    pub fn comp(&self, other: &BigInt) -> Ordering {
         if self.is_neg() != other.is_neg() {
             if self.is_neg() {
                 Ordering::Less
@@ -85,7 +85,7 @@ impl BigInt {
         }
 
         else {
-            match self.val.comp_ubi(&other.val) {
+            match self.val.comp(&other.val) {
                 Ordering::Equal => Ordering::Equal,
                 Ordering::Less if self.is_neg() => Ordering::Greater,
                 Ordering::Less => Ordering::Less,
@@ -194,13 +194,13 @@ impl BigInt {
 
 impl PartialOrd for BigInt {
     fn partial_cmp(&self, other: &BigInt) -> Option<Ordering> {
-        Some(self.comp_bi(other))
+        Some(self.comp(other))
     }
 }
 
 impl Ord for BigInt {
     fn cmp(&self, other: &BigInt) -> Ordering {
-        self.comp_bi(other)
+        self.comp(other)
     }
 }
 
@@ -210,30 +210,30 @@ mod tests {
     use std::cmp::Ordering;
 
     fn bi_comp(bi1: &BigInt, bi2: &BigInt) {
-        match bi1.comp_bi(bi2) {
+        match bi1.comp(bi2) {
             Ordering::Equal => {
-                assert!(!bi1.lt_bi(bi2));
-                assert!(!bi1.gt_bi(bi2));
-                assert!(bi1.eq_bi(bi2));
-                assert!(bi1.leq_bi(bi2));
-                assert!(bi1.geq_bi(bi2));
-                assert!(!bi1.neq_bi(bi2));
+                assert!(!bi1.lt(bi2));
+                assert!(!bi1.gt(bi2));
+                assert!(bi1.eq(bi2));
+                assert!(bi1.leq(bi2));
+                assert!(bi1.geq(bi2));
+                assert!(!bi1.neq(bi2));
             },
             Ordering::Less => {
-                assert!(bi1.lt_bi(bi2));
-                assert!(!bi1.gt_bi(bi2));
-                assert!(!bi1.eq_bi(bi2));
-                assert!(bi1.leq_bi(bi2));
-                assert!(!bi1.geq_bi(bi2));
-                assert!(bi1.neq_bi(bi2));
+                assert!(bi1.lt(bi2));
+                assert!(!bi1.gt(bi2));
+                assert!(!bi1.eq(bi2));
+                assert!(bi1.leq(bi2));
+                assert!(!bi1.geq(bi2));
+                assert!(bi1.neq(bi2));
             },
             Ordering::Greater => {
-                assert!(!bi1.lt_bi(bi2));
-                assert!(bi1.gt_bi(bi2));
-                assert!(!bi1.eq_bi(bi2));
-                assert!(!bi1.leq_bi(bi2));
-                assert!(bi1.geq_bi(bi2));
-                assert!(bi1.neq_bi(bi2));
+                assert!(!bi1.lt(bi2));
+                assert!(bi1.gt(bi2));
+                assert!(!bi1.eq(bi2));
+                assert!(!bi1.leq(bi2));
+                assert!(bi1.geq(bi2));
+                assert!(bi1.neq(bi2));
             },
         }
     }
@@ -273,7 +273,7 @@ mod tests {
             for y in -7..8 {
                 let bix = BigInt::from_i32(x);
                 let biy = BigInt::from_i32(y);
-                assert_eq!(x.cmp(&y), bix.comp_bi(&biy));
+                assert_eq!(x.cmp(&y), bix.comp(&biy));
                 bi_comp(&bix, &biy);
                 bi_i32_comp(&bix, y);
             }

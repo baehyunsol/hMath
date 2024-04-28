@@ -13,41 +13,41 @@ use crate::{Matrix, MatrixError, Ratio};
 macro_rules! determinant_hack {
     // ad - bc
     ($a: ident, $b: ident, $c: ident, $d: ident) => (
-        $a.mul_rat($d).sub_rat(&$b.mul_rat($c))
+        $a.mul($d).sub(&$b.mul($c))
     );
 
     // -(ad - bc)
     (-, $a: ident, $b: ident, $c: ident, $d: ident) => (
-        $b.mul_rat($c).sub_rat(&$a.mul_rat($d))
+        $b.mul($c).sub(&$a.mul($d))
     );
 
     // aei + bfg + cdh - ceg - bdi - afh
     ($a: ident, $b: ident, $c: ident, $d: ident, $e: ident, $f: ident, $g: ident, $h: ident, $i: ident) => (
-        $a.mul_rat(&$e.mul_rat($i)).add_rat(
-            &$b.mul_rat(&$f.mul_rat($g))
-        ).add_rat(
-            &$c.mul_rat(&$d.mul_rat($h))
-        ).sub_rat(
-            &$c.mul_rat(&$e.mul_rat($g))
-        ).sub_rat(
-            &$b.mul_rat(&$d.mul_rat($i))
-        ).sub_rat(
-            &$a.mul_rat(&$f.mul_rat($h))
+        $a.mul(&$e.mul($i)).add(
+            &$b.mul(&$f.mul($g))
+        ).add(
+            &$c.mul(&$d.mul($h))
+        ).sub(
+            &$c.mul(&$e.mul($g))
+        ).sub(
+            &$b.mul(&$d.mul($i))
+        ).sub(
+            &$a.mul(&$f.mul($h))
         )
     );
 
     // -(aei + bfg + cdh - ceg - bdi - afh)
     (-, $a: ident, $b: ident, $c: ident, $d: ident, $e: ident, $f: ident, $g: ident, $h: ident, $i: ident) => (
-        $c.mul_rat(&$e.mul_rat($g)).add_rat(
-            &$b.mul_rat(&$d.mul_rat($i))
-        ).add_rat(
-            &$a.mul_rat(&$f.mul_rat($h))
-        ).sub_rat(
-            &$a.mul_rat(&$e.mul_rat($i))
-        ).sub_rat(
-            &$b.mul_rat(&$f.mul_rat($g))
-        ).sub_rat(
-            &$c.mul_rat(&$d.mul_rat($h))
+        $c.mul(&$e.mul($g)).add(
+            &$b.mul(&$d.mul($i))
+        ).add(
+            &$a.mul(&$f.mul($h))
+        ).sub(
+            &$a.mul(&$e.mul($i))
+        ).sub(
+            &$b.mul(&$f.mul($g))
+        ).sub(
+            &$c.mul(&$d.mul($h))
         )
     );
 }
@@ -80,7 +80,7 @@ impl Matrix {
             let mut result = Ratio::zero();
 
             for j in 0..self.cols {
-                result.add_rat_mut(&self.get(0, j).mul_rat(&self.cofactor(0, j)));
+                result.add_mut(&self.get(0, j).mul(&self.cofactor(0, j)));
             }
 
             Ok(result)
@@ -136,22 +136,22 @@ impl Matrix {
 
         // no a0_, a_0
         let mut result = determinant_hack!(a11, a12, a13, a21, a22, a23, a31, a32, a33);
-        result.mul_rat_mut(a00);
+        result.mul_mut(a00);
 
         // no a0_, a_1
         let mut d = determinant_hack!(-, a10, a12, a13, a20, a22, a23, a30, a32, a33);
-        d.mul_rat_mut(a01);
-        result.add_rat_mut(&d);
+        d.mul_mut(a01);
+        result.add_mut(&d);
 
         // no a0_, a_2
         let mut d = determinant_hack!(a10, a11, a13, a20, a21, a23, a30, a31, a33);
-        d.mul_rat_mut(a02);
-        result.add_rat_mut(&d);
+        d.mul_mut(a02);
+        result.add_mut(&d);
 
         // no a0_, a_3
         let mut d = determinant_hack!(-, a10, a11, a12, a20, a21, a22, a30, a31, a32);
-        d.mul_rat_mut(a03);
-        result.add_rat_mut(&d);
+        d.mul_mut(a03);
+        result.add_mut(&d);
 
         result
     }

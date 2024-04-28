@@ -4,21 +4,21 @@ impl BigInt {
 
     // self - self / other * other
     #[must_use = "method returns a new number and does not mutate the original value"]
-    pub fn rem_bi(&self, other: &BigInt) -> Self {
-        let mut sdo = self.div_bi(other);
-        sdo.mul_bi_mut(other);
+    pub fn rem(&self, other: &BigInt) -> Self {
+        let mut sdo = self.div(other);
+        sdo.mul_mut(other);
 
-        let result = self.sub_bi(&sdo);
+        let result = self.sub(&sdo);
 
         #[cfg(test)] assert!(result.is_valid());
 
         result
     }
 
-    pub fn rem_bi_mut(&mut self, other: &BigInt) {
-        let mut sdo = self.div_bi(other);
-        sdo.mul_bi_mut(other);
-        self.sub_bi_mut(&sdo);
+    pub fn rem_mut(&mut self, other: &BigInt) {
+        let mut sdo = self.div(other);
+        sdo.mul_mut(other);
+        self.sub_mut(&sdo);
         #[cfg(test)] assert!(self.is_valid());
     }
 
@@ -67,10 +67,10 @@ mod tests {
                 let mut x1 = BigInt::from_i32(x);
                 let y1 = BigInt::from_i32(y);
                 let mut x2 = BigInt::from_i32(x);
-                let res1 = x1.rem_bi(&y1);
+                let res1 = x1.rem(&y1);
                 let res2 = x1.rem_i32(y);
                 let res3 = BigInt::from_i32(x % y);
-                x1.rem_bi_mut(&y1);
+                x1.rem_mut(&y1);
                 x2.rem_i32_mut(y);
 
                 assert_eq!(x1, x2);

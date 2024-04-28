@@ -26,20 +26,20 @@ impl UBigInt {
 
         result.shift_left_mut(self.len() / 2 - 1);
 
-        let mut div = self.sub_ubi(&result.mul_ubi(&result)).div_u32(2).div_ubi(&result);
-        result.add_ubi_mut(&div);
+        let mut div = self.sub(&result.mul(&result)).div_u32(2).div(&result);
+        result.add_mut(&div);
 
         loop {
-            let result_sqr = result.mul_ubi(&result);
+            let result_sqr = result.mul(&result);
 
-            if self.geq_ubi(&result_sqr) {
-                div = self.sub_ubi(&result_sqr).div_u32(2).div_ubi(&result);
-                result.add_ubi_mut(&div);
+            if self.geq(&result_sqr) {
+                div = self.sub(&result_sqr).div_u32(2).div(&result);
+                result.add_mut(&div);
             }
 
             else {
-                div = result_sqr.sub_ubi(&self).div_u32(2).div_ubi(&result);
-                result.sub_ubi_mut(&div);
+                div = result_sqr.sub(&self).div_u32(2).div(&result);
+                result.sub_mut(&div);
             }
 
             if div.len() < 2 {
@@ -55,7 +55,7 @@ impl UBigInt {
         }
 
         loop {
-            while result.mul_ubi(&result).lt_ubi(self) {
+            while result.mul(&result).lt(self) {
                 result.add_u32_mut(div);
             }
 
@@ -66,7 +66,7 @@ impl UBigInt {
                 div = 1;
             }
 
-            while result.mul_ubi(&result).gt_ubi(self) {
+            while result.mul(&result).gt(self) {
                 result.sub_u32_mut(div);
             }
 
@@ -125,12 +125,12 @@ impl UBigInt {
                 buffer.mul_u32_mut(i as u32);
 
                 if buffer.len() > 6 {
-                    result.mul_ubi_mut(&buffer);
+                    result.mul_mut(&buffer);
                     buffer = UBigInt::one();
                 }
             }
 
-            result.mul_ubi_mut(&buffer);
+            result.mul_mut(&buffer);
             result
         }
     }
@@ -163,7 +163,7 @@ impl UBigInt {
             let mut result = UBigInt::zero();
 
             for _ in 0..(n - 186) {
-                result = last.add_ubi(&llast);
+                result = last.add(&llast);
                 llast = last;
                 last = result.clone();
             }
@@ -224,8 +224,8 @@ impl UBigInt {
                     let mut div = UBigInt::from_u64(div);
 
                     // TODO: this loop is not tested
-                    while div.mul_ubi(&div).leq_ubi(self) {
-                        if self.rem_ubi(&div).is_zero() {
+                    while div.mul(&div).leq(self) {
+                        if self.rem(&div).is_zero() {
                             return false;
                         }
 
@@ -249,7 +249,7 @@ impl UBigInt {
 
         let mut div = 3;
 
-        while self_clone.geq_ubi(&UBigInt::from_u64(div as u64 * div as u64)) {
+        while self_clone.geq(&UBigInt::from_u64(div as u64 * div as u64)) {
             while self_clone.rem_u32(div).is_zero() {
                 self_clone.div_u32_mut(div);
                 result.push(UBigInt::from_u32(div));
@@ -261,9 +261,9 @@ impl UBigInt {
         let mut div = UBigInt::from_u32(u32::MAX);
 
         // TODO: this loop is not tested
-        while self_clone.geq_ubi(&div.mul_ubi(&div)) {
-            while self_clone.rem_ubi(&div).is_zero() {
-                self_clone.div_ubi_mut(&div);
+        while self_clone.geq(&div.mul(&div)) {
+            while self_clone.rem(&div).is_zero() {
+                self_clone.div_mut(&div);
                 result.push(div.clone());
             }
 
@@ -375,12 +375,12 @@ pub fn gcd_ubi(a: &UBigInt, b: &UBigInt) -> UBigInt {
     }
 
     let _a = a.clone();
-    let mut a = b.rem_ubi(a);
+    let mut a = b.rem(a);
     let mut b = _a;
 
     while !a.is_zero() {
         let _a = a.clone();
-        a = b.rem_ubi(&a);
+        a = b.rem(&a);
         b = _a;
     }
 
@@ -415,7 +415,7 @@ mod tests {
 
         for i in 3..256 {
             fibos.push(
-                fibos[i - 1].add_ubi(&fibos[i - 2])
+                fibos[i - 1].add(&fibos[i - 2])
             );
         }
 
@@ -448,7 +448,7 @@ mod tests {
             "123456789",
         ] {
             let n = UBigInt::from_string(n).unwrap();
-            let nn = n.mul_ubi(&n);
+            let nn = n.mul(&n);
 
             assert_eq!(nn.sqrt(), n);
         }
@@ -556,7 +556,7 @@ mod tests {
         let mut answer = UBigInt::one();
 
         for pf in result.iter() {
-            answer.mul_ubi_mut(pf);
+            answer.mul_mut(pf);
 
             if !pf.is_prime() && !(pf.is_one() && number.is_one()) {
                 panic!("{pf}, {number}, {result:?}");

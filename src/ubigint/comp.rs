@@ -4,7 +4,7 @@ use std::cmp::Ordering;
 impl UBigInt {
 
     /// self < other
-    pub fn lt_ubi(&self, other: &UBigInt) -> bool {
+    pub fn lt(&self, other: &UBigInt) -> bool {
         if self.len() > other.len() {
             false
         }
@@ -31,7 +31,7 @@ impl UBigInt {
     }
 
     /// self > other
-    pub fn gt_ubi(&self, other: &UBigInt) -> bool {
+    pub fn gt(&self, other: &UBigInt) -> bool {
         if self.len() > other.len() {
             true
         }
@@ -59,25 +59,25 @@ impl UBigInt {
 
     /// Though `PartialEq` is implemented for `UBigInt`, this method exists.
     /// That's for consistency.
-    pub fn eq_ubi(&self, other: &UBigInt) -> bool {
+    pub fn eq(&self, other: &UBigInt) -> bool {
         self == other
     }
 
-    pub fn neq_ubi(&self, other: &UBigInt) -> bool {
+    pub fn neq(&self, other: &UBigInt) -> bool {
         self != other
     }
 
     /// self <= other
-    pub fn leq_ubi(&self, other: &UBigInt) -> bool {
-        !self.gt_ubi(other)
+    pub fn leq(&self, other: &UBigInt) -> bool {
+        !self.gt(other)
     }
 
     /// self >= other
-    pub fn geq_ubi(&self, other: &UBigInt) -> bool {
-        !self.lt_ubi(other)
+    pub fn geq(&self, other: &UBigInt) -> bool {
+        !self.lt(other)
     }
 
-    pub fn comp_ubi(&self, other: &UBigInt) -> Ordering {
+    pub fn comp(&self, other: &UBigInt) -> Ordering {
         if self.len() > other.len() {
             Ordering::Greater
         }
@@ -163,13 +163,13 @@ impl UBigInt {
 
 impl PartialOrd for UBigInt {
     fn partial_cmp(&self, other: &UBigInt) -> Option<Ordering> {
-        Some(self.comp_ubi(other))
+        Some(self.comp(other))
     }
 }
 
 impl Ord for UBigInt {
     fn cmp(&self, other: &UBigInt) -> Ordering {
-        self.comp_ubi(other)
+        self.comp(other)
     }
 }
 
@@ -202,11 +202,11 @@ mod tests {
 
         for i in 0..numbers.len() {
             for j in (i + 1)..numbers.len() {
-                match numbers[i].comp_ubi(&numbers[j]) {
+                match numbers[i].comp(&numbers[j]) {
                     Ordering::Greater => {
-                        assert!(numbers[i].gt_ubi(&numbers[j]));
-                        assert!(!numbers[i].eq_ubi(&numbers[j]));
-                        assert!(!numbers[i].lt_ubi(&numbers[j]));
+                        assert!(numbers[i].gt(&numbers[j]));
+                        assert!(!numbers[i].eq(&numbers[j]));
+                        assert!(!numbers[i].lt(&numbers[j]));
 
                         if let Ok(n) = numbers[j].to_u32() {
                             assert!(numbers[i].gt_u32(n));
@@ -214,9 +214,9 @@ mod tests {
                     },
                     Ordering::Equal => panic!("No same numbers"),
                     Ordering::Less => {
-                        assert!(!numbers[i].gt_ubi(&numbers[j]));
-                        assert!(!numbers[i].eq_ubi(&numbers[j]));
-                        assert!(numbers[i].lt_ubi(&numbers[j]));
+                        assert!(!numbers[i].gt(&numbers[j]));
+                        assert!(!numbers[i].eq(&numbers[j]));
+                        assert!(numbers[i].lt(&numbers[j]));
 
                         if let Ok(n) = numbers[i].to_u32() {
                             assert!(numbers[j].gt_u32(n));

@@ -22,13 +22,13 @@ pub fn common_denom(a: &Ratio, b: &Ratio) -> (BigInt, BigInt, BigInt) {
     // v3 = a.denom * b.denom / gcd(a.denom, b.denom)
 
     let gcd = gcd_bi(&a.denom, &b.denom);
-    let a_den_gcd = a.denom.div_bi(&gcd);
-    let b_den_gcd = b.denom.div_bi(&gcd);
+    let a_den_gcd = a.denom.div(&gcd);
+    let b_den_gcd = b.denom.div(&gcd);
 
     (
-        a.numer.mul_bi(&b_den_gcd),
-        b.numer.mul_bi(&a_den_gcd),
-        a.denom.mul_bi(&b_den_gcd),
+        a.numer.mul(&b_den_gcd),
+        b.numer.mul(&a_den_gcd),
+        a.denom.mul(&b_den_gcd),
     )
 }
 
@@ -88,7 +88,7 @@ impl Ratio {
     }
 
     pub fn truncate_mut(&mut self) {
-        self.numer.div_bi_mut(&self.denom);
+        self.numer.div_mut(&self.denom);
         self.denom = BigInt::one();
 
         #[cfg(test)] assert!(self.is_valid());
@@ -96,7 +96,7 @@ impl Ratio {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
     pub fn truncate_bi(&self) -> BigInt {
-        let result = self.numer.div_bi(&self.denom);
+        let result = self.numer.div(&self.denom);
 
         #[cfg(test)] assert!(result.is_valid());
 
@@ -107,11 +107,11 @@ impl Ratio {
     /// self - truncate(self)
     pub fn frac(&self) -> Self {
         // Safety: (a % b) and b are coprime
-        let result = Ratio::from_denom_and_numer_raw(self.denom.clone(), self.numer.rem_bi(&self.denom));
+        let result = Ratio::from_denom_and_numer_raw(self.denom.clone(), self.numer.rem(&self.denom));
 
         #[cfg(test)] {
             assert!(result.is_valid());
-            assert_eq!(&result.add_rat(&self.truncate()), self);
+            assert_eq!(&result.add(&self.truncate()), self);
 
             let mut self_clone = self.clone();
             self_clone.frac_mut();
@@ -124,7 +124,7 @@ impl Ratio {
 
     /// self -= truncate(self)
     pub fn frac_mut(&mut self) {
-        self.numer.rem_bi_mut(&self.denom);
+        self.numer.rem_mut(&self.denom);
     }
 
     /// If you need both `self.truncate_bi` and `self.frac`, use this method. It's way cheaper.
@@ -132,7 +132,7 @@ impl Ratio {
         let trun = self.truncate_bi();
 
         // Safety: (a % b) and b are coprime
-        let frac = Ratio::from_denom_and_numer_raw(self.denom.clone(), self.numer.sub_bi(&self.denom.mul_bi(&trun)));
+        let frac = Ratio::from_denom_and_numer_raw(self.denom.clone(), self.numer.sub(&self.denom.mul(&trun)));
 
         #[cfg(test)] assert_eq!(frac, self.frac());
 
@@ -174,7 +174,7 @@ impl Ratio {
         let numer_double_abs = frac.numer.mul_i32(2).abs();
         use std::cmp::Ordering;
 
-        match numer_double_abs.comp_bi(&frac.denom) {
+        match numer_double_abs.comp(&frac.denom) {
             // less than 0.5
             Ordering::Less => trun,
 

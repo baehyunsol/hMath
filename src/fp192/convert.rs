@@ -286,19 +286,19 @@ impl From<&Ratio> for F192 {
         let mut exp = EXP_COEFF;
 
         // TODO: optimize
-        while n_abs.lt_rat(&lower_bound) {
+        while n_abs.lt(&lower_bound) {
             n_abs.mul_i32_mut(2);
             exp -= 1;
         }
 
-        while n_abs.geq_rat(&upper_bound) {
+        while n_abs.geq(&upper_bound) {
             n_abs.div_i32_mut(2);
             exp += 1;
         }
 
         let n_abs_rem: u32 = n_abs.mul_i32(32).truncate_bi().rem_i32(32).try_into().unwrap();
 
-        n_abs.sub_rat_mut(&lower_bound);
+        n_abs.sub_mut(&lower_bound);
         let mut digits: u128 = n_abs.truncate_bi().try_into().unwrap();
 
         if n_abs_rem > 15 {

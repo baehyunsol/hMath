@@ -66,7 +66,7 @@ impl Polynomial {
         let k = k.into();
 
         let result = Polynomial::from_vec(self.coeffs.iter().map(
-            |n| n.mul_rat(&k)
+            |n| n.mul(&k)
         ).collect());
 
         #[cfg(test)] {
@@ -88,7 +88,7 @@ impl Polynomial {
         }
 
         for n in self.coeffs.iter_mut() {
-            n.mul_rat_mut(&k);
+            n.mul_mut(&k);
         }
     }
 
@@ -144,8 +144,8 @@ impl Polynomial {
         let mut result = Ratio::zero();
 
         for coeff in self.coeffs.iter() {
-            result.mul_rat_mut(x);
-            result.add_rat_mut(coeff);
+            result.mul_mut(x);
+            result.add_mut(coeff);
         }
 
         result
@@ -161,7 +161,7 @@ impl Polynomial {
             }
         };
 
-        x.sub_rat(&self.calc(x).div_rat(&fpx))
+        x.sub(&self.calc(x).div(&fpx))
     }
 
     pub fn to_approx_string(&self, max_len: usize) -> String {

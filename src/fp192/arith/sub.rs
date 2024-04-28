@@ -23,6 +23,6 @@ impl F192 {
         }
 
         // TODO
-        Ratio::from(self).sub_rat(&other.into()).into()
+        Ratio::from(self).sub(&other.into()).into()
     }
 }

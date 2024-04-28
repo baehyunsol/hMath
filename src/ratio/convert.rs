@@ -183,7 +183,7 @@ impl Ratio {
         }
 
         let mut result = Ratio::from_bi(integer_part);
-        result.add_rat_mut(&fractional_part);
+        result.add_mut(&fractional_part);
 
         // exponential_part is a multiple of 2 and 5. So, it uses `rem_i32(2)` and `rem_i32(5)` instead of `rem_bi` for gcd
         // -> that's much faster
@@ -201,7 +201,7 @@ impl Ratio {
                     exponential_part_bi.div_i32_mut(5);
                 }
 
-                result.numer.mul_bi_mut(&exponential_part_bi);
+                result.numer.mul_mut(&exponential_part_bi);
             }
 
             else if exponential_part < 0 {
@@ -215,7 +215,7 @@ impl Ratio {
                     exponential_part_bi.div_i32_mut(5);
                 }
 
-                result.denom.mul_bi_mut(&exponential_part_bi);
+                result.denom.mul_mut(&exponential_part_bi);
             }
 
             #[cfg(test)] assert!(result.is_valid());
@@ -239,7 +239,7 @@ impl Ratio {
     pub fn to_approx_string(&self, max_len: usize) -> String {
         let mut max_len = max_len.max(6);
 
-        let log2 = self.numer.log2_accurate().sub_bi(&self.denom.log2_accurate());
+        let log2 = self.numer.log2_accurate().sub(&self.denom.log2_accurate());
 
         // 2^70777 = 10^21306 + small
         let log10i64 = log2.mul_i32(21306).div_i32(70777).shift_right(1).to_i64().unwrap();
@@ -259,7 +259,7 @@ impl Ratio {
             if exp.is_neg() && !frac.is_zero() {
                 exp.sub_i32_mut(1);
                 frac.abs_mut();
-                frac = Ratio::one().sub_rat(&frac);
+                frac = Ratio::one().sub(&frac);
             }
 
             // it takes only 4 digits
@@ -295,7 +295,7 @@ impl Ratio {
             let mut exp = 0;
 
             if log10i64 > 15 {
-                bi.div_bi_mut(&BigInt::from_i32(10).pow_u32(log10i64 as u32 - 10));
+                bi.div_mut(&BigInt::from_i32(10).pow_u32(log10i64 as u32 - 10));
                 exp += log10i64 - 10;
             }
 
@@ -366,7 +366,7 @@ impl Ratio {
                     pow5 -= 1;
                 }
 
-                self_clone.numer.mul_bi_mut(&BigInt::exp2(pow2 as u64).mul_bi(&BigInt::from_i32(5).pow_u32(pow5 as u32)));
+                self_clone.numer.mul_mut(&BigInt::exp2(pow2 as u64).mul(&BigInt::from_i32(5).pow_u32(pow5 as u32)));
                 exp -= pow10;
             }
 
@@ -455,16 +455,16 @@ impl Ratio {
         self_clone.abs_mut();
 
         // truncate(log10(abs(self)))
-        let approx_digits = self_clone.numer.log2_accurate().sub_bi(&self_clone.denom.log2_accurate()).mul_i32(21306).div_i32(70777).shift_right(1).to_i64().unwrap();
+        let approx_digits = self_clone.numer.log2_accurate().sub(&self_clone.denom.log2_accurate()).mul_i32(21306).div_i32(70777).shift_right(1).to_i64().unwrap();
 
         let mut exp = 0;
 
         let self_bi = if approx_digits < 17 {
             exp -= 17 - approx_digits;
-            self_clone.numer.mul_bi(&BigInt::from_i32(10).pow_u32((17 - approx_digits) as u32)).div_bi(&self_clone.denom).to_i64().unwrap()
+            self_clone.numer.mul(&BigInt::from_i32(10).pow_u32((17 - approx_digits) as u32)).div(&self_clone.denom).to_i64().unwrap()
         } else {
             exp += approx_digits - 17;
-            self_clone.numer.div_bi(&self_clone.denom.mul_bi(&BigInt::from_i32(10).pow_u32(approx_digits as u32 - 17))).to_i64().unwrap()
+            self_clone.numer.div(&self_clone.denom.mul(&BigInt::from_i32(10).pow_u32(approx_digits as u32 - 17))).to_i64().unwrap()
         };
 
         let (digits, new_exp) = _to_scientific_notation(self_bi as u64, digits_max_len);
@@ -509,10 +509,10 @@ fn exp10(n: &Ratio) -> i64 {
     let mut big_exp = Ratio::one();
 
     for _ in 0..32 {
-        let mid = small.mul_bi(&big).sqrt();
-        let mid_exp = small_exp.add_rat(&big_exp).div_i32(2);
+        let mid = small.mul(&big).sqrt();
+        let mid_exp = small_exp.add(&big_exp).div_i32(2);
 
-        if mid_exp.lt_rat(n) {
+        if mid_exp.lt(n) {
             small = mid;
             small_exp = mid_exp;
         }

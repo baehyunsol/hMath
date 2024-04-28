@@ -12,7 +12,7 @@ impl std::iter::Sum for UBigInt {
         let mut result = UBigInt::zero();
 
         while let Some(n) = iter.next() {
-            result.add_ubi_mut(&n);
+            result.add_mut(&n);
         }
 
         result
@@ -24,7 +24,7 @@ impl std::iter::Product for UBigInt {
         let mut result = UBigInt::one();
 
         while let Some(n) = iter.next() {
-            result.mul_ubi_mut(&n);
+            result.mul_mut(&n);
         }
 
         result

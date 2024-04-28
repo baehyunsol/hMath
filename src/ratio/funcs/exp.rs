@@ -12,24 +12,24 @@ pub fn exp_iter(x: &Ratio, iter: usize) -> Ratio {
     let e_approx = e_iter(iter);
 
     // e^0.99 = e/e^0.01 -> converges much faster
-    if iterator.geq_rat(&Ratio::from_denom_and_numer_i32(10, 9)) {
-        iterator = Ratio::one().sub_rat(&iterator);
+    if iterator.geq(&Ratio::from_denom_and_numer_i32(10, 9)) {
+        iterator = Ratio::one().sub(&iterator);
         frac = iterator.clone();
         inverse_iter = true;
     }
 
     for _ in 0..iter {
-        result.add_rat_mut(&iterator);
-        iterator.mul_rat_mut(&frac);
+        result.add_mut(&iterator);
+        iterator.mul_mut(&frac);
         iterator.div_i32_mut(n);
         n += 1;
     }
 
     if inverse_iter {
-        result = e_approx.div_rat(&result);
+        result = e_approx.div(&result);
     }
 
-    result.mul_rat_mut(&e_approx.pow_i32(trun.to_i32().unwrap()));
+    result.mul_mut(&e_approx.pow_i32(trun.to_i32().unwrap()));
 
     result
 }

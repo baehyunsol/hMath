@@ -16,7 +16,7 @@ impl UBigInt {
             }
 
             else {
-                return self.mul_ubi(self);
+                return self.mul(self);
             }
         }
 
@@ -26,7 +26,7 @@ impl UBigInt {
         powers.push(self.clone());
 
         while curr_exp * 2 <= exp {
-            powers.push(powers[powers.len() - 1].mul_ubi(&powers[powers.len() - 1]));
+            powers.push(powers[powers.len() - 1].mul(&powers[powers.len() - 1]));
             curr_exp *= 2;
         }
 
@@ -38,7 +38,7 @@ impl UBigInt {
             let l = powers.pop().unwrap();
 
             if curr_exp <= exp {
-                result.mul_ubi_mut(&l);
+                result.mul_mut(&l);
                 exp -= curr_exp;
             }
 

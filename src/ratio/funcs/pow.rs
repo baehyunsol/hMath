@@ -7,7 +7,7 @@ pub fn pow_iter(a: &Ratio, b: &Ratio, iter: usize) -> Ratio {
     }
 
     // a^b = e^(b*ln(a))
-    exp_iter(&b.mul_rat(&ln_iter(a, iter)), iter)
+    exp_iter(&b.mul(&ln_iter(a, iter)), iter)
 }
 
 #[cfg(test)]

@@ -15,7 +15,7 @@ pub fn pi_iter(k: usize) -> Ratio {
             BigInt::from_i128(PI_TABLE[i].0),
         );
 
-        result.add_rat_mut(&curr.mul_rat(&coeff));
+        result.add_mut(&curr.mul(&coeff));
         coeff.div_i32_mut(256);
     }
 

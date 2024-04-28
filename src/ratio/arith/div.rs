@@ -3,10 +3,10 @@ use crate::{BigInt, Ratio, gcd_bi};
 impl Ratio {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
-    pub fn div_rat(&self, other: &Ratio) -> Self {
+    pub fn div(&self, other: &Ratio) -> Self {
         let result = Ratio::from_denom_and_numer(
-            self.denom.mul_bi(&other.numer),
-            self.numer.mul_bi(&other.denom),
+            self.denom.mul(&other.numer),
+            self.numer.mul(&other.denom),
         );
 
         #[cfg(test)] assert!(result.is_valid());
@@ -14,9 +14,9 @@ impl Ratio {
         result
     }
 
-    pub fn div_rat_mut(&mut self, other: &Ratio) {
-        self.denom.mul_bi_mut(&other.numer);
-        self.numer.mul_bi_mut(&other.denom);
+    pub fn div_mut(&mut self, other: &Ratio) {
+        self.denom.mul_mut(&other.numer);
+        self.numer.mul_mut(&other.denom);
         self.fit();
 
         #[cfg(test)] assert!(self.is_valid());
@@ -38,12 +38,12 @@ impl Ratio {
         let r = gcd_bi(&self.numer, other);
 
         if r.is_one() {
-            self.denom.mul_bi_mut(&other);
+            self.denom.mul_mut(&other);
         }
 
         else {
-            self.denom.mul_bi_mut(&other.div_bi(&r));
-            self.numer.div_bi_mut(&r);
+            self.denom.mul_mut(&other.div(&r));
+            self.numer.div_mut(&r);
         }
 
         if self.denom.is_neg() {

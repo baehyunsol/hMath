@@ -3,17 +3,17 @@ use crate::{BigInt, UBigInt};
 impl BigInt {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
-    pub fn add_bi(&self, other: &BigInt) -> Self {
+    pub fn add(&self, other: &BigInt) -> Self {
         if self.is_neg() == other.is_neg() {
-            BigInt::from_ubi(self.val.add_ubi(&other.val), self.is_neg())
+            BigInt::from_ubi(self.val.add(&other.val), self.is_neg())
         }
 
         else {
-            let self_less = self.val.lt_ubi(&other.val);
+            let self_less = self.val.lt(&other.val);
             let abs_diff = if self_less {
-                other.val.sub_ubi(&self.val)
+                other.val.sub(&self.val)
             } else {
-                self.val.sub_ubi(&other.val)
+                self.val.sub(&other.val)
             };
             let is_diff_zero = abs_diff.is_zero();
 
@@ -33,17 +33,17 @@ impl BigInt {
         }
     }
 
-    pub fn add_bi_mut(&mut self, other: &BigInt) {
+    pub fn add_mut(&mut self, other: &BigInt) {
         if self.is_neg() == other.is_neg() {
-            self.val.add_ubi_mut(&other.val);
+            self.val.add_mut(&other.val);
         }
 
         else {
-            let self_less = self.val.lt_ubi(&other.val);
+            let self_less = self.val.lt(&other.val);
             if self_less {
-                self.val = other.val.sub_ubi(&self.val);
+                self.val = other.val.sub(&self.val);
             } else {
-                self.val.sub_ubi_mut(&other.val);
+                self.val.sub_mut(&other.val);
             }
             let is_diff_zero = self.val.is_zero();
 
@@ -109,10 +109,10 @@ mod tests {
                 let mut x1 = BigInt::from_i32(x);
                 let y1 = BigInt::from_i32(y);
                 let mut x2 = BigInt::from_i32(x);
-                let res1 = x1.add_bi(&y1);
+                let res1 = x1.add(&y1);
                 let res2 = x1.add_i32(y);
                 let res3 = BigInt::from_i32(x + y);
-                x1.add_bi_mut(&y1);
+                x1.add_mut(&y1);
                 x2.add_i32_mut(y);
 
                 assert_eq!(x1, x2);

@@ -4,20 +4,20 @@ impl UBigInt {
 
     // self - self / other * other
     #[must_use = "method returns a new number and does not mutate the original value"]
-    pub fn rem_ubi(&self, other: &UBigInt) -> Self {
-        let sdo = self.div_ubi(other).mul_ubi(other);
+    pub fn rem(&self, other: &UBigInt) -> Self {
+        let sdo = self.div(other).mul(other);
 
-        #[cfg(test)] assert!(self.geq_ubi(&sdo));
+        #[cfg(test)] assert!(self.geq(&sdo));
 
-        self.sub_ubi(&sdo)
+        self.sub(&sdo)
     }
 
-    pub fn rem_ubi_mut(&mut self, other: &UBigInt) {
-        let sdo = self.div_ubi(other).mul_ubi(other);
+    pub fn rem_mut(&mut self, other: &UBigInt) {
+        let sdo = self.div(other).mul(other);
 
-        #[cfg(test)] assert!(self.geq_ubi(&sdo));
+        #[cfg(test)] assert!(self.geq(&sdo));
 
-        self.sub_ubi_mut(&sdo);
+        self.sub_mut(&sdo);
     }
 
     #[must_use = "method returns a new number and does not mutate the original value"]
@@ -36,7 +36,7 @@ impl UBigInt {
         let result = UBigInt::from_u32((result % other) as u32);
 
         #[cfg(test)] {
-            let t = self.rem_ubi(&UBigInt::from_u32(other as u32));
+            let t = self.rem(&UBigInt::from_u32(other as u32));
             assert_eq!(t, result);
             assert!(result.is_valid());
         }
@@ -58,7 +58,7 @@ impl UBigInt {
         *self = UBigInt::from_u32(result % other);
 
         #[cfg(test)] {
-            let mut t = self.rem_ubi(&UBigInt::from_u32(other as u32));
+            let mut t = self.rem(&UBigInt::from_u32(other as u32));
             assert_eq!(&mut t, self);
             assert!(self.is_valid());
         }

@@ -3,10 +3,10 @@ use crate::{BigInt, Ratio};
 impl Ratio {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
-    pub fn add_rat(&self, other: &Ratio) -> Self {
+    pub fn add(&self, other: &Ratio) -> Self {
         let result = Ratio::from_denom_and_numer(
-            self.denom.mul_bi(&other.denom),
-            self.denom.mul_bi(&other.numer).add_bi(&other.denom.mul_bi(&self.numer)),
+            self.denom.mul(&other.denom),
+            self.denom.mul(&other.numer).add(&other.denom.mul(&self.numer)),
         );
 
         #[cfg(test)] assert!(result.is_valid());
@@ -14,9 +14,9 @@ impl Ratio {
         result
     }
 
-    pub fn add_rat_mut(&mut self, other: &Ratio) {
-        self.numer = self.denom.mul_bi(&other.numer).add_bi(&other.denom.mul_bi(&self.numer));
-        self.denom.mul_bi_mut(&other.denom);
+    pub fn add_mut(&mut self, other: &Ratio) {
+        self.numer = self.denom.mul(&other.numer).add(&other.denom.mul(&self.numer));
+        self.denom.mul_mut(&other.denom);
 
         self.fit();
     }
@@ -27,7 +27,7 @@ impl Ratio {
         // Safety: `self.denom` and `self.numer` are already coprime.
         let result = Ratio::from_denom_and_numer_raw(
             self.denom.clone(),
-            self.numer.add_bi(&self.denom.mul_bi(other)),
+            self.numer.add(&self.denom.mul(other)),
         );
 
         #[cfg(test)] assert!(result.is_valid());
@@ -36,7 +36,7 @@ impl Ratio {
     }
 
     pub fn add_bi_mut(&mut self, other: &BigInt) {
-        self.numer.add_bi_mut(&self.denom.mul_bi(other));
+        self.numer.add_mut(&self.denom.mul(other));
         #[cfg(test)] assert!(self.is_valid());
     }
 
@@ -46,7 +46,7 @@ impl Ratio {
         // Safety: `self.denom` and `self.numer` are already coprime.
         let result = Ratio::from_denom_and_numer_raw(
             self.denom.clone(),
-            self.numer.add_bi(&self.denom.mul_i32(other)),
+            self.numer.add(&self.denom.mul_i32(other)),
         );
 
         #[cfg(test)] assert!(result.is_valid());
@@ -55,7 +55,7 @@ impl Ratio {
     }
 
     pub fn add_i32_mut(&mut self, other: i32) {
-        self.numer.add_bi_mut(&self.denom.mul_i32(other));
+        self.numer.add_mut(&self.denom.mul_i32(other));
         #[cfg(test)] assert!(self.is_valid());
     }
 }

@@ -90,8 +90,8 @@ impl Ratio {
         let r = gcd_bi(&self.denom, &self.numer);
 
         if !r.is_one() {
-            self.denom.div_bi_mut(&r);
-            self.numer.div_bi_mut(&r);
+            self.denom.div_mut(&r);
+            self.numer.div_mut(&r);
         }
 
         #[cfg(test)] assert!(self.is_valid());
@@ -125,7 +125,7 @@ impl Ratio {
 
         else if self.numer.len() + 4 < self.denom.len() {
             let shrink = self.numer.len();
-            self.denom.div_bi_mut(&self.numer);
+            self.denom.div_mut(&self.numer);
 
             if self.denom.is_neg() {
                 self.denom.abs_mut();
@@ -147,7 +147,7 @@ impl Ratio {
 
         else if self.denom.len() + 4 < self.numer.len() {
             let shrink = self.denom.len();
-            self.numer.div_bi_mut(&self.denom);
+            self.numer.div_mut(&self.denom);
             self.denom = BigInt::one();
 
             if self.numer.len() > limit {

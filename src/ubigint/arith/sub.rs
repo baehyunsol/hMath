@@ -5,19 +5,19 @@ impl UBigInt {
 
     /// it panics when `other` > `self`
     #[must_use = "method returns a new number and does not mutate the original value"]
-    pub fn sub_ubi(&self, other: &UBigInt) -> Self {
+    pub fn sub(&self, other: &UBigInt) -> Self {
         let mut result = self.clone();
-        result.sub_ubi_mut(other);
+        result.sub_mut(other);
 
         result
     }
 
     /// it panics when `other` > `self`
-    pub fn sub_ubi_mut(&mut self, other: &UBigInt) {
+    pub fn sub_mut(&mut self, other: &UBigInt) {
         let mut carry = false;
 
         #[cfg(test)]
-        if other.gt_ubi(self) {
+        if other.gt(self) {
             panic!("{} > {}", other.to_scientific_notation(12), self.to_scientific_notation(12));
         }
 
@@ -73,7 +73,7 @@ impl UBigInt {
         result.sub_u32_mut(other);
 
         #[cfg(test)] {
-            let t = self.sub_ubi(&UBigInt::from_u32(other));
+            let t = self.sub(&UBigInt::from_u32(other));
             assert_eq!(t, result);
             assert!(result.is_valid());
         }
@@ -107,13 +107,13 @@ impl UBigInt {
         }
     }
 
-    pub fn abs_diff_ubi(&self, other: &UBigInt) -> Self {
-        if self.geq_ubi(other) {
-            self.sub_ubi(other)
+    pub fn abs_diff(&self, other: &UBigInt) -> Self {
+        if self.geq(other) {
+            self.sub(other)
         }
 
         else {
-            other.sub_ubi(self)
+            other.sub(self)
         }
     }
 
@@ -135,7 +135,7 @@ mod tests {
     #[test]
     fn sub_carry_test() {
         assert_eq!(
-            UBigInt::from_raw(vec![0, 0, 0, 1]).sub_ubi(&UBigInt::from_u32(1)),
+            UBigInt::from_raw(vec![0, 0, 0, 1]).sub(&UBigInt::from_u32(1)),
             UBigInt::from_raw(vec![u32::MAX, u32::MAX, u32::MAX]),
         );
 
@@ -166,12 +166,12 @@ mod tests {
         #[cfg(not(feature = "rand"))]
         let (x, y) = (UBigInt::from_u128(0x16227766123), UBigInt::from_u128(0x16229416032));
 
-        match x.comp_ubi(&y) {
+        match x.comp(&y) {
             std::cmp::Ordering::Greater => {
-                let _ = y.sub_ubi(&x);  // should panic
+                let _ = y.sub(&x);  // should panic
             },
             std::cmp::Ordering::Less => {
-                let _ = x.sub_ubi(&y);  // should panic
+                let _ = x.sub(&y);  // should panic
             },
             _ => {
                 panic!();

@@ -27,7 +27,7 @@ pub fn cbrt_iter(x: &Ratio, iter: usize) -> Ratio {
     // a2 = a1 - (a1^3 - x)/3a1^2 = a1 * 2/3 + x/3a1^2
     for _ in 0..iter {
         let len_pre = approx.denom.len().min(approx.numer.len());
-        approx = approx.mul_rat(&two_third).add_rat(&x_third.div_rat(&approx).div_rat(&approx));
+        approx = approx.mul(&two_third).add(&x_third.div(&approx).div(&approx));
         let len_post = approx.denom.len().min(approx.numer.len());
 
         // ratio operations generate unnecessary digits, which has to be remove for the sake of performance -> it doesn't hurt accuracy at all!

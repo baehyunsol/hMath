@@ -3,8 +3,8 @@ use crate::BigInt;
 impl BigInt {
 
     #[must_use = "method returns a new number and does not mutate the original value"]
-    pub fn mul_bi(&self, other: &BigInt) -> Self {
-        let val = self.val.mul_ubi(&other.val);
+    pub fn mul(&self, other: &BigInt) -> Self {
+        let val = self.val.mul(&other.val);
         let is_neg = !val.is_zero() && self.is_neg() != other.is_neg();
  
         let result = BigInt::from_ubi(val, is_neg);
@@ -14,8 +14,8 @@ impl BigInt {
         result
     }
 
-    pub fn mul_bi_mut(&mut self, other: &BigInt) {
-        self.val.mul_ubi_mut(&other.val);
+    pub fn mul_mut(&mut self, other: &BigInt) {
+        self.val.mul_mut(&other.val);
         self._is_neg = !self.val.is_zero() && self.is_neg() != other.is_neg();
         #[cfg(test)] assert!(self.is_valid());
     }
@@ -61,10 +61,10 @@ mod tests {
                 let mut x1 = BigInt::from_i32(x);
                 let y1 = BigInt::from_i32(y);
                 let mut x2 = BigInt::from_i32(x);
-                let res1 = x1.mul_bi(&y1);
+                let res1 = x1.mul(&y1);
                 let res2 = x1.mul_i32(y);
                 let res3 = BigInt::from_i32(x * y);
-                x1.mul_bi_mut(&y1);
+                x1.mul_mut(&y1);
                 x2.mul_i32_mut(y);
 
                 assert_eq!(x1, x2);

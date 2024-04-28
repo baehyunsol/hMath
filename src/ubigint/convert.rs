@@ -189,7 +189,7 @@ impl UBigInt {
             let big_number = UBigInt::from_raw(vec![0, 0, 3211403009, 1849224548, 3668416493, 3913284084, 1593091]);
 
             while n.len() > 8 {
-                n.div_ubi_mut(&big_number);
+                n.div_mut(&big_number);
                 exp += 64;
             }
         }

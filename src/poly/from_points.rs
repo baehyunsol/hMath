@@ -15,7 +15,7 @@ pub fn from_points(p: Vec<(Ratio, Ratio)>) -> Result<Polynomial, MatrixError> {
 
         for j in 1..(p.len() + 1) {
             *mat1.get_mut(i, p.len() - j) = curr.clone();
-            curr.mul_rat_mut(&p[i].0);
+            curr.mul_mut(&p[i].0);
         }
 
         *mat2.get_mut(i, 0) = p[i].1.clone();
@@ -89,12 +89,12 @@ pub fn cubic_2_points(a: &Ratio, b: &Ratio, v1: &Ratio, v2: &Ratio, v3: &Ratio, 
         vec![v4.clone()],
     ]).unwrap();
 
-    let aa = a.mul_rat(a);
-    let bb = b.mul_rat(b);
+    let aa = a.mul(a);
+    let bb = b.mul(b);
 
     let mat2 = match Matrix::from_vec(vec![
-        vec![aa.mul_rat(a), aa.clone(), a.clone(), Ratio::one()],
-        vec![bb.mul_rat(b), bb.clone(), b.clone(), Ratio::one()],
+        vec![aa.mul(a), aa.clone(), a.clone(), Ratio::one()],
+        vec![bb.mul(b), bb.clone(), b.clone(), Ratio::one()],
         vec![aa.mul_i32(3), a.mul_i32(2), Ratio::one(), Ratio::zero()],
         vec![bb.mul_i32(3), b.mul_i32(2), Ratio::one(), Ratio::zero()],
     ]).unwrap().inverse() {
@@ -103,7 +103,7 @@ pub fn cubic_2_points(a: &Ratio, b: &Ratio, v1: &Ratio, v2: &Ratio, v3: &Ratio, 
             // v3 (x - a) + v1
             return Polynomial::from_vec(vec![
                 v3.clone(),
-                v1.sub_rat(&a.mul_rat(v3)),
+                v1.sub(&a.mul(v3)),
             ]);
         },
         _ => unreachable!(),  // I can't think of this case
@@ -140,9 +140,9 @@ pub fn quadratic_3_points(a: &Ratio, b: &Ratio, c: &Ratio, v1: &Ratio, v2: &Rati
     ]).unwrap();
 
     let mat2 = match Matrix::from_vec(vec![
-        vec![a.mul_rat(a), a.clone(), Ratio::one()],
-        vec![b.mul_rat(b), b.clone(), Ratio::one()],
-        vec![c.mul_rat(c), c.clone(), Ratio::one()],
+        vec![a.mul(a), a.clone(), Ratio::one()],
+        vec![b.mul(b), b.clone(), Ratio::one()],
+        vec![c.mul(c), c.clone(), Ratio::one()],
     ]).unwrap().inverse() {
         Ok(m) => m,
         Err(_) => if a == b {
@@ -169,10 +169,10 @@ pub fn linear_2_points(a: &Ratio, b: &Ratio, v1: &Ratio, v2: &Ratio) -> Polynomi
     let tan = if a == b {
         Ratio::zero()
     } else {
-        v2.sub_rat(v1).div_rat(&b.sub_rat(a))
+        v2.sub(v1).div(&b.sub(a))
     };
 
-    let c = v1.sub_rat(&a.mul_rat(&tan));
+    let c = v1.sub(&a.mul(&tan));
 
     Polynomial::from_vec(vec![tan, c])
 }

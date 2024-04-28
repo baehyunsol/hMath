@@ -13,7 +13,7 @@ pub fn ln_iter(x: &Ratio, iter: usize) -> Ratio {
     // ln(x) = ln(1 + a) = sum{k=1}{inf} -(-a)^k/k = a - a^2/2 + a^3/3 - a^4/4...
     // it's best when a is close to 0 -> log_2(1 + a) = log_2(x) is close to 0
     // approximation of log_2 is very easily calculated: log2_accurate
-    let log2_approx = x.numer.log2_accurate().sub_bi(&x.denom.log2_accurate()).shift_right(1).to_i64().unwrap();
+    let log2_approx = x.numer.log2_accurate().sub(&x.denom.log2_accurate()).shift_right(1).to_i64().unwrap();
     let mut x_iter = x.clone();
     let mut log2_approx_counter = log2_approx.abs();
 
@@ -56,18 +56,18 @@ pub fn ln_iter(x: &Ratio, iter: usize) -> Ratio {
     let mut result = a.clone();
 
     for k in 0..iter {
-        x_iter.mul_rat_mut(&a);
-        result.sub_rat_mut(&x_iter.div_i32((2 * k + 2) as i32));
-        x_iter.mul_rat_mut(&a);
-        result.add_rat_mut(&x_iter.div_i32((2 * k + 3) as i32));
+        x_iter.mul_mut(&a);
+        result.sub_mut(&x_iter.div_i32((2 * k + 2) as i32));
+        x_iter.mul_mut(&a);
+        result.add_mut(&x_iter.div_i32((2 * k + 3) as i32));
     }
 
-    result.add_rat(&ln2_iter(iter).mul_bi(&BigInt::from_i64(log2_approx)))
+    result.add(&ln2_iter(iter).mul_bi(&BigInt::from_i64(log2_approx)))
 }
 
 /// It returns log(x) with base `base`. It gets more accurate as `iter` gets bigger. It panics when `x` or `base` is less than or equal 0.
 pub fn log_iter(base: &Ratio, x: &Ratio, iter: usize) -> Ratio {
-    ln_iter(x, iter).div_rat(&ln_iter(base, iter))
+    ln_iter(x, iter).div(&ln_iter(base, iter))
 }
 
 #[cfg(test)]
@@ -117,10 +117,10 @@ mod tests {
                 let ans_f64_rat = Ratio::from_ieee754_f64(ans_f64).unwrap();
                 let ans_rat_1 = Ratio::from_denom_and_numer(
                     BigInt::from_raw(vec![0, 1], false),
-                    b_rat.numer.log2_accurate().sub_bi(&b_rat.denom.log2_accurate()),
-                ).div_rat(&Ratio::from_denom_and_numer(
+                    b_rat.numer.log2_accurate().sub(&b_rat.denom.log2_accurate()),
+                ).div(&Ratio::from_denom_and_numer(
                     BigInt::from_raw(vec![0, 1], false),
-                    a_rat.numer.log2_accurate().sub_bi(&a_rat.denom.log2_accurate()),
+                    a_rat.numer.log2_accurate().sub(&a_rat.denom.log2_accurate()),
                 ));
                 let ans_rat_2 = log_iter(
                     &a_rat, &b_rat, 14

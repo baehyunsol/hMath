@@ -113,7 +113,7 @@ impl Matrix {
 
         let result = self.data.iter().enumerate().map(
             |(row_ind, row)| row.iter().enumerate().map(
-                |(col_ind, n)| n.add_rat(other.get(row_ind, col_ind))
+                |(col_ind, n)| n.add(other.get(row_ind, col_ind))
             ).collect::<Vec<Ratio>>()
         ).collect();
 
@@ -139,7 +139,7 @@ impl Matrix {
 
         for i in 0..self.rows {
             for j in 0..self.cols {
-                self.get_mut(i, j).add_rat_mut(other.get(i, j));
+                self.get_mut(i, j).add_mut(other.get(i, j));
             }
         }
 
@@ -152,7 +152,7 @@ impl Matrix {
 
         let result = self.data.iter().map(
             |row| row.iter().map(
-                |n| n.mul_rat(&k)
+                |n| n.mul(&k)
             ).collect::<Vec<Ratio>>()
         ).collect();
 
@@ -173,7 +173,7 @@ impl Matrix {
 
         for i in 0..self.rows {
             for j in 0..self.cols {
-                self.get_mut(i, j).mul_rat_mut(&k);
+                self.get_mut(i, j).mul_mut(&k);
             }
         }
     }
@@ -192,7 +192,7 @@ impl Matrix {
         for i in 0..self.rows {
             for j in 0..other.cols {
                 for k in 0..self.cols {
-                    result.get_mut(i, j).add_rat_mut(&self.get(i, k).mul_rat(other.get(k, j)));
+                    result.get_mut(i, j).add_mut(&self.get(i, k).mul(other.get(k, j)));
                 }
             }
         }

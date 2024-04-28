@@ -21,8 +21,8 @@ impl UBigInt {
         };
 
         for _ in 0..16 {
-            self_clone = self_clone.mul_ubi(&self_clone);
-            self_clone = self_clone.mul_ubi(&self_clone);
+            self_clone = self_clone.mul(&self_clone);
+            self_clone = self_clone.mul(&self_clone);
             result *= 4;
 
             if self_clone.len() > 6 {
